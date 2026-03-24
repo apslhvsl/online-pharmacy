@@ -18,12 +18,9 @@
         <module>api-gateway</module>
         <module>auth-service</module>
         <module>catalog-service</module>
-        <!--
-
-
         <module>order-service</module>
-        <module>admin-service</module>
-        -->
+<!--        <module>admin-service</module>-->
+
     </modules>
 
     <properties>
@@ -31,12 +28,13 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring-boot.version>3.4.4</spring-boot.version>
-        <spring-cloud.version>2024.0.1</spring-cloud.version>
+        <spring-boot.version>3.2.5</spring-boot.version>
+        <spring-cloud.version>2023.0.3</spring-cloud.version>
         <jjwt.version>0.12.6</jjwt.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <lombok.version>1.18.36</lombok.version>
         <postgresql.version>42.7.3</postgresql.version>
+        <springdoc.version>2.5.0</springdoc.version>
     </properties>
 
     <dependencyManagement>
@@ -99,6 +97,13 @@
                 <version>${lombok.version}</version>
                 <optional>true</optional>
             </dependency>
+
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

@@ -18,12 +18,16 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
+            http
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/signup", "/api/auth/login","/swagger-ui.html", "/swagger-ui/**","/api-docs/**","/v3/api-docs/**",
+                        .requestMatchers("/api/auth/signup",
+                                "/api/auth/login",
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/api-docs/**",
+                                "/v3/api-docs/**",
                                 "/api-docs/**",
                                 "/webjars/**").permitAll()
                         .anyRequest().authenticated());

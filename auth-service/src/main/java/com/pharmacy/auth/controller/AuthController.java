@@ -27,7 +27,7 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<UserProfileResponse> getProfile(
-            @RequestHeader("X-User-Id") Long userId) {
+            @RequestHeader(value = "X-User-Id", required = false) Long userId) {
         return ResponseEntity.ok(authService.getProfile(userId));
     }
 }
