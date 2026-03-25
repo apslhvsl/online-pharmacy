@@ -37,6 +37,11 @@
 			<artifactId>jjwt-jackson</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
+			<version>${springdoc.version}</version>
+		</dependency>
 	</dependencies>
 
 	<build>

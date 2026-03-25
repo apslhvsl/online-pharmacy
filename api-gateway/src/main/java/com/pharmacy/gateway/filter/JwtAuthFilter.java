@@ -25,7 +25,14 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     // These paths are open — no JWT required
     private static final List<String> PUBLIC_PATHS = List.of(
             "/api/auth/signup",
-            "/api/auth/login"
+            "/api/auth/login",
+            "/api/auth/api-docs",        // Add this
+            "/api/catalog/v3/api-docs",  // Add this
+            "/api/orders/v3/api-docs",   // Add this
+            "/api/admin/api-docs",       // Add this
+            "/v3/api-docs",              // Gateway's own docs
+            "/swagger-ui.html",          // Gateway's UI
+            "/swagger-ui/index.html"     // Gateway's UI resources
     );
 
     @Override

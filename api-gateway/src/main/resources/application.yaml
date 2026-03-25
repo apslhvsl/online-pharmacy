@@ -44,3 +44,15 @@ logging:
 
 jwt:
   secret: 3cfa76ef14937c1c0ea519f8fc057a80fcd04a7d0d7b7b6d9b9e2f0b3d5a1c8
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: 1. Auth Service
+        url: /api/auth/api-docs
+      - name: 2. Catalog Service
+        url: /api/catalog/v3/api-docs
+      - name: 3. Order Service
+        url: /api/orders/v3/api-docs
+      - name: 4. Admin Service
+        url: /api/admin/api-docs
