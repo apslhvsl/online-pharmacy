@@ -35,54 +35,113 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             "/swagger-ui/index.html"     // Gateway's UI resources
     );
 
-    @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        String path = exchange.getRequest().getURI().getPath();
+//    @Override
+//    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+//        String path = exchange.getRequest().getURI().getPath();
+//
+//        // Skip JWT check for public paths
+//        if (isPublicPath(path)) {
+//            return chain.filter(exchange);
+//        }
+//
+//        // Get Authorization header
+//        String authHeader = exchange.getRequest()
+//                .getHeaders()
+//                .getFirst(HttpHeaders.AUTHORIZATION);
+//
+//        // Missing or malformed header
+//        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+//            return unauthorized(exchange);
+//        }
+//
+//        String token = authHeader.substring(7);
+//
+//        try {
+//            Claims claims = Jwts.parser()
+//                    .verifyWith(Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8)))
+//                    .build()
+//                    .parseSignedClaims(token)
+//                    .getPayload();
+//
+//            String userId = claims.getSubject();
+//            String role = claims.get("role", String.class);
+//
+//            // Block non-admins from admin routes
+//            if (path.startsWith("/api/admin/") && !"ADMIN".equals(role)) {
+//                return forbidden(exchange);
+//            }
+//
+//            // Forward user context to downstream services
+//            ServerWebExchange mutatedExchange = exchange.mutate()
+//                    .request(r -> r.header("X-User-Id", userId)
+//                            .header("X-User-Role", role))
+//                    .build();
+//
+//            return chain.filter(mutatedExchange);
+//
+//        } catch (Exception e) {
+//            return unauthorized(exchange);
+//        }
+//    }
+@Override
+public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+    String path = exchange.getRequest().getURI().getPath();
+    String method = exchange.getRequest().getMethod().name(); // Get HTTP Method (GET, POST, etc.)
 
-        // Skip JWT check for public paths
-        if (isPublicPath(path)) {
-            return chain.filter(exchange);
-        }
-
-        // Get Authorization header
-        String authHeader = exchange.getRequest()
-                .getHeaders()
-                .getFirst(HttpHeaders.AUTHORIZATION);
-
-        // Missing or malformed header
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return unauthorized(exchange);
-        }
-
-        String token = authHeader.substring(7);
-
-        try {
-            Claims claims = Jwts.parser()
-                    .verifyWith(Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8)))
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
-
-            String userId = claims.getSubject();
-            String role = claims.get("role", String.class);
-
-            // Block non-admins from admin routes
-            if (path.startsWith("/api/admin/") && !"ADMIN".equals(role)) {
-                return forbidden(exchange);
-            }
-
-            // Forward user context to downstream services
-            ServerWebExchange mutatedExchange = exchange.mutate()
-                    .request(r -> r.header("X-User-Id", userId)
-                            .header("X-User-Role", role))
-                    .build();
-
-            return chain.filter(mutatedExchange);
-
-        } catch (Exception e) {
-            return unauthorized(exchange);
-        }
+    if (isPublicPath(path)) {
+        return chain.filter(exchange);
     }
+
+    String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+
+    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        return unauthorized(exchange);
+    }
+
+    String token = authHeader.substring(7);
+
+    try {
+        Claims claims = Jwts.parser()
+                .verifyWith(Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8)))
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+        String userId = claims.getSubject();
+        String role = claims.get("role", String.class);
+
+        // --- NEW SECURITY LOGIC START ---
+
+        // 1. Strict Admin Route Check
+        if (path.startsWith("/api/admin/") && !"ADMIN".equals(role)) {
+            return forbidden(exchange);
+        }
+
+        // 2. Catalog Service Protection
+        // Block Customers from POST/PUT/DELETE on medicines,
+        // but ALLOW them to POST prescriptions.
+        if (path.startsWith("/api/catalog/") && !role.equals("ADMIN")) {
+            if (method.equals("POST") || method.equals("PUT") || method.equals("DELETE")) {
+                // Exception: Customers MUST be allowed to upload prescriptions
+                if (!path.contains("/prescriptions/upload")) {
+                    return forbidden(exchange);
+                }
+            }
+        }
+
+        // --- NEW SECURITY LOGIC END ---
+
+        ServerWebExchange mutatedExchange = exchange.mutate()
+                .request(r -> r.header("X-User-Id", userId)
+                        .header("X-User-Role", role))
+                .build();
+
+        return chain.filter(mutatedExchange);
+
+    } catch (Exception e) {
+        return unauthorized(exchange);
+    }
+}
     private boolean isPublicPath(String path) {
         // Exact matches for login/signup are fine
         if (path.equals("/api/auth/login") || path.equals("/api/auth/signup")) {
