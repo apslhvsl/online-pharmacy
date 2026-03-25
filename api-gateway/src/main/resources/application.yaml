@@ -47,7 +47,7 @@ jwt:
 
 springdoc:
   swagger-ui:
-    urls:
+    URLs:
       - name: 1. Auth Service
         url: /api/auth/api-docs
       - name: 2. Catalog Service

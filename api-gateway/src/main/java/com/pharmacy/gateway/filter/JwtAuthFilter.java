@@ -83,10 +83,24 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             return unauthorized(exchange);
         }
     }
-
     private boolean isPublicPath(String path) {
-        return PUBLIC_PATHS.stream().anyMatch(path::equals);
+        // Exact matches for login/signup are fine
+        if (path.equals("/api/auth/login") || path.equals("/api/auth/signup")) {
+            return true;
+        }
+
+        // Use startsWith or contains for documentation and UI resources
+        // This handles sub-paths like /v3/api-docs/swagger-config
+        return path.contains("/api-docs") ||
+                path.contains("/v3/api-docs") ||
+                path.startsWith("/swagger-ui") ||
+                path.startsWith("/webjars");
     }
+
+//    private boolean isPublicPath(String path) {
+//        return PUBLIC_PATHS.stream().anyMatch(path::equals);
+//    }
+
 
     private Mono<Void> unauthorized(ServerWebExchange exchange) {
         exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);

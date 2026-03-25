@@ -32,3 +32,12 @@ eureka:
 
 prescription:
   upload-dir: uploads/prescriptions
+
+## order-service/src/main/resources/application.yml
+#springdoc:
+#  swagger-ui:
+#    path: /swagger-ui.html
+#  api-docs:
+#    path: /v3/api-docs
+#  server-url: http://localhost:8080   # THIS is the key line
+#  server-description: API Gateway
