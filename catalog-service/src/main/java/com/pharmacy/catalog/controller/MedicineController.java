@@ -7,8 +7,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/api/catalog/medicines")
@@ -35,5 +37,19 @@ public class MedicineController {
             @PathVariable(name = "id") Long id,
             @RequestParam(name = "quantity") Integer quantity) {
         return ResponseEntity.ok(medicineService.checkStock(id, quantity));
+    }
+
+
+    @PostMapping
+    public ResponseEntity<MedicineDto> createMedicine(@RequestBody MedicineDto request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(medicineService.createMedicine(request));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<MedicineDto> updateMedicine(
+            @PathVariable(name = "id") Long id,
+            @RequestBody MedicineDto request) {
+        return ResponseEntity.ok(medicineService.updateMedicine(id, request));
     }
 }

@@ -61,9 +61,9 @@ public class OrderController {
         return ResponseEntity.ok(orderService.updateStatus(orderId, status));
     }
 
-//    // Admin-only endpoint (no user filter)
-//    @GetMapping("/all")
-//    public ResponseEntity<List<OrderDto>> getAllOrders() {
-//        return ResponseEntity.ok(orderService.getAllOrders());
-//    }
+    // Admin-only endpoint (no user filter)
+    @GetMapping("/all")
+    public ResponseEntity<List<OrderDto>> getAllOrders() {
+        return ResponseEntity.ok(orderService.getAllOrders());
+    }
 }

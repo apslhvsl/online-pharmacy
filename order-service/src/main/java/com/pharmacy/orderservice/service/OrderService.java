@@ -74,12 +74,12 @@ public class OrderService {
                 .items(itemDtos)
                 .build();
     }
-//    //remove this later if not works
-//
-//    public List<OrderDto> getAllOrders() {
-//        return orderRepository.findAll()
-//                .stream()
-//                .map(this::toDto)
-//                .toList();
-//    }
+    //remove this later if not works
+
+    public List<OrderDto> getAllOrders() {
+        return orderRepository.findAll()
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
 }

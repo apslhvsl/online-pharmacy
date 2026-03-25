@@ -1,6 +1,7 @@
 package com.pharmacy.catalog.dto;
 
 import lombok.*;
+import java.time.LocalDate;
 
 import java.math.BigDecimal;
 
@@ -17,4 +18,6 @@ public class MedicineDto {
     private Boolean requiresPrescription;
     private Long categoryId;
     private String categoryName;
+    private LocalDate expiryDate;
+
 }

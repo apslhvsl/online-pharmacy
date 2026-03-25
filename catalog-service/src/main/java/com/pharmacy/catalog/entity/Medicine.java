@@ -2,6 +2,7 @@ package com.pharmacy.catalog.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDate;
 
 import java.math.BigDecimal;
 
@@ -30,6 +31,9 @@ public class Medicine {
 
     @Column(nullable = false)
     private Boolean requiresPrescription;
+
+    @Column
+    private LocalDate expiryDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")

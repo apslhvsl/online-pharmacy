@@ -4,7 +4,7 @@ import com.pharmacy.admin.dto.MedicineCreateRequest;
 import com.pharmacy.admin.dto.MedicineResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
-
+import com.pharmacy.admin.dto.CategoryResponse;
 import java.util.List;
 
 @FeignClient(name = "catalog-service")
