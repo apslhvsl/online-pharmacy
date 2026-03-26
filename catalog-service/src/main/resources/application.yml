@@ -33,6 +33,20 @@ eureka:
 prescription:
   upload-dir: uploads/prescriptions
 
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+spring.devtools.restart.enabled: false
+
 springdoc:
   api-docs:
     path: /api/catalog/v3/api-docs

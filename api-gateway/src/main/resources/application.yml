@@ -49,25 +49,26 @@ eureka:
 logging:
   level:
     org.springframework.cloud.gateway: DEBUG
+  pattern:
+    level: "%5p [${spring.application.name},%X{traceId},%X{spanId}]"
 
 jwt:
   secret: 3cfa76ef14937c1c0ea519f8fc057a80fcd04a7d0d7b7b6d9b9e2f0b3d5a1c8
 
-#springdoc:
-#  api-docs:
-#    path: /v3/api-docs
-#  swagger-ui:
-#    path: /swagger-ui.html
-#    display-query-params-ui: true
-#    urls:
-#      - name: 1. Auth Service
-#        url: /api/auth/api-docs
-#      - name: 2. Catalog Service
-#        url: /api/catalog/v3/api-docs
-#      - name: 3. Order Service
-#        url: /api/orders/v3/api-docs
-#      - name: 4. Admin Service
-#        url: /api/admin/api-docs
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+spring.devtools.restart.enabled: false
+
 
 springdoc:
   api-docs:
@@ -88,3 +89,4 @@ springdoc:
         url: /api/admin/v3/api-docs
   webjars:
     prefix: ""   # critical for WebFlux
+

@@ -20,6 +20,14 @@ services:
       timeout: 5s
       retries: 5
 
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+    networks:
+      - pharmacy-network
+
   eureka-server:
     build:
       context: ./eureka-server
@@ -41,8 +49,10 @@ services:
       - "8080:8080"
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
     depends_on:
       - eureka-server
+      - zipkin
     networks:
       - pharmacy-network
 
@@ -56,10 +66,13 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/auth_db
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
     depends_on:
       postgres-db:
         condition: service_healthy
       eureka-server:
+        condition: service_started
+      zipkin:
         condition: service_started
     networks:
       - pharmacy-network
@@ -74,10 +87,13 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/catalog_db
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
     depends_on:
       postgres-db:
         condition: service_healthy
       eureka-server:
+        condition: service_started
+      zipkin:
         condition: service_started
     networks:
       - pharmacy-network
@@ -92,10 +108,13 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/order_db
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
     depends_on:
       postgres-db:
         condition: service_healthy
       eureka-server:
+        condition: service_started
+      zipkin:
         condition: service_started
     networks:
       - pharmacy-network
@@ -109,8 +128,10 @@ services:
       - "8084:8084"
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - MANAGEMENT_ZIPKIN_TRACING_ENDPOINT=http://zipkin:9411/api/v2/spans
     depends_on:
       - eureka-server
+      - zipkin
     networks:
       - pharmacy-network
 
