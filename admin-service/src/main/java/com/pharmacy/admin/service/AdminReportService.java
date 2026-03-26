@@ -29,7 +29,7 @@ public class AdminReportService {
         List<OrderResponse> allOrders = orderClient.getAllOrders();
 
         List<MedicineResponse> lowStock = allMedicines.stream()
-                .filter(m -> m.getStock() != null && m.getStock() <= LOW_STOCK_THRESHOLD)
+                .filter(m -> m.getStockQuantity() != null && m.getStockQuantity() <= LOW_STOCK_THRESHOLD)
                 .toList();
 
         long pendingOrders = allOrders.stream()

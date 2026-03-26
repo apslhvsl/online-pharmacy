@@ -74,6 +74,9 @@ public class CheckoutService {
                 );
             }
 
+            // Deduct stock after confirming availability
+            catalogClient.deductStock(medicineId, quantity);
+
             // Get medicine details
             Map<String, Object> medicine = catalogClient.getMedicineById(medicineId);
             String medicineName = (String) medicine.get("name");

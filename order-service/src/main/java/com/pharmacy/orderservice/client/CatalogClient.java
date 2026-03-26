@@ -22,4 +22,10 @@ public interface CatalogClient {
 
     @GetMapping("/api/catalog/prescriptions/{id}/status")
     String getPrescriptionStatus(@PathVariable(name = "id") Long prescriptionId);
+
+    @org.springframework.web.bind.annotation.PutMapping("/api/catalog/medicines/{id}/stock/deduct")
+    void deductStock(
+            @PathVariable(name = "id") Long medicineId,
+            @RequestParam(name = "quantity") Integer quantity
+    );
 }

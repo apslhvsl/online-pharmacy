@@ -46,6 +46,23 @@ public class MedicineService {
                 .sufficient(medicine.getStockQuantity() >= requestedQuantity)
                 .build();
     }
+
+    public java.util.List<MedicineDto> getAllMedicinesAsList() {
+        return medicineRepository.findAll().stream()
+                .map(medicineMapper::toDto)
+                .toList();
+    }
+
+    @Transactional
+    public void deductStock(Long medicineId, Integer requestedQuantity) {
+        Medicine medicine = medicineRepository.findById(medicineId)
+                .orElseThrow(() -> new EntityNotFoundException("Medicine not found with id: " + medicineId));
+        if (medicine.getStockQuantity() < requestedQuantity) {
+            throw new IllegalStateException("Insufficient stock to deduct");
+        }
+        medicine.setStockQuantity(medicine.getStockQuantity() - requestedQuantity);
+        medicineRepository.save(medicine);
+    }
     @Transactional
     public MedicineDto createMedicine(MedicineDto request) {
         Category category = categoryRepository.findById(request.getCategoryId())

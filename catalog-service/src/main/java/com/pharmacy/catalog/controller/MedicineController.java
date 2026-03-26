@@ -39,6 +39,19 @@ public class MedicineController {
         return ResponseEntity.ok(medicineService.checkStock(id, quantity));
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<java.util.List<MedicineDto>> getAllMedicinesAsList() {
+        return ResponseEntity.ok(medicineService.getAllMedicinesAsList());
+    }
+
+    @PutMapping("/{id}/stock/deduct")
+    public ResponseEntity<Void> deductStock(
+            @PathVariable(name = "id") Long id,
+            @RequestParam(name = "quantity") Integer quantity) {
+        medicineService.deductStock(id, quantity);
+        return ResponseEntity.noContent().build();
+    }
+
 
     @PostMapping
     public ResponseEntity<MedicineDto> createMedicine(@RequestBody MedicineDto request) {

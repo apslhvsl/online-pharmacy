@@ -21,7 +21,7 @@ public interface CatalogClient {
     @GetMapping("/api/catalog/medicines/{id}")
     MedicineResponse getMedicineById(@PathVariable(name = "id") Long id);
 
-    @GetMapping("/api/catalog/medicines")
+    @GetMapping("/api/catalog/medicines/all")
     List<MedicineResponse> getAllMedicines();
 
     @GetMapping("/api/catalog/categories")
