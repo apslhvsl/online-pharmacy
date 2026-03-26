@@ -7,10 +7,13 @@ spring:
   cloud:
     gateway:
       routes:
+
         - id: auth-service
           uri: lb://auth-service
           predicates:
             - Path=/api/auth/**
+          filters:
+            - PreserveHostHeader
 
         - id: catalog-service
           uri: lb://catalog-service
@@ -23,11 +26,16 @@ spring:
           uri: lb://order-service
           predicates:
             - Path=/api/orders/**
+          filters:
+            - PreserveHostHeader
 
         - id: admin-service
           uri: lb://admin-service
           predicates:
             - Path=/api/admin/**
+          filters:
+            - PreserveHostHeader
+
   codec:
     max-in-memory-size: 10MB
 
@@ -45,14 +53,38 @@ logging:
 jwt:
   secret: 3cfa76ef14937c1c0ea519f8fc057a80fcd04a7d0d7b7b6d9b9e2f0b3d5a1c8
 
+#springdoc:
+#  api-docs:
+#    path: /v3/api-docs
+#  swagger-ui:
+#    path: /swagger-ui.html
+#    display-query-params-ui: true
+#    urls:
+#      - name: 1. Auth Service
+#        url: /api/auth/api-docs
+#      - name: 2. Catalog Service
+#        url: /api/catalog/v3/api-docs
+#      - name: 3. Order Service
+#        url: /api/orders/v3/api-docs
+#      - name: 4. Admin Service
+#        url: /api/admin/api-docs
+
 springdoc:
+  api-docs:
+    path: /v3/api-docs
   swagger-ui:
-    URLs:
+    path: /swagger-ui.html
+    use-root-path: true
+    config-url: /v3/api-docs/swagger-config
+    disable-swagger-default-url: true
+    urls:
       - name: 1. Auth Service
-        url: /api/auth/api-docs
+        url: /api/auth/v3/api-docs
       - name: 2. Catalog Service
         url: /api/catalog/v3/api-docs
       - name: 3. Order Service
         url: /api/orders/v3/api-docs
       - name: 4. Admin Service
-        url: /api/admin/api-docs
+        url: /api/admin/v3/api-docs
+  webjars:
+    prefix: ""   # critical for WebFlux

@@ -30,6 +30,8 @@ public class SecurityConfig {
                                 "/api-docs/**",
                                 "/v3/api-docs/**",
                                 "/api-docs/**",
+                                "/api/auth/v3/api-docs",
+                                "/api/auth/v3/api-docs/**",
                                 "/webjars/**").permitAll()
                         .anyRequest().authenticated());
 
