@@ -31,9 +31,9 @@ public class MedicineService {
     private final MedicineMapper medicineMapper;
 
     public Page<MedicineDto> getMedicines(String q, Long categoryId, Boolean requiresPrescription,
-                                          Boolean inStock, BigDecimal minPrice, BigDecimal maxPrice,
+                                          BigDecimal minPrice, BigDecimal maxPrice,
                                           Pageable pageable) {
-        return medicineRepository.findByFilters(q, categoryId, requiresPrescription, inStock, minPrice, maxPrice, pageable)
+        return medicineRepository.findByFilters(q, categoryId, requiresPrescription, minPrice, maxPrice, pageable)
                 .map(m -> enrichWithStock(medicineMapper.toDto(m), m.getId()));
     }
 
@@ -160,6 +160,21 @@ public class MedicineService {
         return medicineRepository.findAll().stream()
                 .map(m -> enrichWithStock(medicineMapper.toDto(m), m.getId()))
                 .toList();
+    }
+
+    /** Admin view — includes inactive medicines, supports full filters */
+    public Page<MedicineDto> getMedicinesAdmin(String q, Long categoryId, Boolean requiresPrescription,
+                                               BigDecimal minPrice, BigDecimal maxPrice,
+                                               Pageable pageable) {
+        return medicineRepository.findByFiltersAdmin(q, categoryId, requiresPrescription, minPrice, maxPrice, pageable)
+                .map(m -> enrichWithStock(medicineMapper.toDto(m), m.getId()));
+    }
+
+    /** Admin get by id — does not filter by active */
+    public MedicineDto getMedicineByIdAdmin(Long id) {
+        Medicine m = medicineRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Medicine not found: " + id));
+        return enrichWithStock(medicineMapper.toDto(m), id);
     }
 
     private MedicineDto enrichWithStock(MedicineDto dto, Long medicineId) {

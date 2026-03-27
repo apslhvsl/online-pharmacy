@@ -19,8 +19,14 @@ public class AdminMedicineController {
     // ── Medicine endpoints ───────────────────────────────────────────
 
     @GetMapping("/medicines")
-    public ResponseEntity<List<MedicineResponse>> getAllMedicines() {
-        return ResponseEntity.ok(adminMedicineService.getAllMedicines());
+    public ResponseEntity<PagedResponse<MedicineResponse>> getAllMedicines(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Boolean requiresPrescription,
+            @RequestParam(required = false) Boolean inStock,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(adminMedicineService.getAllMedicines(q, categoryId, requiresPrescription, inStock, page, size));
     }
 
     @GetMapping("/medicines/{id}")
@@ -40,14 +46,6 @@ public class AdminMedicineController {
             @PathVariable Long id,
             @RequestBody MedicineCreateRequest request) {
         return ResponseEntity.ok(adminMedicineService.updateMedicine(id, request));
-    }
-
-    @PatchMapping("/medicines/{id}/stock")
-    public ResponseEntity<MedicineResponse> adjustStock(
-            @PathVariable Long id,
-            @RequestBody StockAdjustRequest request,
-            @RequestHeader("X-User-Id") Long adminId) {
-        return ResponseEntity.ok(adminMedicineService.adjustStock(id, request, adminId));
     }
 
     @PatchMapping("/medicines/{id}/deactivate")

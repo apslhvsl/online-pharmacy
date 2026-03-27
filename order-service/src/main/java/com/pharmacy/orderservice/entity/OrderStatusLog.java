@@ -16,8 +16,10 @@ public class OrderStatusLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "order_id", nullable = false)
-    private Long orderId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false,
+                foreignKey = @ForeignKey(name = "fk_order_status_log_order"))
+    private Order order;
 
     @Column(name = "from_status", length = 50)
     private String fromStatus;

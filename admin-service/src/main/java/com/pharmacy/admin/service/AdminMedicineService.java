@@ -13,12 +13,13 @@ public class AdminMedicineService {
 
     private final CatalogClient catalogClient;
 
-    public List<MedicineResponse> getAllMedicines() {
-        return catalogClient.getAllMedicines();
+    public PagedResponse<MedicineResponse> getAllMedicines(String q, Long categoryId, Boolean requiresPrescription,
+                                                  Boolean inStock, int page, int size) {
+        return catalogClient.getAllMedicines(q, categoryId, requiresPrescription, inStock, page, size);
     }
 
     public MedicineResponse getMedicineById(Long id) {
-        return catalogClient.getMedicineById(id);
+        return catalogClient.getMedicineByIdInternal(id);
     }
 
     public MedicineResponse createMedicine(MedicineCreateRequest request, Long adminId) {
@@ -29,12 +30,13 @@ public class AdminMedicineService {
         return catalogClient.updateMedicine(id, request);
     }
 
-    public MedicineResponse adjustStock(Long id, StockAdjustRequest request, Long adminId) {
-        return catalogClient.adjustStock(id, request, adminId);
-    }
-
     public MedicineResponse deactivateMedicine(Long id) {
         return catalogClient.deactivateMedicine(id);
+    }
+
+    public void adjustStock(Long medicineId, StockAdjustRequest request, Long adminId) {
+        if (request.getBatchId() == null) throw new IllegalArgumentException("batchId is required for stock adjustment");
+        catalogClient.adjustBatchStock(request.getBatchId(), request, adminId);
     }
 
     public List<MedicineResponse> getLowStockMedicines(Integer stockLessThan) {

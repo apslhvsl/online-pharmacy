@@ -31,6 +31,13 @@ public class InternalBatchController {
         return ResponseEntity.status(HttpStatus.CREATED).body(batchService.createBatch(request));
     }
 
+    @PutMapping("/{batchId}")
+    public ResponseEntity<InventoryBatchDto> updateBatch(
+            @PathVariable Long batchId,
+            @Valid @RequestBody InventoryBatchCreateRequest request) {
+        return ResponseEntity.ok(batchService.updateBatch(batchId, request));
+    }
+
     @PatchMapping("/{batchId}/stock")
     public ResponseEntity<InventoryBatchDto> adjustStock(
             @PathVariable Long batchId,
@@ -39,20 +46,19 @@ public class InternalBatchController {
         return ResponseEntity.ok(batchService.adjustBatchStock(batchId, request, performedBy));
     }
 
+    @PostMapping("/{batchId}/deduct")
+    public ResponseEntity<Void> deductBatchStock(
+            @PathVariable Long batchId,
+            @RequestParam Integer quantity) {
+        batchService.deductBatchStock(batchId, quantity);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/{batchId}/stock-check")
     public ResponseEntity<StockCheckResponse> checkStock(
             @PathVariable Long batchId,
             @RequestParam Integer quantity) {
         return ResponseEntity.ok(batchService.checkStock(batchId, quantity));
-    }
-
-    /** Used by Order Service to deduct stock on order confirmation (FEFO across batches) */
-    @PostMapping("/medicine/{medicineId}/deduct")
-    public ResponseEntity<Void> deductStock(
-            @PathVariable Long medicineId,
-            @RequestParam Integer quantity) {
-        batchService.deductStock(medicineId, quantity);
-        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/expiring-soon")

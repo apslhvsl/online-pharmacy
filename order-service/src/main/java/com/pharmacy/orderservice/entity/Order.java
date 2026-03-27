@@ -19,13 +19,13 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "order_number", unique = true, length = 20)
+    @Column(name = "order_number", unique = true, nullable = false, length = 20)
     private String orderNumber;
 
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "address_id")
+    @Column(name = "address_id", nullable = false)
     private Long addressId;
 
     @Enumerated(EnumType.STRING)

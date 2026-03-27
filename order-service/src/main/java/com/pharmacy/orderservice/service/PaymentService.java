@@ -32,7 +32,7 @@ public class PaymentService {
             throw new IllegalStateException("Order is not in PAYMENT_PENDING state");
 
         Payment payment = Payment.builder()
-                .orderId(order.getId())
+                .order(order)
                 .paymentMethod(request.getPaymentMethod())
                 .amount(order.getTotalAmount())
                 .status(PaymentStatus.PENDING)
@@ -49,26 +49,6 @@ public class PaymentService {
         return toDto(paymentRepository.save(payment));
     }
 
-    /** Called by payment gateway webhook */
-    @Transactional
-    public void handleCallback(String txnRef, boolean success, String gatewayResponse) {
-        Payment payment = paymentRepository.findByGatewayTxnRef(txnRef)
-                .orElseThrow(() -> new EntityNotFoundException("Payment not found for txnRef: " + txnRef));
-        Order order = orderRepository.findById(payment.getOrderId())
-                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
-
-        payment.setGatewayResponse(gatewayResponse);
-        if (success) {
-            payment.setStatus(PaymentStatus.PAID);
-            payment.setPaidAt(LocalDateTime.now());
-            transitionOrder(order, OrderStatus.PAID, null, "Payment confirmed via gateway");
-        } else {
-            payment.setStatus(PaymentStatus.FAILED);
-            transitionOrder(order, OrderStatus.PAYMENT_FAILED, null, "Payment failed via gateway");
-        }
-        paymentRepository.save(payment);
-    }
-
     public PaymentDto getPaymentByOrder(Long orderId) {
         return paymentRepository.findByOrderId(orderId)
                 .map(this::toDto)
@@ -78,7 +58,7 @@ public class PaymentService {
     private void transitionOrder(Order order, OrderStatus next, Long changedBy, String note) {
         orderStateMachine.validate(order.getStatus(), next);
         statusLogRepository.save(OrderStatusLog.builder()
-                .orderId(order.getId())
+                .order(order)
                 .fromStatus(order.getStatus().name())
                 .toStatus(next.name())
                 .changedBy(changedBy)
@@ -90,7 +70,7 @@ public class PaymentService {
 
     private PaymentDto toDto(Payment p) {
         return PaymentDto.builder()
-                .id(p.getId()).orderId(p.getOrderId())
+                .id(p.getId()).orderId(p.getOrder().getId())
                 .paymentMethod(p.getPaymentMethod()).status(p.getStatus())
                 .amount(p.getAmount()).gatewayTxnRef(p.getGatewayTxnRef())
                 .paidAt(p.getPaidAt()).refundedAt(p.getRefundedAt())

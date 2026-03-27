@@ -38,11 +38,10 @@ public class AdminOrderController {
     }
 
     @PostMapping("/{id}/cancel")
-    public ResponseEntity<Void> cancelOrder(
+    public ResponseEntity<OrderResponse> cancelOrder(
             @PathVariable Long id,
             @RequestBody OrderStatusUpdateRequest request,
             @RequestHeader("X-User-Id") Long adminId) {
-        adminOrderService.cancelOrder(id, request.getNote(), adminId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(adminOrderService.cancelOrder(id, request.getNote(), adminId));
     }
 }

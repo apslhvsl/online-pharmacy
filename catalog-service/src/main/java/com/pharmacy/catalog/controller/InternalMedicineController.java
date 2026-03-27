@@ -5,16 +5,19 @@ import com.pharmacy.catalog.dto.MedicineDto;
 import com.pharmacy.catalog.service.MedicineService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
  * Internal medicine endpoints — NOT gateway-routed.
  * Called exclusively by Admin Service via Feign.
- * Stock operations (adjust, deduct, low-stock, expiring-soon) live in InternalBatchController.
  */
 @RestController
 @RequestMapping("/api/catalog/internal/medicines")
@@ -23,9 +26,21 @@ public class InternalMedicineController {
 
     private final MedicineService medicineService;
 
+    /** Admin-filtered list — includes inactive medicines */
     @GetMapping
-    public ResponseEntity<List<MedicineDto>> getAllMedicines() {
-        return ResponseEntity.ok(medicineService.getAllMedicinesAsList());
+    public ResponseEntity<Page<MedicineDto>> getAllMedicines(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Boolean requiresPrescription,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @PageableDefault(size = 20, sort = "name") Pageable pageable) {
+        return ResponseEntity.ok(medicineService.getMedicinesAdmin(q, categoryId, requiresPrescription, minPrice, maxPrice, pageable));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<MedicineDto> getMedicineById(@PathVariable Long id) {
+        return ResponseEntity.ok(medicineService.getMedicineByIdAdmin(id));
     }
 
     @PostMapping
@@ -45,12 +60,9 @@ public class InternalMedicineController {
         return ResponseEntity.ok(medicineService.deactivateMedicine(id));
     }
 
-    /** Used by Order Service to deduct stock on order confirmation (FEFO across batches) */
-    @PostMapping("/{id}/deduct")
-    public ResponseEntity<Void> deductStock(
-            @PathVariable Long id,
-            @RequestParam Integer quantity) {
-        medicineService.deductStock(id, quantity);
-        return ResponseEntity.noContent().build();
+    @GetMapping("/low-stock")
+    public ResponseEntity<List<MedicineDto>> getLowStock(
+            @RequestParam(required = false) Integer stockLessThan) {
+        return ResponseEntity.ok(medicineService.getLowStockMedicines(stockLessThan));
     }
 }

@@ -2,6 +2,7 @@ package com.pharmacy.orderservice.client;
 
 import com.pharmacy.orderservice.dto.StockCheckResponse;
 import com.pharmacy.orderservice.dto.MedicineInfo;
+import com.pharmacy.orderservice.dto.PrescriptionInfo;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,12 +16,17 @@ public interface CatalogClient {
     StockCheckResponse checkStock(@PathVariable("id") Long medicineId,
                                   @RequestParam("quantity") Integer quantity);
 
-    // Batch-level stock check — used when adding to cart by batchId
+    /** Batch-level stock check — used when adding to cart by batchId */
     @GetMapping("/api/catalog/internal/batches/{batchId}/stock-check")
     StockCheckResponse checkBatchStock(@PathVariable("batchId") Long batchId,
                                        @RequestParam("quantity") Integer quantity);
 
-    @PostMapping("/api/catalog/internal/medicines/{id}/deduct")
-    void deductStock(@PathVariable("id") Long medicineId,
-                     @RequestParam("quantity") Integer quantity);
+    /** Deduct from a specific batch by batchId — used at order confirmation */
+    @PostMapping("/api/catalog/internal/batches/{batchId}/deduct")
+    void deductBatchStock(@PathVariable("batchId") Long batchId,
+                          @RequestParam("quantity") Integer quantity);
+
+    /** Validate prescription status at checkout */
+    @GetMapping("/api/catalog/internal/prescriptions/{id}")
+    PrescriptionInfo getPrescriptionById(@PathVariable("id") Long prescriptionId);
 }

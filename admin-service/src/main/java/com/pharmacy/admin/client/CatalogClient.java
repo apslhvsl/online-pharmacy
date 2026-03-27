@@ -9,7 +9,7 @@ import java.util.List;
 @FeignClient(name = "catalog-service")
 public interface CatalogClient {
 
-    // ── Public reads (used by dashboard/reports) ─────────────────────
+    // ── Public reads ─────────────────────────────────────────────────
 
     @GetMapping("/api/catalog/medicines/{id}")
     MedicineResponse getMedicineById(@PathVariable("id") Long id);
@@ -23,18 +23,22 @@ public interface CatalogClient {
     // ── Internal medicine operations ─────────────────────────────────
 
     @GetMapping("/api/catalog/internal/medicines")
-    List<MedicineResponse> getAllMedicines();
+    PagedResponse<MedicineResponse> getAllMedicines(
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Boolean requiresPrescription,
+            @RequestParam(required = false) Boolean inStock,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size);
+
+    @GetMapping("/api/catalog/internal/medicines/{id}")
+    MedicineResponse getMedicineByIdInternal(@PathVariable("id") Long id);
 
     @PostMapping("/api/catalog/internal/medicines")
     MedicineResponse createMedicine(@RequestBody MedicineCreateRequest request);
 
     @PutMapping("/api/catalog/internal/medicines/{id}")
     MedicineResponse updateMedicine(@PathVariable("id") Long id, @RequestBody MedicineCreateRequest request);
-
-    @PatchMapping("/api/catalog/internal/medicines/{id}/stock")
-    MedicineResponse adjustStock(@PathVariable("id") Long id,
-                                 @RequestBody StockAdjustRequest request,
-                                 @RequestHeader("X-User-Id") Long performedBy);
 
     @PatchMapping("/api/catalog/internal/medicines/{id}/deactivate")
     MedicineResponse deactivateMedicine(@PathVariable("id") Long id);
@@ -46,6 +50,13 @@ public interface CatalogClient {
     List<MedicineResponse> getExpiringSoon(
             @RequestParam(required = false) String expiryBefore,
             @RequestParam(defaultValue = "90") int days);
+
+    // ── Internal batch operations ─────────────────────────────────────
+
+    @PatchMapping("/api/catalog/internal/batches/{batchId}/stock")
+    Object adjustBatchStock(@PathVariable("batchId") Long batchId,
+                            @RequestBody StockAdjustRequest request,
+                            @RequestHeader("X-User-Id") Long performedBy);
 
     // ── Internal category operations ─────────────────────────────────
 

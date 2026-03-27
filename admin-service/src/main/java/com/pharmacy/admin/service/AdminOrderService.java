@@ -25,7 +25,7 @@ public class AdminOrderService {
         return orderClient.updateOrderStatus(id, request, adminId);
     }
 
-    public void cancelOrder(Long id, String reason, Long adminId) {
-        orderClient.cancelOrder(id, new OrderStatusUpdateRequest("ADMIN_CANCELLED", reason), adminId);
+    public OrderResponse cancelOrder(Long id, String reason, Long adminId) {
+        return orderClient.cancelOrder(id, new OrderStatusUpdateRequest("ADMIN_CANCELLED", reason), adminId);
     }
 }

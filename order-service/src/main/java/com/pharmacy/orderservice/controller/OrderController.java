@@ -81,15 +81,6 @@ public class OrderController {
         return ResponseEntity.ok(paymentService.initiatePayment(request, userId));
     }
 
-    @PostMapping("/payments/callback")
-    public ResponseEntity<Void> paymentCallback(
-            @RequestParam String txnRef,
-            @RequestParam boolean success,
-            @RequestBody(required = false) String gatewayResponse) {
-        paymentService.handleCallback(txnRef, success, gatewayResponse);
-        return ResponseEntity.ok().build();
-    }
-
     @GetMapping("/payments/{orderId}")
     public ResponseEntity<PaymentDto> getPayment(
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId,
@@ -124,7 +115,7 @@ public class OrderController {
         return ResponseEntity.ok(orderService.updateStatus(id, request, adminId));
     }
 
-    @PostMapping("/internal/{id}/cancel")
+    @PatchMapping("/internal/{id}/cancel")
     public ResponseEntity<OrderDto> cancelOrderInternal(
             @PathVariable Long id,
             @RequestBody CancelRequest request,

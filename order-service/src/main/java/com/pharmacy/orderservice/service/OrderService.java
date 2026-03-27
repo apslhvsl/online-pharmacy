@@ -157,7 +157,7 @@ public class OrderService {
 
     private void logTransition(Order order, OrderStatus next, Long changedBy, String note) {
         statusLogRepository.save(OrderStatusLog.builder()
-                .orderId(order.getId())
+                .order(order)
                 .fromStatus(order.getStatus().name())
                 .toStatus(next.name())
                 .changedBy(changedBy)

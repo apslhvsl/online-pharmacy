@@ -49,6 +49,18 @@ public class InventoryBatchService {
     }
 
     @Transactional
+    public InventoryBatchDto updateBatch(Long batchId, InventoryBatchCreateRequest request) {
+        InventoryBatch batch = batchRepository.findById(batchId)
+                .orElseThrow(() -> new EntityNotFoundException("Batch not found: " + batchId));
+        if (request.getBatchNumber() != null) batch.setBatchNumber(request.getBatchNumber());
+        if (request.getPrice() != null) batch.setPrice(request.getPrice());
+        if (request.getMrp() != null) batch.setMrp(request.getMrp());
+        if (request.getQuantity() != null) batch.setQuantity(request.getQuantity());
+        if (request.getExpiryDate() != null) batch.setExpiryDate(request.getExpiryDate());
+        return toDto(batchRepository.save(batch));
+    }
+
+    @Transactional
     public InventoryBatchDto adjustBatchStock(Long batchId, StockAdjustRequest request, Long performedBy) {
         InventoryBatch batch = batchRepository.findById(batchId)
                 .orElseThrow(() -> new EntityNotFoundException("Batch not found: " + batchId));
@@ -97,6 +109,17 @@ public class InventoryBatchService {
             remaining -= deduct;
         }
         if (remaining > 0) throw new IllegalStateException("Insufficient stock for medicine: " + medicineId);
+    }
+
+    /** Deducts stock from a specific batch by batchId. Used by order-service when batchId is known. */
+    @Transactional
+    public void deductBatchStock(Long batchId, Integer quantity) {
+        InventoryBatch batch = batchRepository.findById(batchId)
+                .orElseThrow(() -> new EntityNotFoundException("Batch not found: " + batchId));
+        if (batch.getQuantity() < quantity)
+            throw new IllegalStateException("Insufficient stock in batch: " + batchId);
+        batch.setQuantity(batch.getQuantity() - quantity);
+        batchRepository.save(batch);
     }
 
     public Integer getTotalAvailableStock(Long medicineId) {

@@ -55,4 +55,10 @@ public class InternalPrescriptionController {
     public ResponseEntity<String> getPrescriptionFilePath(@PathVariable Long id) {
         return ResponseEntity.ok(prescriptionService.getPrescriptionFilePath(id).toString());
     }
+
+    /** Used by Order Service to validate prescription status at checkout */
+    @GetMapping("/{id}")
+    public ResponseEntity<PrescriptionDto> getPrescriptionById(@PathVariable Long id) {
+        return ResponseEntity.ok(prescriptionService.getPrescriptionById(id, null, true));
+    }
 }

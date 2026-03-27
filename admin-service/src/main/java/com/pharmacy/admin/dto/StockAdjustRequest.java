@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StockAdjustRequest {
-    private Integer adjustment;
+    private Long batchId;      // required: which batch to adjust
+    private Integer adjustment; // positive = add, negative = deduct
     private String reason;
 }

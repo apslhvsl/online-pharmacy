@@ -36,8 +36,9 @@ public class CartItem {
     @Column(nullable = false)
     private Integer quantity;
 
-    @Column(name = "requires_prescription")
-    private Boolean requiresPrescription;
+    @Column(name = "requires_prescription", nullable = false)
+    @Builder.Default
+    private Boolean requiresPrescription = false;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

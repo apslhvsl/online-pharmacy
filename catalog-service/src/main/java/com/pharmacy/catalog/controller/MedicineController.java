@@ -29,11 +29,10 @@ public class MedicineController {
             @RequestParam(required = false) String q,
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Boolean requiresPrescription,
-            @RequestParam(required = false) Boolean inStock,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
             @PageableDefault(size = 10, sort = "name") Pageable pageable) {
-        return ResponseEntity.ok(medicineService.getMedicines(q, categoryId, requiresPrescription, inStock, minPrice, maxPrice, pageable));
+        return ResponseEntity.ok(medicineService.getMedicines(q, categoryId, requiresPrescription, minPrice, maxPrice, pageable));
     }
 
     @GetMapping("/featured")

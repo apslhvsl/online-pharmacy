@@ -144,13 +144,13 @@ INSERT INTO carts (user_id, updated_at) VALUES
 ON CONFLICT (user_id) DO NOTHING;
 
 -- Cart items for john (medicine_id 1 = Paracetamol, 4 = Vitamin C)
-INSERT INTO cart_items (cart_id, batch_id, medicine_id, medicine_name, unit_price, quantity)
-SELECT c.id, 1, 1, 'Paracetamol 500mg', 25.00, 2
+INSERT INTO cart_items (cart_id, batch_id, medicine_id, medicine_name, unit_price, quantity, requires_prescription)
+SELECT c.id, 1, 1, 'Paracetamol 500mg', 25.00, 2, false
 FROM carts c WHERE c.user_id = 2
 ON CONFLICT DO NOTHING;
 
-INSERT INTO cart_items (cart_id, batch_id, medicine_id, medicine_name, unit_price, quantity)
-SELECT c.id, 4, 4, 'Vitamin C 500mg', 35.00, 1
+INSERT INTO cart_items (cart_id, batch_id, medicine_id, medicine_name, unit_price, quantity, requires_prescription)
+SELECT c.id, 4, 4, 'Vitamin C 500mg', 35.00, 1, false
 FROM carts c WHERE c.user_id = 2
 ON CONFLICT DO NOTHING;
 

@@ -4,6 +4,7 @@ import com.pharmacy.orderservice.client.CatalogClient;
 import com.pharmacy.orderservice.dto.CheckoutRequest;
 import com.pharmacy.orderservice.dto.CheckoutSessionDto;
 import com.pharmacy.orderservice.dto.OrderDto;
+import com.pharmacy.orderservice.dto.PrescriptionInfo;
 import com.pharmacy.orderservice.entity.*;
 import com.pharmacy.orderservice.exception.InsufficientStockException;
 import com.pharmacy.orderservice.repository.*;
@@ -81,7 +82,7 @@ public class CheckoutService {
         return orderService.toDto(orderRepository.save(order));
     }
 
-    /** Step 4 — confirm order: validate stock, snapshot prices, create payment record */
+    /** Step 4 — confirm order: validate stock, enforce prescription, snapshot prices */
     @Transactional
     public OrderDto confirmOrder(Long orderId, Long userId) {
         Order order = getOwnedOrder(orderId, userId);
@@ -89,6 +90,27 @@ public class CheckoutService {
 
         if (cart.getItems().isEmpty()) throw new IllegalStateException("Cart is empty");
 
+        // ── Prescription enforcement ──────────────────────────────────
+        boolean requiresRx = cart.getItems().stream()
+                .anyMatch(i -> Boolean.TRUE.equals(i.getRequiresPrescription()));
+
+        if (requiresRx) {
+            if (order.getPrescriptionId() == null) {
+                throw new IllegalStateException("Cart contains prescription-required medicines. Please link an approved prescription first.");
+            }
+            PrescriptionInfo rx = catalogClient.getPrescriptionById(order.getPrescriptionId());
+            if (!"APPROVED".equals(rx.getStatus())) {
+                throw new IllegalStateException("Linked prescription is not approved (status: " + rx.getStatus() + ")");
+            }
+            if (rx.getValidTill() != null && rx.getValidTill().isBefore(java.time.LocalDateTime.now())) {
+                throw new IllegalStateException("Linked prescription has expired");
+            }
+            if (!userId.equals(rx.getUserId())) {
+                throw new IllegalStateException("Prescription does not belong to this user");
+            }
+        }
+
+        // ── Stock validation & order item snapshot ────────────────────
         List<OrderItem> orderItems = new ArrayList<>();
         BigDecimal subtotal = BigDecimal.ZERO;
 
@@ -125,7 +147,7 @@ public class CheckoutService {
 
         // Deduct stock per batch
         for (CartItem cartItem : cart.getItems()) {
-            catalogClient.deductStock(cartItem.getMedicineId(), cartItem.getQuantity());
+            catalogClient.deductBatchStock(cartItem.getBatchId(), cartItem.getQuantity());
         }
 
         // Clear cart
