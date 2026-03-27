@@ -2,7 +2,6 @@ package com.pharmacy.catalog.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -17,21 +16,39 @@ public class Prescription {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(nullable = false)
+    @Column(name = "file_path", nullable = false, length = 500)
     private String filePath;
 
-    @Column(nullable = false)
-    private String originalFileName;
+    @Column(name = "file_name", nullable = false, length = 255)
+    private String fileName;
+
+    @Column(name = "file_type", length = 50)
+    private String fileType;
+
+    @Column(name = "file_size_bytes")
+    private Long fileSizeBytes;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PrescriptionStatus status;
 
-    @Column(nullable = false)
+    @Column(name = "reviewed_by")
+    private Long reviewedBy;
+
+    @Column(columnDefinition = "TEXT")
+    private String remarks;
+
+    @Column(name = "valid_till")
+    private LocalDateTime validTill;
+
+    @Column(name = "uploaded_at", nullable = false)
     private LocalDateTime uploadedAt;
+
+    @Column(name = "reviewed_at")
+    private LocalDateTime reviewedAt;
 
     @PrePersist
     protected void onCreate() {

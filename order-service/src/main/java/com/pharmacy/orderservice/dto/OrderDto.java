@@ -2,7 +2,6 @@ package com.pharmacy.orderservice.dto;
 
 import com.pharmacy.orderservice.entity.OrderStatus;
 import lombok.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,23 +12,31 @@ import java.util.List;
 @Builder
 public class OrderDto {
     private Long id;
+    private String orderNumber;
     private Long userId;
+    private Long addressId;
     private OrderStatus status;
-    private BigDecimal totalAmount;
     private Long prescriptionId;
-    private String shippingAddress;
+    private BigDecimal subtotal;
+    private BigDecimal taxAmount;
+    private BigDecimal deliveryCharge;
+    private BigDecimal totalAmount;
+    private String notes;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private List<OrderItemDto> items;
+    private PaymentDto payment;
 
     @Getter @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
     public static class OrderItemDto {
+        private Long batchId;
         private Long medicineId;
         private String medicineName;
-        private Integer quantity;
         private BigDecimal unitPrice;
-        private BigDecimal subtotal;
+        private Integer quantity;
+        private BigDecimal lineTotal;
     }
 }

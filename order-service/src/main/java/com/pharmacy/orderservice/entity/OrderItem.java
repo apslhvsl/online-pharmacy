@@ -2,7 +2,6 @@ package com.pharmacy.orderservice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.math.BigDecimal;
 
 @Entity
@@ -21,18 +20,21 @@ public class OrderItem {
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-    @Column(nullable = false)
+    @Column(name = "batch_id")
+    private Long batchId;
+
+    @Column(name = "medicine_id", nullable = false)
     private Long medicineId;
 
-    @Column(nullable = false)
+    @Column(name = "medicine_name", nullable = false, length = 200)
     private String medicineName;
+
+    @Column(name = "unit_price", nullable = false, precision = 10, scale = 2)
+    private BigDecimal unitPrice;
 
     @Column(nullable = false)
     private Integer quantity;
 
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal unitPrice;
-
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal subtotal;
+    @Column(name = "line_total", precision = 10, scale = 2)
+    private BigDecimal lineTotal;
 }

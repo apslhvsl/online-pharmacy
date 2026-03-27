@@ -2,7 +2,6 @@ package com.pharmacy.orderservice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -18,21 +17,37 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "order_id", nullable = false, unique = true)
     private Long orderId;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method")
+    private PaymentMethod paymentMethod;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus status;
+
+    @Column(precision = 10, scale = 2)
     private BigDecimal amount;
 
-    @Column(nullable = false)
-    private String status; // PENDING, SUCCESS, FAILED
+    @Column(name = "gateway_txn_ref", length = 200)
+    private String gatewayTxnRef;
 
-    @Column(nullable = false)
+    @Column(name = "gateway_response", columnDefinition = "TEXT")
+    private String gatewayResponse;
+
+    @Column(name = "paid_at")
+    private LocalDateTime paidAt;
+
+    @Column(name = "refunded_at")
+    private LocalDateTime refundedAt;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
-        if (status == null) status = "PENDING";
+        if (status == null) status = PaymentStatus.PENDING;
     }
 }

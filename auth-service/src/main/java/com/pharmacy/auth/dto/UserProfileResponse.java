@@ -13,5 +13,8 @@ public class UserProfileResponse {
     private Long id;
     private String name;
     private String email;
+    private String mobile;
     private String role;
+    private String status;
+    private java.time.LocalDateTime createdAt;
 }

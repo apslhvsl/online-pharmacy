@@ -2,7 +2,6 @@ package com.pharmacy.orderservice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -17,17 +16,24 @@ public class IdempotencyKey {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String keyValue;
+    @Column(unique = true, nullable = false, length = 255)
+    private String key;
 
-    @Column(nullable = false)
-    private Long orderId;
+    @Column(name = "response_body", columnDefinition = "TEXT")
+    private String responseBody;
 
-    @Column(nullable = false)
+    @Column(name = "status_code")
+    private Integer statusCode;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "expires_at")
+    private LocalDateTime expiresAt;
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+        if (expiresAt == null) expiresAt = createdAt.plusHours(24);
     }
 }

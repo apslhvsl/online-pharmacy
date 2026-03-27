@@ -20,32 +20,39 @@ public class LoggingFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String requestId = UUID.randomUUID().toString();
-        long startTime = System.currentTimeMillis();
+        long   startTime = System.currentTimeMillis();
 
+        // Stamp the request ID so JwtAuthFilter (and downstream services)
+        // can include it in their own log lines — full trace with one ID
         ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
-                .header("X-Request-Id", requestId)
-                .build();
+            .header("X-Request-Id", requestId)
+            .build();
 
         ServerWebExchange mutatedExchange = exchange.mutate()
-                .request(mutatedRequest)
-                .build();
+            .request(mutatedRequest)
+            .build();
 
         log.info("REQUEST  | id={} method={} path={}",
-                requestId,
-                mutatedRequest.getMethod(),
-                mutatedRequest.getURI().getPath());
+            requestId,
+            mutatedRequest.getMethod(),
+            mutatedRequest.getURI().getPath());
 
         return chain.filter(mutatedExchange).then(Mono.fromRunnable(() -> {
             long duration = System.currentTimeMillis() - startTime;
-            log.info("RESPONSE | id={} status={} duration={}ms",
-                    requestId,
-                    mutatedExchange.getResponse().getStatusCode(),
-                    duration);
+            int  status   = mutatedExchange.getResponse().getStatusCode() != null
+                            ? mutatedExchange.getResponse().getStatusCode().value()
+                            : 0;
+            // Warn on 4xx/5xx so security events are easy to grep in prod logs
+            if (status >= 400) {
+                log.warn("RESPONSE | id={} status={} duration={}ms", requestId, status, duration);
+            } else {
+                log.info("RESPONSE | id={} status={} duration={}ms", requestId, status, duration);
+            }
         }));
     }
 
     @Override
     public int getOrder() {
-        return -2; // Run even before JwtAuthFilter
+        return -2; // Must run before JwtAuthFilter so X-Request-Id is available
     }
 }

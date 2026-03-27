@@ -1,16 +1,18 @@
 package com.pharmacy.orderservice.controller;
 
-
-import com.pharmacy.orderservice.dto.OrderDto;
-import com.pharmacy.orderservice.dto.PaymentDto;
+import com.pharmacy.orderservice.dto.*;
 import com.pharmacy.orderservice.entity.OrderStatus;
+import com.pharmacy.orderservice.service.CartService;
 import com.pharmacy.orderservice.service.OrderService;
 import com.pharmacy.orderservice.service.PaymentService;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -19,56 +21,127 @@ public class OrderController {
 
     private final OrderService orderService;
     private final PaymentService paymentService;
+    private final CartService cartService;
+
+    // ── Customer endpoints ───────────────────────────────────────────
 
     @GetMapping
-    public ResponseEntity<List<OrderDto>> getMyOrders(
-            @RequestHeader(name = "X-User-Id") Long userId) {
-        return ResponseEntity.ok(orderService.getOrdersByUser(userId));
+    public ResponseEntity<Page<OrderDto>> getMyOrders(
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId,
+            @RequestParam(required = false) OrderStatus status,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(orderService.getOrdersByUser(userId, status, pageable));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<OrderDto> getOrder(
-            @RequestHeader(name = "X-User-Id") Long userId,
-            @PathVariable(name = "id") Long orderId) {
-        return ResponseEntity.ok(orderService.getOrderById(orderId, userId));
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId,
+            @PathVariable Long id) {
+        return ResponseEntity.ok(orderService.getOrderById(id, userId));
     }
 
-    @DeleteMapping("/{id}/cancel")
+    @PatchMapping("/{id}/cancel")
     public ResponseEntity<OrderDto> cancelOrder(
-            @RequestHeader(name = "X-User-Id") Long userId,
-            @PathVariable(name = "id") Long orderId) {
-        return ResponseEntity.ok(orderService.cancelOrder(orderId, userId));
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId,
+            @PathVariable Long id,
+            @RequestBody CancelRequest request) {
+        return ResponseEntity.ok(orderService.cancelOrder(id, userId, request.getReason()));
     }
 
-    @PostMapping("/{id}/pay")
-    public ResponseEntity<PaymentDto> pay(
-            @RequestHeader(name = "X-User-Id") Long userId,
-            @PathVariable(name = "id") Long orderId) {
-        return ResponseEntity.ok(paymentService.processPayment(orderId, userId));
+    @PostMapping("/{id}/reorder")
+    public ResponseEntity<CartDto> reorder(
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId,
+            @PathVariable Long id) {
+        OrderDto order = orderService.getOrderById(id, userId);
+        // Add all items back to cart (skips out-of-stock silently via CartService)
+        for (var item : order.getItems()) {
+            try {
+                cartService.addItem(userId, item.getBatchId(), item.getQuantity());
+            } catch (Exception ignored) {
+                // out-of-stock items skipped
+            }
+        }
+        return ResponseEntity.ok(cartService.getCart(userId));
     }
 
-    @GetMapping("/{id}/payment")
+    @PostMapping("/{id}/return")
+    public ResponseEntity<OrderDto> requestReturn(
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId,
+            @PathVariable Long id,
+            @RequestBody ReturnRequest request) {
+        return ResponseEntity.ok(orderService.requestReturn(id, userId, request.getReason()));
+    }
+
+    // ── Payment endpoints ────────────────────────────────────────────
+
+    @PostMapping("/payments/initiate")
+    public ResponseEntity<PaymentDto> initiatePayment(
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId,
+            @Valid @RequestBody PaymentInitiateRequest request) {
+        return ResponseEntity.ok(paymentService.initiatePayment(request, userId));
+    }
+
+    @PostMapping("/payments/callback")
+    public ResponseEntity<Void> paymentCallback(
+            @RequestParam String txnRef,
+            @RequestParam boolean success,
+            @RequestBody(required = false) String gatewayResponse) {
+        paymentService.handleCallback(txnRef, success, gatewayResponse);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/payments/{orderId}")
     public ResponseEntity<PaymentDto> getPayment(
-            @PathVariable(name = "id") Long orderId) {
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId,
+            @PathVariable Long orderId) {
+        // validates ownership — getOrderById throws 404 if order doesn't belong to user
+        orderService.getOrderById(orderId, userId);
         return ResponseEntity.ok(paymentService.getPaymentByOrder(orderId));
     }
 
-    // Internal — for admin service
-    @PatchMapping("/{id}/status")
+    // ── Internal endpoints (Admin Service via Feign) ─────────────────
+
+    @GetMapping("/internal/all")
+    public ResponseEntity<Page<OrderDto>> getAllOrders(
+            @RequestParam(required = false) OrderStatus status,
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) java.time.LocalDateTime dateFrom,
+            @RequestParam(required = false) java.time.LocalDateTime dateTo,
+            @PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(orderService.getAllOrders(status, userId, dateFrom, dateTo, pageable));
+    }
+
+    @GetMapping("/internal/{id}")
+    public ResponseEntity<OrderDto> getOrderByIdInternal(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.getOrderByIdAdmin(id));
+    }
+
+    @PatchMapping("/internal/{id}/status")
     public ResponseEntity<OrderDto> updateStatus(
-            @PathVariable(name = "id") Long orderId,
-            @RequestParam(name = "status") OrderStatus status) {
-        return ResponseEntity.ok(orderService.updateStatus(orderId, status));
+            @PathVariable Long id,
+            @Valid @RequestBody OrderStatusUpdateRequest request,
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") Long adminId) {
+        return ResponseEntity.ok(orderService.updateStatus(id, request, adminId));
     }
 
-    // Admin-only endpoint (no user filter)
-    @GetMapping("/all")
-    public ResponseEntity<List<OrderDto>> getAllOrders() {
-        return ResponseEntity.ok(orderService.getAllOrders());
+    @PostMapping("/internal/{id}/cancel")
+    public ResponseEntity<OrderDto> cancelOrderInternal(
+            @PathVariable Long id,
+            @RequestBody CancelRequest request,
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") Long adminId) {
+        OrderStatusUpdateRequest statusRequest = new OrderStatusUpdateRequest();
+        statusRequest.setStatus(OrderStatus.ADMIN_CANCELLED);
+        statusRequest.setNote(request.getReason());
+        return ResponseEntity.ok(orderService.updateStatus(id, statusRequest, adminId));
     }
 
-    @GetMapping("/admin/{id}")
-    public ResponseEntity<OrderDto> getOrderAdmin(@PathVariable(name = "id") Long orderId) {
-        return ResponseEntity.ok(orderService.getOrderByIdAdmin(orderId));
+    @GetMapping("/internal/dashboard")
+    public ResponseEntity<com.pharmacy.orderservice.dto.DashboardDto> getDashboard() {
+        return ResponseEntity.ok(orderService.getDashboard());
+    }
+
+    @GetMapping("/internal/reports/sales")
+    public ResponseEntity<com.pharmacy.orderservice.dto.SalesReportDto> getSalesReport() {
+        return ResponseEntity.ok(orderService.getSalesReport());
     }
 }

@@ -1,8 +1,8 @@
 package com.pharmacy.orderservice.dto;
 
 import lombok.*;
-
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.List;
 
 @Getter @Setter
 @NoArgsConstructor
@@ -10,5 +10,9 @@ import java.util.Map;
 @Builder
 public class CartDto {
     private Long userId;
-    private Map<Long, Integer> items; // medicineId -> quantity
+    private List<CartItemDto> items;
+    private BigDecimal subTotal;
+    private BigDecimal taxAmount;
+    private BigDecimal total;
+    private Boolean requiresPrescription;
 }

@@ -7,11 +7,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
 
+import java.math.BigDecimal;
+import java.util.List;
+
+/**
+ * Public-facing medicine endpoints — accessible by anyone through the gateway.
+ * Write operations live in InternalMedicineController (Feign-only, not gateway-routed).
+ */
 @RestController
 @RequestMapping("/api/catalog/medicines")
 @RequiredArgsConstructor
@@ -21,48 +26,30 @@ public class MedicineController {
 
     @GetMapping
     public ResponseEntity<Page<MedicineDto>> getMedicines(
-            @RequestParam(name = "name", required = false) String name,
-            @RequestParam(name = "categoryId", required = false) Long categoryId,
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Boolean requiresPrescription,
+            @RequestParam(required = false) Boolean inStock,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
             @PageableDefault(size = 10, sort = "name") Pageable pageable) {
-        return ResponseEntity.ok(medicineService.getMedicines(name, categoryId, pageable));
+        return ResponseEntity.ok(medicineService.getMedicines(q, categoryId, requiresPrescription, inStock, minPrice, maxPrice, pageable));
+    }
+
+    @GetMapping("/featured")
+    public ResponseEntity<List<MedicineDto>> getFeatured() {
+        return ResponseEntity.ok(medicineService.getFeaturedMedicines());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MedicineDto> getMedicineById(@PathVariable(name = "id") Long id) {
+    public ResponseEntity<MedicineDto> getMedicineById(@PathVariable Long id) {
         return ResponseEntity.ok(medicineService.getMedicineById(id));
     }
 
     @GetMapping("/{id}/stock-check")
     public ResponseEntity<StockCheckResponse> checkStock(
-            @PathVariable(name = "id") Long id,
-            @RequestParam(name = "quantity") Integer quantity) {
+            @PathVariable Long id,
+            @RequestParam Integer quantity) {
         return ResponseEntity.ok(medicineService.checkStock(id, quantity));
-    }
-
-    @GetMapping("/all")
-    public ResponseEntity<java.util.List<MedicineDto>> getAllMedicinesAsList() {
-        return ResponseEntity.ok(medicineService.getAllMedicinesAsList());
-    }
-
-    @PutMapping("/{id}/stock/deduct")
-    public ResponseEntity<Void> deductStock(
-            @PathVariable(name = "id") Long id,
-            @RequestParam(name = "quantity") Integer quantity) {
-        medicineService.deductStock(id, quantity);
-        return ResponseEntity.noContent().build();
-    }
-
-
-    @PostMapping
-    public ResponseEntity<MedicineDto> createMedicine(@RequestBody MedicineDto request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(medicineService.createMedicine(request));
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<MedicineDto> updateMedicine(
-            @PathVariable(name = "id") Long id,
-            @RequestBody MedicineDto request) {
-        return ResponseEntity.ok(medicineService.updateMedicine(id, request));
     }
 }

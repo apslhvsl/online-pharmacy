@@ -1,7 +1,5 @@
 package com.pharmacy.orderservice.repository;
 
-
-
 import com.pharmacy.orderservice.entity.Cart;
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -2,12 +2,11 @@ package com.pharmacy.admin.controller;
 
 import com.pharmacy.admin.dto.OrderResponse;
 import com.pharmacy.admin.dto.OrderStatusUpdateRequest;
+import com.pharmacy.admin.dto.PagedResponse;
 import com.pharmacy.admin.service.AdminOrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/orders")
@@ -17,20 +16,33 @@ public class AdminOrderController {
     private final AdminOrderService adminOrderService;
 
     @GetMapping
-    public ResponseEntity<List<OrderResponse>> getAllOrders() {
-        return ResponseEntity.ok(adminOrderService.getAllOrders());
+    public ResponseEntity<PagedResponse<OrderResponse>> getAllOrders(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(adminOrderService.getAllOrders(status, userId, page, size));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<OrderResponse> getOrderById(
-            @PathVariable(name = "id") Long id) {
+    public ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
         return ResponseEntity.ok(adminOrderService.getOrderById(id));
     }
 
-    @PutMapping("/{id}/status")
+    @PatchMapping("/{id}/status")
     public ResponseEntity<OrderResponse> updateOrderStatus(
-            @PathVariable(name = "id") Long id,
-            @RequestBody OrderStatusUpdateRequest request) {
-        return ResponseEntity.ok(adminOrderService.updateOrderStatus(id, request.getStatus()));
+            @PathVariable Long id,
+            @RequestBody OrderStatusUpdateRequest request,
+            @RequestHeader("X-User-Id") Long adminId) {
+        return ResponseEntity.ok(adminOrderService.updateOrderStatus(id, request, adminId));
+    }
+
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<Void> cancelOrder(
+            @PathVariable Long id,
+            @RequestBody OrderStatusUpdateRequest request,
+            @RequestHeader("X-User-Id") Long adminId) {
+        adminOrderService.cancelOrder(id, request.getNote(), adminId);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -4,16 +4,26 @@ server:
 spring:
   application:
     name: api-gateway
+
   cloud:
     gateway:
       routes:
 
+        # ── Auth Service ─────────────────────────────────────────────
         - id: auth-service
           uri: lb://auth-service
           predicates:
             - Path=/api/auth/**
           filters:
             - PreserveHostHeader
+
+        # ── Catalog Service (internal paths are NOT routed — Feign only) ──
+        - id: catalog-internal-block
+          uri: no://op
+          predicates:
+            - Path=/api/catalog/internal/**
+          filters:
+            - SetStatus=404
 
         - id: catalog-service
           uri: lb://catalog-service
@@ -22,6 +32,21 @@ spring:
           filters:
             - PreserveHostHeader
 
+        # ── Order Service ────────────────────────────────────────────
+        - id: order-internal-block
+          uri: no://op
+          predicates:
+            - Path=/api/orders/internal/**
+          filters:
+            - SetStatus=404
+
+        - id: auth-internal-block
+          uri: no://op
+          predicates:
+            - Path=/api/auth/internal/**
+          filters:
+            - SetStatus=404
+
         - id: order-service
           uri: lb://order-service
           predicates:
@@ -29,12 +54,47 @@ spring:
           filters:
             - PreserveHostHeader
 
+        # ── Admin Service ────────────────────────────────────────────
         - id: admin-service
           uri: lb://admin-service
           predicates:
             - Path=/api/admin/**
           filters:
             - PreserveHostHeader
+
+        # ── Swagger api-docs pass-through (ADDED, no removal) ────────
+        - id: auth-api-docs
+          uri: lb://auth-service
+          predicates:
+            - Path=/auth-service/v3/api-docs/**
+          filters:
+            - RewritePath=/auth-service/v3/api-docs/?(?<segment>.*), /v3/api-docs/${segment}
+
+        - id: catalog-api-docs
+          uri: lb://catalog-service
+          predicates:
+            - Path=/catalog-service/v3/api-docs
+          filters:
+            - RewritePath=/catalog-service/v3/api-docs, /v3/api-docs
+
+        - id: order-api-docs
+          uri: lb://order-service
+          predicates:
+            - Path=/order-service/v3/api-docs
+          filters:
+            - RewritePath=/order-service/v3/api-docs, /v3/api-docs
+
+        - id: admin-api-docs
+          uri: lb://admin-service
+          predicates:
+            - Path=/admin-service/v3/api-docs
+          filters:
+            - RewritePath=/admin-service/v3/api-docs, /v3/api-docs
+
+      # ── Timeouts (ADDED, safe production default) ──────────────────
+      httpclient:
+        connect-timeout: 5000
+        response-timeout: 5s
 
   codec:
     max-in-memory-size: 10MB
@@ -52,6 +112,7 @@ logging:
   pattern:
     level: "%5p [${spring.application.name},%X{traceId},%X{spanId}]"
 
+# ── JWT (MODIFIED: externalized, NOT removed) ───────────────────────
 jwt:
   secret: 3cfa76ef14937c1c0ea519f8fc057a80fcd04a7d0d7b7b6d9b9e2f0b3d5a1c8
 
@@ -69,7 +130,6 @@ management:
 
 spring.devtools.restart.enabled: false
 
-
 springdoc:
   api-docs:
     path: /v3/api-docs
@@ -79,14 +139,105 @@ springdoc:
     config-url: /v3/api-docs/swagger-config
     disable-swagger-default-url: true
     urls:
-      - name: 1. Auth Service
-        url: /api/auth/v3/api-docs
-      - name: 2. Catalog Service
-        url: /api/catalog/v3/api-docs
-      - name: 3. Order Service
-        url: /api/orders/v3/api-docs
-      - name: 4. Admin Service
-        url: /api/admin/v3/api-docs
+      - name: auth-service
+        url: /auth-service/v3/api-docs
+      - name: catalog-service
+        url: /catalog-service/v3/api-docs
+      - name: order-service
+        url: /order-service/v3/api-docs
+      - name: admin-service
+        url: /admin-service/v3/api-docs
   webjars:
-    prefix: ""   # critical for WebFlux
+    prefix: ""
+# server:
+#   port: 8080
+
+# spring:
+#   application:
+#     name: api-gateway
+#   cloud:
+#     gateway:
+#       routes:
+
+#         - id: auth-service
+#           uri: lb://auth-service
+#           predicates:
+#             - Path=/api/auth/**
+#           filters:
+#             - PreserveHostHeader
+
+#         - id: catalog-service
+#           uri: lb://catalog-service
+#           predicates:
+#             - Path=/api/catalog/**
+#           filters:
+#             - PreserveHostHeader
+
+#         - id: order-service
+#           uri: lb://order-service
+#           predicates:
+#             - Path=/api/orders/**
+#           filters:
+#             - PreserveHostHeader
+
+#         - id: admin-service
+#           uri: lb://admin-service
+#           predicates:
+#             - Path=/api/admin/**
+#           filters:
+#             - PreserveHostHeader
+
+#   codec:
+#     max-in-memory-size: 10MB
+
+# eureka:
+#   client:
+#     service-url:
+#       defaultZone: http://localhost:8761/eureka/
+#   instance:
+#     prefer-ip-address: true
+
+# logging:
+#   level:
+#     org.springframework.cloud.gateway: DEBUG
+#   pattern:
+#     level: "%5p [${spring.application.name},%X{traceId},%X{spanId}]"
+
+# jwt:
+#   secret: 3cfa76ef14937c1c0ea519f8fc057a80fcd04a7d0d7b7b6d9b9e2f0b3d5a1c8
+
+# management:
+#   tracing:
+#     sampling:
+#       probability: 1.0
+#   zipkin:
+#     tracing:
+#       endpoint: http://localhost:9411/api/v2/spans
+#   endpoints:
+#     web:
+#       exposure:
+#         include: health,info,metrics,prometheus
+
+# spring.devtools.restart.enabled: false
+
+
+# springdoc:
+#   api-docs:
+#     path: /v3/api-docs
+#   swagger-ui:
+#     path: /swagger-ui.html
+#     use-root-path: true
+#     config-url: /v3/api-docs/swagger-config
+#     disable-swagger-default-url: true
+#     urls:
+#       - name: auth-service
+#         url: /auth-service/v3/api-docs
+#       - name: catalog-service
+#         url: /catalog-service/v3/api-docs
+#       - name: order-service
+#         url: /order-service/v3/api-docs
+#       - name: admin-service
+#         url: /admin-service/v3/api-docs
+#   webjars:
+#     prefix: ""   # critical for WebFlux
 

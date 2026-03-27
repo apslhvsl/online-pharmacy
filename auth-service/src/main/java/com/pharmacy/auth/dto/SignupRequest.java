@@ -15,6 +15,9 @@ public class SignupRequest {
     @Email(message = "Invalid email format")
     private String email;
 
+    @NotBlank(message = "Mobile is required")
+    private String mobile;
+
     @NotBlank(message = "Password is required")
     @Pattern(
             regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",

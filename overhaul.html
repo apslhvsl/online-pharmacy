@@ -1,0 +1,2070 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Online Pharmacy — API Endpoints & DB Schema Reference</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Sora:wght@300;400;600;700&display=swap');
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #141720;
+      --surface2: #1c2030;
+      --border: #262b3d;
+      --border2: #323750;
+      --text: #e2e6f3;
+      --text-muted: #7a82a0;
+      --text-dim: #4a5068;
+      --auth: #ff6b6b;
+      --auth-bg: rgba(255, 107, 107, 0.08);
+      --auth-border: rgba(255, 107, 107, 0.25);
+      --catalog: #43d9ad;
+      --catalog-bg: rgba(67, 217, 173, 0.08);
+      --catalog-border: rgba(67, 217, 173, 0.25);
+      --order: #6cb6ff;
+      --order-bg: rgba(108, 182, 255, 0.08);
+      --order-border: rgba(108, 182, 255, 0.25);
+      --admin: #f7c94b;
+      --admin-bg: rgba(247, 201, 75, 0.08);
+      --admin-border: rgba(247, 201, 75, 0.25);
+      --public: #a0a8c8;
+      --public-bg: rgba(160, 168, 200, 0.1);
+      --customer-c: #c084fc;
+      --admin-c: #f7c94b;
+      --get: #43d9ad;
+      --post: #6cb6ff;
+      --put: #f7c94b;
+      --delete: #ff6b6b;
+      --patch: #c084fc;
+      --font: 'Sora', sans-serif;
+      --mono: 'IBM Plex Mono', monospace;
+      --radius: 8px;
+      --radius-sm: 4px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Layout */
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .sidebar-logo {
+      padding: 0 20px 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .sidebar-logo .mark {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .sidebar-logo .title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .nav-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .nav-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 4px 8px 8px;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 12.5px;
+      transition: all 0.15s;
+      cursor: pointer;
+    }
+
+    .nav-link:hover {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .nav-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* Main content */
+    .main {
+      flex: 1;
+      padding: 40px 48px;
+      max-width: 1100px;
+    }
+
+    /* Page header */
+    .page-header {
+      margin-bottom: 48px;
+    }
+
+    .page-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .page-header p {
+      color: var(--text-muted);
+      font-size: 14px;
+      max-width: 600px;
+      line-height: 1.7;
+    }
+
+    .version-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 11px;
+      font-family: var(--mono);
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    /* Role legend */
+    .role-legend {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 16px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 48px;
+    }
+
+    .role-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .role-public {
+      background: rgba(160, 168, 200, 0.15);
+      color: #a0a8c8;
+      border: 1px solid rgba(160, 168, 200, 0.3);
+    }
+
+    .role-customer {
+      background: rgba(192, 132, 252, 0.12);
+      color: #c084fc;
+      border: 1px solid rgba(192, 132, 252, 0.3);
+    }
+
+    .role-admin {
+      background: rgba(247, 201, 75, 0.12);
+      color: #f7c94b;
+      border: 1px solid rgba(247, 201, 75, 0.3);
+    }
+
+    .role-legend-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-right: 4px;
+    }
+
+    /* Service section */
+    .service-section {
+      margin-bottom: 56px;
+    }
+
+    .service-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .service-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .service-meta h2 {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .service-meta .port {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Endpoint table */
+    .endpoint-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 16px;
+    }
+
+    .endpoint-table th {
+      text-align: left;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .endpoint-table td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .endpoint-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .endpoint-table tr:hover td {
+      background: var(--surface2);
+    }
+
+    .method-badge {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      padding: 2px 6px;
+      border-radius: 3px;
+      letter-spacing: 0.04em;
+      min-width: 46px;
+      text-align: center;
+    }
+
+    .m-get {
+      background: rgba(67, 217, 173, 0.12);
+      color: var(--get);
+      border: 1px solid rgba(67, 217, 173, 0.25);
+    }
+
+    .m-post {
+      background: rgba(108, 182, 255, 0.12);
+      color: var(--post);
+      border: 1px solid rgba(108, 182, 255, 0.25);
+    }
+
+    .m-put {
+      background: rgba(247, 201, 75, 0.12);
+      color: var(--put);
+      border: 1px solid rgba(247, 201, 75, 0.25);
+    }
+
+    .m-delete {
+      background: rgba(255, 107, 107, 0.12);
+      color: var(--delete);
+      border: 1px solid rgba(255, 107, 107, 0.25);
+    }
+
+    .m-patch {
+      background: rgba(192, 132, 252, 0.12);
+      color: var(--patch);
+      border: 1px solid rgba(192, 132, 252, 0.25);
+    }
+
+    .path-cell {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text);
+    }
+
+    .path-cell .param {
+      color: var(--text-muted);
+    }
+
+    .desc-cell {
+      font-size: 12.5px;
+      color: var(--text-muted);
+    }
+
+    .desc-cell .note {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 3px;
+      font-family: var(--mono);
+    }
+
+    .access-cell {
+      white-space: nowrap;
+    }
+
+    /* Auth badge */
+    .auth-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 7px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .tag-public {
+      background: rgba(160, 168, 200, 0.12);
+      color: #a0a8c8;
+      border: 1px solid rgba(160, 168, 200, 0.25);
+    }
+
+    .tag-customer {
+      background: rgba(192, 132, 252, 0.1);
+      color: #c084fc;
+      border: 1px solid rgba(192, 132, 252, 0.25);
+    }
+
+    .tag-admin {
+      background: rgba(247, 201, 75, 0.1);
+      color: #f7c94b;
+      border: 1px solid rgba(247, 201, 75, 0.25);
+    }
+
+    .tag-both {
+      background: rgba(108, 182, 255, 0.1);
+      color: #6cb6ff;
+      border: 1px solid rgba(108, 182, 255, 0.25);
+    }
+
+    /* Section card */
+    .controller-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .controller-card-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .controller-name {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .controller-desc {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    /* DB Schema section */
+    .schema-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .schema-table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .schema-table-header {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .schema-table-name {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .schema-table-db {
+      font-size: 10px;
+      color: var(--text-dim);
+      font-family: var(--mono);
+    }
+
+    .schema-fields {
+      padding: 0;
+    }
+
+    .schema-field {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding: 7px 14px;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+
+    .schema-field:last-child {
+      border-bottom: none;
+    }
+
+    .field-name {
+      font-family: var(--mono);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .field-name .pk {
+      color: #f7c94b;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .field-name .fk {
+      color: #6cb6ff;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .field-name .uk {
+      color: #43d9ad;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .field-name .nn {
+      color: #ff6b6b;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .field-type {
+      font-family: var(--mono);
+      color: var(--text-dim);
+      font-size: 11px;
+    }
+
+    /* Divider */
+    .section-divider {
+      margin: 40px 0;
+      border: none;
+      border-top: 1px solid var(--border);
+    }
+
+    h3.sub-heading {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 14px;
+      margin-top: 28px;
+    }
+
+    .info-box {
+      background: rgba(108, 182, 255, 0.06);
+      border: 1px solid rgba(108, 182, 255, 0.2);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      line-height: 1.7;
+    }
+
+    .info-box code {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: #6cb6ff;
+      background: rgba(108, 182, 255, 0.1);
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    .warn-box {
+      background: rgba(247, 201, 75, 0.06);
+      border: 1px solid rgba(247, 201, 75, 0.2);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      line-height: 1.7;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        display: none;
+      }
+
+      .main {
+        padding: 24px 20px;
+      }
+
+      .schema-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <div class="sidebar-logo">
+        <span class="mark">Pharmacy Platform</span>
+        <div class="title">API + Schema Reference</div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-label">Services</div>
+        <a class="nav-link" href="#auth"><span class="nav-dot" style="background:#ff6b6b"></span>Auth Service</a>
+        <a class="nav-link" href="#catalog"><span class="nav-dot" style="background:#43d9ad"></span>Catalog Service</a>
+        <a class="nav-link" href="#order"><span class="nav-dot" style="background:#6cb6ff"></span>Order Service</a>
+        <a class="nav-link" href="#admin"><span class="nav-dot" style="background:#f7c94b"></span>Admin Service</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-label">Database</div>
+        <a class="nav-link" href="#db-auth"><span class="nav-dot" style="background:#ff6b6b"></span>auth_db</a>
+        <a class="nav-link" href="#db-catalog"><span class="nav-dot" style="background:#43d9ad"></span>catalog_db</a>
+        <a class="nav-link" href="#db-order"><span class="nav-dot" style="background:#6cb6ff"></span>order_db</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-label">Reference</div>
+        <a class="nav-link" href="#enums"><span class="nav-dot" style="background:#c084fc"></span>Enums & Constants</a>
+        <a class="nav-link" href="#gateway"><span class="nav-dot" style="background:#a0a8c8"></span>Gateway Rules</a>
+      </div>
+    </nav>
+
+    <!-- Main -->
+    <main class="main">
+
+      <!-- Header -->
+      <div class="page-header">
+        <div class="version-badge">v1.0 · Spring Boot 3.x · postgres · JWT</div>
+        <h1>API Endpoints & Database Schema</h1>
+        <p>Complete finalized reference for all four microservices. Covers every controller endpoint, HTTP method,
+          access role, request/response notes, and the full postgres schema per service database.</p>
+      </div>
+
+      <!-- Role legend -->
+      <div class="role-legend">
+        <span class="role-legend-label">Access roles:</span>
+        <span class="role-pill role-public">PUBLIC — no token required</span>
+        <span class="role-pill role-customer">CUSTOMER — JWT with ROLE_CUSTOMER</span>
+        <span class="role-pill role-admin">ADMIN — JWT with ROLE_ADMIN</span>
+        <span style="margin-left:auto;font-size:11px;color:var(--text-dim);align-self:center;">All protected routes
+          validated at Gateway via JwtAuthFilter</span>
+      </div>
+
+      <!-- ======================= AUTH SERVICE ======================= -->
+      <div class="service-section" id="auth">
+        <div class="service-header">
+          <div class="service-icon"
+            style="background:var(--auth-bg);border:1px solid var(--auth-border);color:var(--auth)">🔐</div>
+          <div class="service-meta">
+            <h2 style="color:var(--auth)">Auth Service</h2>
+            <div class="port">Port 8081 · /api/auth/** · AuthController.java</div>
+          </div>
+        </div>
+
+        <div class="info-box">
+          JWT issued via JJWT. Token payload includes <code>userId</code>, <code>email</code>, <code>role</code>,
+          <code>iat</code>, <code>exp</code>. Expiry: 24h access token. Refresh token stored in DB. Password hashed with
+          BCrypt (strength 12).
+        </div>
+
+        <div class="controller-card">
+          <div class="controller-card-header">
+            <span class="controller-name">AuthController</span>
+            <span class="controller-desc">Authentication, registration, token management</span>
+          </div>
+          <table class="endpoint-table">
+            <thead>
+              <tr>
+                <th style="width:64px">Method</th>
+                <th>Path</th>
+                <th>Description</th>
+                <th>Access</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="method-badge m-post">POST</span></td>
+                <td class="path-cell">/api/auth/signup</td>
+                <td class="desc-cell">Register new customer account<div class="note">Body: name, email, mobile, password
+                    → returns AuthResponse (token + profile)</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-public">PUBLIC</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-post">POST</span></td>
+                <td class="path-cell">/api/auth/login</td>
+                <td class="desc-cell">Login with email + password<div class="note">Returns accessToken, refreshToken,
+                    expiresIn, userRole</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-public">PUBLIC</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-post">POST</span></td>
+                <td class="path-cell">/api/auth/refresh</td>
+                <td class="desc-cell">Exchange refresh token for new access token<div class="note">Body: { refreshToken
+                    }. Validates against DB before issuing.</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-public">PUBLIC</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-post">POST</span></td>
+                <td class="path-cell">/api/auth/logout</td>
+                <td class="desc-cell">Invalidate refresh token<div class="note">Deletes refresh token record from DB.
+                    Access token expires naturally.</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-both">CUST + ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/auth/me</td>
+                <td class="desc-cell">Get own profile from token<div class="note">Returns UserProfileResponse (id, name,
+                    email, mobile, role, status, createdAt)</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-both">CUST + ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-put">PUT</span></td>
+                <td class="path-cell">/api/auth/me</td>
+                <td class="desc-cell">Update own profile (name, mobile)<div class="note">Email and role changes not
+                    permitted here</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-customer">CUSTOMER</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-post">POST</span></td>
+                <td class="path-cell">/api/auth/change-password</td>
+                <td class="desc-cell">Change password with old password verification<div class="note">Body: {
+                    currentPassword, newPassword }</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-both">CUST + ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-post">POST</span></td>
+                <td class="path-cell">/api/auth/forgot-password</td>
+                <td class="desc-cell">Initiate password reset (OTP/link via email)<div class="note">Generates a reset
+                    token stored in password_reset_tokens table</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-public">PUBLIC</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-post">POST</span></td>
+                <td class="path-cell">/api/auth/reset-password</td>
+                <td class="desc-cell">Complete password reset with token<div class="note">Body: { token, newPassword }.
+                    Token expires in 15 min.</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-public">PUBLIC</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/auth/validate</td>
+                <td class="desc-cell">Internal-only: validate JWT and return claims<div class="note">Used by Gateway
+                    JwtAuthFilter. Not exposed externally.</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-public">INTERNAL</span></td>
+              </tr>
+              <!-- Admin user management -->
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/auth/admin/users</td>
+                <td class="desc-cell">List all users with filters (role, status, search)<div class="note">Paginated.
+                    Params: page, size, role, status, q</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/auth/admin/users/<span class="param">{id}</span></td>
+                <td class="desc-cell">Get any user's profile by ID</td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-patch">PATCH</span></td>
+                <td class="path-cell">/api/auth/admin/users/<span class="param">{id}</span>/status</td>
+                <td class="desc-cell">Activate / deactivate a user account<div class="note">Body: { status: ACTIVE |
+                    INACTIVE | SUSPENDED }</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-post">POST</span></td>
+                <td class="path-cell">/api/auth/admin/users</td>
+                <td class="desc-cell">Create an admin-level user<div class="note">Only ADMIN can set role=ADMIN during
+                    creation</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ======================= CATALOG SERVICE ======================= -->
+      <div class="service-section" id="catalog">
+        <div class="service-header">
+          <div class="service-icon"
+            style="background:var(--catalog-bg);border:1px solid var(--catalog-border);color:var(--catalog)">💊</div>
+          <div class="service-meta">
+            <h2 style="color:var(--catalog)">Catalog & Prescription Service</h2>
+            <div class="port">Port 8082 · /api/catalog/** · MedicineController, CategoryController,
+              PrescriptionController</div>
+          </div>
+        </div>
+
+        <!-- MedicineController -->
+        <div class="controller-card">
+          <div class="controller-card-header">
+            <span class="controller-name">MedicineController</span>
+            <span class="controller-desc">/api/catalog/medicines/**</span>
+          </div>
+          <table class="endpoint-table">
+            <thead>
+              <tr>
+                <th style="width:64px">Method</th>
+                <th>Path</th>
+                <th>Description</th>
+                <th>Access</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/catalog/medicines</td>
+                <td class="desc-cell">Search & list medicines with full filters<div class="note">Params: q, categoryId,
+                    requiresPrescription, inStock, minPrice, maxPrice, sort (name|price|popularity), page, size</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-public">PUBLIC</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/catalog/medicines/<span class="param">{id}</span></td>
+                <td class="desc-cell">Get single medicine detail (full dosage, description, batch info)<div
+                    class="note">Returns MedicineDto with stock status, expiryDate, activeIngredient</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-public">PUBLIC</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/catalog/medicines/<span class="param">{id}</span>/stock-check</td>
+                <td class="desc-cell">Check real-time stock availability<div class="note">Returns StockCheckResponse: {
+                    available, quantity, nextRestockDate }</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-public">PUBLIC</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/catalog/medicines/featured</td>
+                <td class="desc-cell">Get featured / promoted medicines for homepage</td>
+                <td class="access-cell"><span class="auth-tag tag-public">PUBLIC</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/catalog/medicines/expiring-soon</td>
+                <td class="desc-cell">Medicines expiring within 90 days (admin/internal use)<div class="note">Used by
+                    Admin Service via Feign client</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <!-- Admin CRUD -->
+              <tr>
+                <td><span class="method-badge m-post">POST</span></td>
+                <td class="path-cell">/api/catalog/medicines</td>
+                <td class="desc-cell">Create new medicine entry<div class="note">Body: MedicineCreateRequest. Returns
+                    created MedicineDto.</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-put">PUT</span></td>
+                <td class="path-cell">/api/catalog/medicines/<span class="param">{id}</span></td>
+                <td class="desc-cell">Full update of medicine record</td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-patch">PATCH</span></td>
+                <td class="path-cell">/api/catalog/medicines/<span class="param">{id}</span>/stock</td>
+                <td class="desc-cell">Partial stock update (increment/decrement)<div class="note">Body: { adjustment:
+                    int, reason: string }. Logs to inventory_audit.</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-delete">DELETE</span></td>
+                <td class="path-cell">/api/catalog/medicines/<span class="param">{id}</span></td>
+                <td class="desc-cell">Soft-delete medicine (sets active=false)<div class="note">Hard delete not
+                    permitted if medicine appears in any order</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- CategoryController -->
+        <div class="controller-card">
+          <div class="controller-card-header">
+            <span class="controller-name">CategoryController</span>
+            <span class="controller-desc">/api/catalog/categories/**</span>
+          </div>
+          <table class="endpoint-table">
+            <thead>
+              <tr>
+                <th style="width:64px">Method</th>
+                <th>Path</th>
+                <th>Description</th>
+                <th>Access</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/catalog/categories</td>
+                <td class="desc-cell">List all active categories<div class="note">Returns list of CategoryDto: id, name,
+                    slug, iconUrl, medicineCount</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-public">PUBLIC</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/catalog/categories/<span class="param">{id}</span></td>
+                <td class="desc-cell">Get single category with its medicines</td>
+                <td class="access-cell"><span class="auth-tag tag-public">PUBLIC</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-post">POST</span></td>
+                <td class="path-cell">/api/catalog/categories</td>
+                <td class="desc-cell">Create a new category</td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-put">PUT</span></td>
+                <td class="path-cell">/api/catalog/categories/<span class="param">{id}</span></td>
+                <td class="desc-cell">Update category name or metadata</td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-delete">DELETE</span></td>
+                <td class="path-cell">/api/catalog/categories/<span class="param">{id}</span></td>
+                <td class="desc-cell">Soft-delete category (fails if medicines exist under it)</td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- PrescriptionController -->
+        <div class="controller-card">
+          <div class="controller-card-header">
+            <span class="controller-name">PrescriptionController</span>
+            <span class="controller-desc">/api/catalog/prescriptions/**</span>
+          </div>
+          <table class="endpoint-table">
+            <thead>
+              <tr>
+                <th style="width:64px">Method</th>
+                <th>Path</th>
+                <th>Description</th>
+                <th>Access</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="method-badge m-post">POST</span></td>
+                <td class="path-cell">/api/catalog/prescriptions/upload</td>
+                <td class="desc-cell">Upload prescription file (PDF, JPG, PNG)<div class="note">MultipartFile; max 5MB;
+                    stores to /uploads/prescriptions/{userId}/; returns prescriptionId</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-customer">CUSTOMER</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/catalog/prescriptions</td>
+                <td class="desc-cell">Get all prescriptions for the current user<div class="note">Returns list with
+                    status: PENDING | APPROVED | REJECTED | EXPIRED</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-customer">CUSTOMER</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/catalog/prescriptions/<span class="param">{id}</span></td>
+                <td class="desc-cell">Get specific prescription by ID<div class="note">Customer can only access own
+                    prescriptions (userId check in service)</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-customer">CUSTOMER</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/catalog/prescriptions/<span class="param">{id}</span>/file</td>
+                <td class="desc-cell">Download/view prescription file<div class="note">Returns file stream with correct
+                    Content-Type header</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-both">CUST + ADMIN</span></td>
+              </tr>
+              <!-- Admin prescription management -->
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/catalog/prescriptions/admin/queue</td>
+                <td class="desc-cell">List all PENDING prescriptions for review<div class="note">Params: page, size,
+                    userId. Ordered by uploadedAt ASC (oldest first)</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-patch">PATCH</span></td>
+                <td class="path-cell">/api/catalog/prescriptions/admin/<span class="param">{id}</span>/status</td>
+                <td class="desc-cell">Approve or reject a prescription<div class="note">Body: { status:
+                    APPROVED|REJECTED, remarks: string }. Triggers order state update via event/Feign.</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/catalog/prescriptions/admin/all</td>
+                <td class="desc-cell">List all prescriptions with full filters<div class="note">Params: status, userId,
+                    dateFrom, dateTo, page, size</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ======================= ORDER SERVICE ======================= -->
+      <div class="service-section" id="order">
+        <div class="service-header">
+          <div class="service-icon"
+            style="background:var(--order-bg);border:1px solid var(--order-border);color:var(--order)">🛒</div>
+          <div class="service-meta">
+            <h2 style="color:var(--order)">Order & Delivery Service</h2>
+            <div class="port">Port 8083 · /api/orders/** · CartController, CheckoutController, OrderController</div>
+          </div>
+        </div>
+
+        <!-- CartController -->
+        <div class="controller-card">
+          <div class="controller-card-header">
+            <span class="controller-name">CartController</span>
+            <span class="controller-desc">/api/orders/cart/**</span>
+          </div>
+          <table class="endpoint-table">
+            <thead>
+              <tr>
+                <th style="width:64px">Method</th>
+                <th>Path</th>
+                <th>Description</th>
+                <th>Access</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/orders/cart</td>
+                <td class="desc-cell">Get current user's active cart with item totals<div class="note">Returns CartDto:
+                    items[], subTotal, taxAmount, total, requiresPrescription flag</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-customer">CUSTOMER</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-post">POST</span></td>
+                <td class="path-cell">/api/orders/cart/items</td>
+                <td class="desc-cell">Add item to cart or update quantity if exists<div class="note">Body: { medicineId,
+                    quantity }. Validates stock via CatalogClient Feign call.</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-customer">CUSTOMER</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-put">PUT</span></td>
+                <td class="path-cell">/api/orders/cart/items/<span class="param">{medicineId}</span></td>
+                <td class="desc-cell">Update item quantity in cart<div class="note">Body: { quantity }. quantity=0
+                    removes the item.</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-customer">CUSTOMER</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-delete">DELETE</span></td>
+                <td class="path-cell">/api/orders/cart/items/<span class="param">{medicineId}</span></td>
+                <td class="desc-cell">Remove specific item from cart</td>
+                <td class="access-cell"><span class="auth-tag tag-customer">CUSTOMER</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-delete">DELETE</span></td>
+                <td class="path-cell">/api/orders/cart</td>
+                <td class="desc-cell">Clear all items from cart</td>
+                <td class="access-cell"><span class="auth-tag tag-customer">CUSTOMER</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- CheckoutController -->
+        <div class="controller-card">
+          <div class="controller-card-header">
+            <span class="controller-name">CheckoutController</span>
+            <span class="controller-desc">/api/orders/checkout/**</span>
+          </div>
+          <table class="endpoint-table">
+            <thead>
+              <tr>
+                <th style="width:64px">Method</th>
+                <th>Path</th>
+                <th>Description</th>
+                <th>Access</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="method-badge m-post">POST</span></td>
+                <td class="path-cell">/api/orders/checkout/start</td>
+                <td class="desc-cell">Initiate checkout — Step 1<div class="note">Validates cart is non-empty. Returns
+                    checkout session with orderId, requiresPrescription, prescriptionStatus.</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-customer">CUSTOMER</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-post">POST</span></td>
+                <td class="path-cell">/api/orders/checkout/<span class="param">{orderId}</span>/address</td>
+                <td class="desc-cell">Set delivery address — Step 2<div class="note">Body: CheckoutRequest (addressId or
+                    inline address). Validates pincode serviceability.</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-customer">CUSTOMER</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-post">POST</span></td>
+                <td class="path-cell">/api/orders/checkout/<span class="param">{orderId}</span>/prescription-link</td>
+                <td class="desc-cell">Attach approved prescription to order — Step 3<div class="note">Body: {
+                    prescriptionId }. Verifies prescription is APPROVED and belongs to user.</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-customer">CUSTOMER</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-post">POST</span></td>
+                <td class="path-cell">/api/orders/checkout/<span class="param">{orderId}</span>/confirm</td>
+                <td class="desc-cell">Final order confirmation — Step 4<div class="note">Runs all validations (stock, Rx
+                    approval). Creates Payment record. Status → PAYMENT_PENDING.</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-customer">CUSTOMER</span></td>
+              </tr>
+              <!-- Addresses sub-resource -->
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/orders/addresses</td>
+                <td class="desc-cell">List saved delivery addresses for user</td>
+                <td class="access-cell"><span class="auth-tag tag-customer">CUSTOMER</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-post">POST</span></td>
+                <td class="path-cell">/api/orders/addresses</td>
+                <td class="desc-cell">Add a new delivery address<div class="note">Body: AddressRequest (label, line1,
+                    line2, city, state, pincode, isDefault)</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-customer">CUSTOMER</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-put">PUT</span></td>
+                <td class="path-cell">/api/orders/addresses/<span class="param">{id}</span></td>
+                <td class="desc-cell">Update an existing address</td>
+                <td class="access-cell"><span class="auth-tag tag-customer">CUSTOMER</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-delete">DELETE</span></td>
+                <td class="path-cell">/api/orders/addresses/<span class="param">{id}</span></td>
+                <td class="desc-cell">Remove a saved address</td>
+                <td class="access-cell"><span class="auth-tag tag-customer">CUSTOMER</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- OrderController -->
+        <div class="controller-card">
+          <div class="controller-card-header">
+            <span class="controller-name">OrderController</span>
+            <span class="controller-desc">/api/orders/** + /api/orders/payments/**</span>
+          </div>
+          <table class="endpoint-table">
+            <thead>
+              <tr>
+                <th style="width:64px">Method</th>
+                <th>Path</th>
+                <th>Description</th>
+                <th>Access</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/orders</td>
+                <td class="desc-cell">Get order history for current user<div class="note">Params: status, page, size,
+                    sort. Returns paginated OrderDto list.</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-customer">CUSTOMER</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/orders/<span class="param">{id}</span></td>
+                <td class="desc-cell">Get full order detail<div class="note">Includes items, payment, delivery status,
+                    tracking info</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-customer">CUSTOMER</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-post">POST</span></td>
+                <td class="path-cell">/api/orders/<span class="param">{id}</span>/cancel</td>
+                <td class="desc-cell">Customer cancels order<div class="note">Allowed only in CHECKOUT_STARTED or
+                    PAYMENT_PENDING state. Body: { reason }.</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-customer">CUSTOMER</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-post">POST</span></td>
+                <td class="path-cell">/api/orders/<span class="param">{id}</span>/reorder</td>
+                <td class="desc-cell">Add all items from a past order to cart<div class="note">Stock validated before
+                    adding. Out-of-stock items skipped with warning.</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-customer">CUSTOMER</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-post">POST</span></td>
+                <td class="path-cell">/api/orders/<span class="param">{id}</span>/return</td>
+                <td class="desc-cell">Initiate return request<div class="note">Allowed only for DELIVERED orders within
+                    7 days. Body: { reason, items[] }.</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-customer">CUSTOMER</span></td>
+              </tr>
+              <!-- Payments -->
+              <tr>
+                <td><span class="method-badge m-post">POST</span></td>
+                <td class="path-cell">/api/orders/payments/initiate</td>
+                <td class="desc-cell">Initiate payment for an order<div class="note">Body: { orderId, paymentMethod:
+                    COD|PREPAID }. Creates PaymentDto with transactionRef.</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-customer">CUSTOMER</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-post">POST</span></td>
+                <td class="path-cell">/api/orders/payments/callback</td>
+                <td class="desc-cell">Payment gateway webhook callback<div class="note">Verified by HMAC signature.
+                    Updates Payment status and triggers order state machine.</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-public">WEBHOOK</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/orders/payments/<span class="param">{orderId}</span></td>
+                <td class="desc-cell">Get payment details for an order</td>
+                <td class="access-cell"><span class="auth-tag tag-customer">CUSTOMER</span></td>
+              </tr>
+              <!-- Admin order access via Order Service -->
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/orders/internal/all</td>
+                <td class="desc-cell">Internal: all orders (used by Admin Service via Feign)<div class="note">Full
+                    filter support: status, userId, dateFrom, dateTo, page, size</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-patch">PATCH</span></td>
+                <td class="path-cell">/api/orders/internal/<span class="param">{id}</span>/status</td>
+                <td class="desc-cell">Internal: update order status (called by Admin Service)<div class="note">Body: {
+                    status, note }. Validates via OrderStateMachine.</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ======================= ADMIN SERVICE ======================= -->
+      <div class="service-section" id="admin">
+        <div class="service-header">
+          <div class="service-icon"
+            style="background:var(--admin-bg);border:1px solid var(--admin-border);color:var(--admin)">⚙️</div>
+          <div class="service-meta">
+            <h2 style="color:var(--admin)">Admin & Reporting Service</h2>
+            <div class="port">Port 8084 · /api/admin/** · AdminMedicineController, AdminOrderController,
+              AdminReportController</div>
+          </div>
+        </div>
+
+        <div class="warn-box">
+          All /api/admin/** routes are protected with <strong>@PreAuthorize("hasRole('ADMIN')")</strong> at both the
+          Gateway filter level and the service method level. Double enforcement. No customer token can reach these
+          endpoints.
+        </div>
+
+        <!-- AdminMedicineController -->
+        <div class="controller-card">
+          <div class="controller-card-header">
+            <span class="controller-name">AdminMedicineController</span>
+            <span class="controller-desc">/api/admin/medicines/** — proxies to Catalog Service via Feign</span>
+          </div>
+          <table class="endpoint-table">
+            <thead>
+              <tr>
+                <th style="width:64px">Method</th>
+                <th>Path</th>
+                <th>Description</th>
+                <th>Access</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/admin/medicines</td>
+                <td class="desc-cell">List all medicines including inactive ones<div class="note">Includes inactive
+                    flag, low stock threshold alerts</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-post">POST</span></td>
+                <td class="path-cell">/api/admin/medicines</td>
+                <td class="desc-cell">Create new medicine via Admin UI<div class="note">Delegates to POST
+                    /api/catalog/medicines via CatalogClient</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-put">PUT</span></td>
+                <td class="path-cell">/api/admin/medicines/<span class="param">{id}</span></td>
+                <td class="desc-cell">Update medicine detail</td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-patch">PATCH</span></td>
+                <td class="path-cell">/api/admin/medicines/<span class="param">{id}</span>/stock</td>
+                <td class="desc-cell">Adjust stock quantity with audit reason</td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-delete">DELETE</span></td>
+                <td class="path-cell">/api/admin/medicines/<span class="param">{id}</span></td>
+                <td class="desc-cell">Soft-delete medicine</td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/admin/medicines/low-stock</td>
+                <td class="desc-cell">Get medicines below reorder threshold<div class="note">Threshold configurable per
+                    medicine (reorderLevel field)</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/admin/medicines/expiring</td>
+                <td class="desc-cell">Get medicines expiring within N days<div class="note">Param: days (default 90)
+                  </div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/admin/prescriptions/queue</td>
+                <td class="desc-cell">Pending prescription review queue</td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-patch">PATCH</span></td>
+                <td class="path-cell">/api/admin/prescriptions/<span class="param">{id}</span>/review</td>
+                <td class="desc-cell">Approve or reject prescription with remarks</td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- AdminOrderController -->
+        <div class="controller-card">
+          <div class="controller-card-header">
+            <span class="controller-name">AdminOrderController</span>
+            <span class="controller-desc">/api/admin/orders/** — proxies to Order Service via Feign</span>
+          </div>
+          <table class="endpoint-table">
+            <thead>
+              <tr>
+                <th style="width:64px">Method</th>
+                <th>Path</th>
+                <th>Description</th>
+                <th>Access</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/admin/orders</td>
+                <td class="desc-cell">List all orders across all users<div class="note">Params: status, userId,
+                    dateFrom, dateTo, search (order#), page, size</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/admin/orders/<span class="param">{id}</span></td>
+                <td class="desc-cell">Full order detail including customer info</td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-patch">PATCH</span></td>
+                <td class="path-cell">/api/admin/orders/<span class="param">{id}</span>/status</td>
+                <td class="desc-cell">Update order status through lifecycle<div class="note">Body: { status, note }.
+                    Valid transitions enforced by OrderStateMachine.</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-post">POST</span></td>
+                <td class="path-cell">/api/admin/orders/<span class="param">{id}</span>/cancel</td>
+                <td class="desc-cell">Admin forcefully cancels an order<div class="note">Body: { reason }. Triggers
+                    refund if payment was made.</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-post">POST</span></td>
+                <td class="path-cell">/api/admin/orders/<span class="param">{id}</span>/refund</td>
+                <td class="desc-cell">Initiate refund for an order<div class="note">Body: { amount, reason }. Updates
+                    Payment record to REFUND_INITIATED.</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- AdminReportController -->
+        <div class="controller-card">
+          <div class="controller-card-header">
+            <span class="controller-name">AdminReportController</span>
+            <span class="controller-desc">/api/admin/dashboard + /api/admin/reports/**</span>
+          </div>
+          <table class="endpoint-table">
+            <thead>
+              <tr>
+                <th style="width:64px">Method</th>
+                <th>Path</th>
+                <th>Description</th>
+                <th>Access</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/admin/dashboard</td>
+                <td class="desc-cell">Main dashboard KPIs<div class="note">Returns: totalOrders, todayRevenue,
+                    pendingPrescriptions, lowStockCount, expiringCount, recentOrders[]</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/admin/reports/sales</td>
+                <td class="desc-cell">Sales report with revenue breakdown<div class="note">Params: dateFrom, dateTo,
+                    groupBy (day|week|month). Returns SalesReportDto.</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/admin/reports/inventory</td>
+                <td class="desc-cell">Inventory status report (stock levels, movements)</td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/admin/reports/prescriptions</td>
+                <td class="desc-cell">Prescription volume report<div class="note">Breakdown by status, date range,
+                    approval rate</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/admin/reports/top-medicines</td>
+                <td class="desc-cell">Top-selling medicines by quantity / revenue<div class="note">Params: dateFrom,
+                    dateTo, limit (default 10)</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/admin/reports/export/sales</td>
+                <td class="desc-cell">Export sales report as CSV or Excel<div class="note">Param: format (csv|xlsx).
+                    Returns file download with Content-Disposition header.</div>
+                </td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+              <tr>
+                <td><span class="method-badge m-get">GET</span></td>
+                <td class="path-cell">/api/admin/reports/export/inventory</td>
+                <td class="desc-cell">Export inventory report as CSV</td>
+                <td class="access-cell"><span class="auth-tag tag-admin">ADMIN</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <hr class="section-divider" />
+
+      <!-- ======================= DATABASE SCHEMAS ======================= -->
+      <div style="margin-bottom: 48px;">
+        <div style="margin-bottom: 28px;">
+          <div class="version-badge">postgres 8 · Spring Data JPA · Hibernate</div>
+          <h2 style="font-size:20px;font-weight:700;margin-top:8px;">Database Schemas</h2>
+          <p style="color:var(--text-muted);font-size:13px;margin-top:6px;">Each service owns a separate database.
+            Cross-service data is accessed via Feign clients, not JOINs.</p>
+        </div>
+
+        <!-- auth_db -->
+        <div id="db-auth" style="margin-bottom:40px;">
+          <h3 class="sub-heading" style="color:var(--auth)">auth_db — Identity/Auth Service</h3>
+          <div class="schema-grid">
+
+            <div class="schema-table-card">
+              <div class="schema-table-header">
+                <span class="schema-table-name">users</span>
+                <span class="schema-table-db">auth_db</span>
+              </div>
+              <div class="schema-fields">
+                <div class="schema-field"><span class="field-name"><span class="pk">PK</span> id</span><span
+                    class="field-type">BIGINT AUTO_INCREMENT</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> name</span><span
+                    class="field-type">VARCHAR(100)</span></div>
+                <div class="schema-field"><span class="field-name"><span class="uk">UK</span> email</span><span
+                    class="field-type">VARCHAR(150)</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> mobile</span><span
+                    class="field-type">VARCHAR(15)</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> password_hash</span><span
+                    class="field-type">VARCHAR(255)</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> role</span><span
+                    class="field-type">ENUM(CUSTOMER, ADMIN)</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> status</span><span
+                    class="field-type">ENUM(ACTIVE, INACTIVE, SUSPENDED)</span></div>
+                <div class="schema-field"><span class="field-name">created_at</span><span class="field-type">DATETIME
+                    DEFAULT NOW()</span></div>
+                <div class="schema-field"><span class="field-name">updated_at</span><span class="field-type">DATETIME ON
+                    UPDATE NOW()</span></div>
+              </div>
+            </div>
+
+            <div class="schema-table-card">
+              <div class="schema-table-header">
+                <span class="schema-table-name">refresh_tokens</span>
+                <span class="schema-table-db">auth_db</span>
+              </div>
+              <div class="schema-fields">
+                <div class="schema-field"><span class="field-name"><span class="pk">PK</span> id</span><span
+                    class="field-type">BIGINT AUTO_INCREMENT</span></div>
+                <div class="schema-field"><span class="field-name"><span class="fk">FK</span> user_id</span><span
+                    class="field-type">BIGINT → users.id</span></div>
+                <div class="schema-field"><span class="field-name"><span class="uk">UK</span> token</span><span
+                    class="field-type">VARCHAR(512)</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> expires_at</span><span
+                    class="field-type">DATETIME</span></div>
+                <div class="schema-field"><span class="field-name">revoked</span><span class="field-type">BOOLEAN
+                    DEFAULT FALSE</span></div>
+                <div class="schema-field"><span class="field-name">created_at</span><span class="field-type">DATETIME
+                    DEFAULT NOW()</span></div>
+              </div>
+            </div>
+
+            <div class="schema-table-card">
+              <div class="schema-table-header">
+                <span class="schema-table-name">password_reset_tokens</span>
+                <span class="schema-table-db">auth_db</span>
+              </div>
+              <div class="schema-fields">
+                <div class="schema-field"><span class="field-name"><span class="pk">PK</span> id</span><span
+                    class="field-type">BIGINT AUTO_INCREMENT</span></div>
+                <div class="schema-field"><span class="field-name"><span class="fk">FK</span> user_id</span><span
+                    class="field-type">BIGINT → users.id</span></div>
+                <div class="schema-field"><span class="field-name"><span class="uk">UK</span> token</span><span
+                    class="field-type">VARCHAR(255)</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> expires_at</span><span
+                    class="field-type">DATETIME</span></div>
+                <div class="schema-field"><span class="field-name">used</span><span class="field-type">BOOLEAN DEFAULT
+                    FALSE</span></div>
+                <div class="schema-field"><span class="field-name">created_at</span><span class="field-type">DATETIME
+                    DEFAULT NOW()</span></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- catalog_db -->
+        <div id="db-catalog" style="margin-bottom:40px;">
+          <h3 class="sub-heading" style="color:var(--catalog)">catalog_db — Catalog & Prescription Service</h3>
+          <div class="schema-grid">
+
+            <div class="schema-table-card">
+              <div class="schema-table-header">
+                <span class="schema-table-name">categories</span>
+                <span class="schema-table-db">catalog_db</span>
+              </div>
+              <div class="schema-fields">
+                <div class="schema-field"><span class="field-name"><span class="pk">PK</span> id</span><span
+                    class="field-type">BIGINT AUTO_INCREMENT</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> name</span><span
+                    class="field-type">VARCHAR(100)</span></div>
+                <div class="schema-field"><span class="field-name"><span class="uk">UK</span> slug</span><span
+                    class="field-type">VARCHAR(100)</span></div>
+                <div class="schema-field"><span class="field-name">icon_url</span><span
+                    class="field-type">VARCHAR(500)</span></div>
+                <div class="schema-field"><span class="field-name">active</span><span class="field-type">BOOLEAN DEFAULT
+                    TRUE</span></div>
+                <div class="schema-field"><span class="field-name">created_at</span><span class="field-type">DATETIME
+                    DEFAULT NOW()</span></div>
+              </div>
+            </div>
+
+            <div class="schema-table-card">
+              <div class="schema-table-header">
+                <span class="schema-table-name">medicines</span>
+                <span class="schema-table-db">catalog_db</span>
+              </div>
+              <div class="schema-fields">
+                <div class="schema-field"><span class="field-name"><span class="pk">PK</span> id</span><span
+                    class="field-type">BIGINT AUTO_INCREMENT</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> name</span><span
+                    class="field-type">VARCHAR(200)</span></div>
+                <div class="schema-field"><span class="field-name">brand_name</span><span
+                    class="field-type">VARCHAR(200)</span></div>
+                <div class="schema-field"><span class="field-name">active_ingredient</span><span
+                    class="field-type">VARCHAR(300)</span></div>
+                <div class="schema-field"><span class="field-name"><span class="fk">FK</span> category_id</span><span
+                    class="field-type">BIGINT → categories.id</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> price</span><span
+                    class="field-type">DECIMAL(10,2)</span></div>
+                <div class="schema-field"><span class="field-name">mrp</span><span
+                    class="field-type">DECIMAL(10,2)</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> stock</span><span
+                    class="field-type">INT DEFAULT 0</span></div>
+                <div class="schema-field"><span class="field-name">reorder_level</span><span class="field-type">INT
+                    DEFAULT 10</span></div>
+                <div class="schema-field"><span class="field-name">requires_prescription</span><span
+                    class="field-type">BOOLEAN DEFAULT FALSE</span></div>
+                <div class="schema-field"><span class="field-name">dosage_form</span><span
+                    class="field-type">VARCHAR(100)</span></div>
+                <div class="schema-field"><span class="field-name">strength</span><span
+                    class="field-type">VARCHAR(100)</span></div>
+                <div class="schema-field"><span class="field-name">pack_size</span><span
+                    class="field-type">VARCHAR(100)</span></div>
+                <div class="schema-field"><span class="field-name">description</span><span
+                    class="field-type">TEXT</span></div>
+                <div class="schema-field"><span class="field-name">image_url</span><span
+                    class="field-type">VARCHAR(500)</span></div>
+                <div class="schema-field"><span class="field-name">expiry_date</span><span
+                    class="field-type">DATE</span></div>
+                <div class="schema-field"><span class="field-name">manufacturer</span><span
+                    class="field-type">VARCHAR(200)</span></div>
+                <div class="schema-field"><span class="field-name">is_featured</span><span class="field-type">BOOLEAN
+                    DEFAULT FALSE</span></div>
+                <div class="schema-field"><span class="field-name">active</span><span class="field-type">BOOLEAN DEFAULT
+                    TRUE</span></div>
+                <div class="schema-field"><span class="field-name">created_at</span><span class="field-type">DATETIME
+                    DEFAULT NOW()</span></div>
+                <div class="schema-field"><span class="field-name">updated_at</span><span class="field-type">DATETIME ON
+                    UPDATE NOW()</span></div>
+              </div>
+            </div>
+
+            <div class="schema-table-card">
+              <div class="schema-table-header">
+                <span class="schema-table-name">prescriptions</span>
+                <span class="schema-table-db">catalog_db</span>
+              </div>
+              <div class="schema-fields">
+                <div class="schema-field"><span class="field-name"><span class="pk">PK</span> id</span><span
+                    class="field-type">BIGINT AUTO_INCREMENT</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> user_id</span><span
+                    class="field-type">BIGINT (ref: auth_db.users)</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> file_path</span><span
+                    class="field-type">VARCHAR(500)</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> file_name</span><span
+                    class="field-type">VARCHAR(255)</span></div>
+                <div class="schema-field"><span class="field-name">file_type</span><span
+                    class="field-type">VARCHAR(50)</span></div>
+                <div class="schema-field"><span class="field-name">file_size_bytes</span><span
+                    class="field-type">BIGINT</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> status</span><span
+                    class="field-type">ENUM(PENDING, APPROVED, REJECTED, EXPIRED)</span></div>
+                <div class="schema-field"><span class="field-name">reviewed_by</span><span class="field-type">BIGINT
+                    (ref: auth_db.users)</span></div>
+                <div class="schema-field"><span class="field-name">remarks</span><span class="field-type">TEXT</span>
+                </div>
+                <div class="schema-field"><span class="field-name">valid_till</span><span
+                    class="field-type">DATETIME</span></div>
+                <div class="schema-field"><span class="field-name">uploaded_at</span><span class="field-type">DATETIME
+                    DEFAULT NOW()</span></div>
+                <div class="schema-field"><span class="field-name">reviewed_at</span><span
+                    class="field-type">DATETIME</span></div>
+              </div>
+            </div>
+
+            <div class="schema-table-card">
+              <div class="schema-table-header">
+                <span class="schema-table-name">inventory_audit</span>
+                <span class="schema-table-db">catalog_db</span>
+              </div>
+              <div class="schema-fields">
+                <div class="schema-field"><span class="field-name"><span class="pk">PK</span> id</span><span
+                    class="field-type">BIGINT AUTO_INCREMENT</span></div>
+                <div class="schema-field"><span class="field-name"><span class="fk">FK</span> medicine_id</span><span
+                    class="field-type">BIGINT → medicines.id</span></div>
+                <div class="schema-field"><span class="field-name">adjustment</span><span class="field-type">INT</span>
+                </div>
+                <div class="schema-field"><span class="field-name">stock_before</span><span
+                    class="field-type">INT</span></div>
+                <div class="schema-field"><span class="field-name">stock_after</span><span class="field-type">INT</span>
+                </div>
+                <div class="schema-field"><span class="field-name">reason</span><span
+                    class="field-type">VARCHAR(255)</span></div>
+                <div class="schema-field"><span class="field-name">performed_by</span><span class="field-type">BIGINT
+                    (ref: auth_db.users)</span></div>
+                <div class="schema-field"><span class="field-name">created_at</span><span class="field-type">DATETIME
+                    DEFAULT NOW()</span></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- order_db -->
+        <div id="db-order" style="margin-bottom:40px;">
+          <h3 class="sub-heading" style="color:var(--order)">order_db — Order & Delivery Service</h3>
+          <div class="schema-grid">
+
+            <div class="schema-table-card">
+              <div class="schema-table-header">
+                <span class="schema-table-name">addresses</span>
+                <span class="schema-table-db">order_db</span>
+              </div>
+              <div class="schema-fields">
+                <div class="schema-field"><span class="field-name"><span class="pk">PK</span> id</span><span
+                    class="field-type">BIGINT AUTO_INCREMENT</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> user_id</span><span
+                    class="field-type">BIGINT (ref: auth_db.users)</span></div>
+                <div class="schema-field"><span class="field-name">label</span><span
+                    class="field-type">VARCHAR(50)</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> line1</span><span
+                    class="field-type">VARCHAR(255)</span></div>
+                <div class="schema-field"><span class="field-name">line2</span><span
+                    class="field-type">VARCHAR(255)</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> city</span><span
+                    class="field-type">VARCHAR(100)</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> state</span><span
+                    class="field-type">VARCHAR(100)</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> pincode</span><span
+                    class="field-type">VARCHAR(10)</span></div>
+                <div class="schema-field"><span class="field-name">is_default</span><span class="field-type">BOOLEAN
+                    DEFAULT FALSE</span></div>
+                <div class="schema-field"><span class="field-name">created_at</span><span class="field-type">DATETIME
+                    DEFAULT NOW()</span></div>
+              </div>
+            </div>
+
+            <div class="schema-table-card">
+              <div class="schema-table-header">
+                <span class="schema-table-name">carts</span>
+                <span class="schema-table-db">order_db</span>
+              </div>
+              <div class="schema-fields">
+                <div class="schema-field"><span class="field-name"><span class="pk">PK</span> id</span><span
+                    class="field-type">BIGINT AUTO_INCREMENT</span></div>
+                <div class="schema-field"><span class="field-name"><span class="uk">UK</span> user_id</span><span
+                    class="field-type">BIGINT (one cart per user)</span></div>
+                <div class="schema-field"><span class="field-name">updated_at</span><span class="field-type">DATETIME ON
+                    UPDATE NOW()</span></div>
+              </div>
+            </div>
+
+            <div class="schema-table-card">
+              <div class="schema-table-header">
+                <span class="schema-table-name">cart_items</span>
+                <span class="schema-table-db">order_db</span>
+              </div>
+              <div class="schema-fields">
+                <div class="schema-field"><span class="field-name"><span class="pk">PK</span> id</span><span
+                    class="field-type">BIGINT AUTO_INCREMENT</span></div>
+                <div class="schema-field"><span class="field-name"><span class="fk">FK</span> cart_id</span><span
+                    class="field-type">BIGINT → carts.id</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> medicine_id</span><span
+                    class="field-type">BIGINT (ref: catalog_db)</span></div>
+                <div class="schema-field"><span class="field-name">medicine_name</span><span
+                    class="field-type">VARCHAR(200) (snapshot)</span></div>
+                <div class="schema-field"><span class="field-name">unit_price</span><span
+                    class="field-type">DECIMAL(10,2) (snapshot)</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> quantity</span><span
+                    class="field-type">INT</span></div>
+                <div class="schema-field"><span class="field-name">requires_prescription</span><span
+                    class="field-type">BOOLEAN</span></div>
+                <div class="schema-field" style="border:none">
+                  <span style="font-size:11px;color:var(--text-dim);font-family:var(--mono)">UNIQUE(cart_id,
+                    medicine_id)</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="schema-table-card">
+              <div class="schema-table-header">
+                <span class="schema-table-name">orders</span>
+                <span class="schema-table-db">order_db</span>
+              </div>
+              <div class="schema-fields">
+                <div class="schema-field"><span class="field-name"><span class="pk">PK</span> id</span><span
+                    class="field-type">BIGINT AUTO_INCREMENT</span></div>
+                <div class="schema-field"><span class="field-name"><span class="uk">UK</span> order_number</span><span
+                    class="field-type">VARCHAR(20) e.g. RX-2024-00001</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> user_id</span><span
+                    class="field-type">BIGINT (ref: auth_db.users)</span></div>
+                <div class="schema-field"><span class="field-name"><span class="fk">FK</span> address_id</span><span
+                    class="field-type">BIGINT → addresses.id</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> status</span><span
+                    class="field-type">ENUM(see enums section)</span></div>
+                <div class="schema-field"><span class="field-name">prescription_id</span><span class="field-type">BIGINT
+                    (ref: catalog_db)</span></div>
+                <div class="schema-field"><span class="field-name">subtotal</span><span
+                    class="field-type">DECIMAL(10,2)</span></div>
+                <div class="schema-field"><span class="field-name">tax_amount</span><span
+                    class="field-type">DECIMAL(10,2)</span></div>
+                <div class="schema-field"><span class="field-name">delivery_charge</span><span
+                    class="field-type">DECIMAL(10,2)</span></div>
+                <div class="schema-field"><span class="field-name">total_amount</span><span
+                    class="field-type">DECIMAL(10,2)</span></div>
+                <div class="schema-field"><span class="field-name">notes</span><span class="field-type">TEXT</span>
+                </div>
+                <div class="schema-field"><span class="field-name">created_at</span><span class="field-type">DATETIME
+                    DEFAULT NOW()</span></div>
+                <div class="schema-field"><span class="field-name">updated_at</span><span class="field-type">DATETIME ON
+                    UPDATE NOW()</span></div>
+              </div>
+            </div>
+
+            <div class="schema-table-card">
+              <div class="schema-table-header">
+                <span class="schema-table-name">order_items</span>
+                <span class="schema-table-db">order_db</span>
+              </div>
+              <div class="schema-fields">
+                <div class="schema-field"><span class="field-name"><span class="pk">PK</span> id</span><span
+                    class="field-type">BIGINT AUTO_INCREMENT</span></div>
+                <div class="schema-field"><span class="field-name"><span class="fk">FK</span> order_id</span><span
+                    class="field-type">BIGINT → orders.id</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> medicine_id</span><span
+                    class="field-type">BIGINT (ref: catalog_db)</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> medicine_name</span><span
+                    class="field-type">VARCHAR(200) (price snapshot)</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> unit_price</span><span
+                    class="field-type">DECIMAL(10,2) (price snapshot)</span></div>
+                <div class="schema-field"><span class="field-name"><span class="nn">NN</span> quantity</span><span
+                    class="field-type">INT</span></div>
+                <div class="schema-field"><span class="field-name">line_total</span><span
+                    class="field-type">DECIMAL(10,2)</span></div>
+              </div>
+            </div>
+
+            <div class="schema-table-card">
+              <div class="schema-table-header">
+                <span class="schema-table-name">payments</span>
+                <span class="schema-table-db">order_db</span>
+              </div>
+              <div class="schema-fields">
+                <div class="schema-field"><span class="field-name"><span class="pk">PK</span> id</span><span
+                    class="field-type">BIGINT AUTO_INCREMENT</span></div>
+                <div class="schema-field"><span class="field-name"><span class="fk">FK</span> order_id</span><span
+                    class="field-type">BIGINT → orders.id (UNIQUE)</span></div>
+                <div class="schema-field"><span class="field-name">payment_method</span><span
+                    class="field-type">ENUM(COD, PREPAID, WALLET)</span></div>
+                <div class="schema-field"><span class="field-name">status</span><span class="field-type">ENUM(PENDING,
+                    PAID, FAILED, REFUND_INITIATED, REFUNDED)</span></div>
+                <div class="schema-field"><span class="field-name">amount</span><span
+                    class="field-type">DECIMAL(10,2)</span></div>
+                <div class="schema-field"><span class="field-name">gateway_txn_ref</span><span
+                    class="field-type">VARCHAR(200)</span></div>
+                <div class="schema-field"><span class="field-name">gateway_response</span><span
+                    class="field-type">JSON</span></div>
+                <div class="schema-field"><span class="field-name">paid_at</span><span
+                    class="field-type">DATETIME</span></div>
+                <div class="schema-field"><span class="field-name">refunded_at</span><span
+                    class="field-type">DATETIME</span></div>
+                <div class="schema-field"><span class="field-name">created_at</span><span class="field-type">DATETIME
+                    DEFAULT NOW()</span></div>
+              </div>
+            </div>
+
+            <div class="schema-table-card">
+              <div class="schema-table-header">
+                <span class="schema-table-name">order_status_log</span>
+                <span class="schema-table-db">order_db</span>
+              </div>
+              <div class="schema-fields">
+                <div class="schema-field"><span class="field-name"><span class="pk">PK</span> id</span><span
+                    class="field-type">BIGINT AUTO_INCREMENT</span></div>
+                <div class="schema-field"><span class="field-name"><span class="fk">FK</span> order_id</span><span
+                    class="field-type">BIGINT → orders.id</span></div>
+                <div class="schema-field"><span class="field-name">from_status</span><span
+                    class="field-type">VARCHAR(50)</span></div>
+                <div class="schema-field"><span class="field-name">to_status</span><span
+                    class="field-type">VARCHAR(50)</span></div>
+                <div class="schema-field"><span class="field-name">changed_by</span><span class="field-type">BIGINT
+                    (ref: auth_db.users)</span></div>
+                <div class="schema-field"><span class="field-name">note</span><span class="field-type">TEXT</span></div>
+                <div class="schema-field"><span class="field-name">created_at</span><span class="field-type">DATETIME
+                    DEFAULT NOW()</span></div>
+              </div>
+            </div>
+
+            <div class="schema-table-card">
+              <div class="schema-table-header">
+                <span class="schema-table-name">idempotency_keys</span>
+                <span class="schema-table-db">order_db</span>
+              </div>
+              <div class="schema-fields">
+                <div class="schema-field"><span class="field-name"><span class="pk">PK</span> id</span><span
+                    class="field-type">BIGINT AUTO_INCREMENT</span></div>
+                <div class="schema-field"><span class="field-name"><span class="uk">UK</span> key</span><span
+                    class="field-type">VARCHAR(255)</span></div>
+                <div class="schema-field"><span class="field-name">response_body</span><span
+                    class="field-type">TEXT</span></div>
+                <div class="schema-field"><span class="field-name">status_code</span><span class="field-type">INT</span>
+                </div>
+                <div class="schema-field"><span class="field-name">created_at</span><span class="field-type">DATETIME
+                    DEFAULT NOW()</span></div>
+                <div class="schema-field"><span class="field-name">expires_at</span><span
+                    class="field-type">DATETIME</span></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Enums -->
+        <div id="enums" style="margin-bottom:40px;">
+          <h3 class="sub-heading" style="color:#c084fc">Enums & Constants</h3>
+          <div class="schema-grid">
+            <div class="schema-table-card">
+              <div class="schema-table-header">
+                <span class="schema-table-name">OrderStatus</span>
+                <span class="schema-table-db">Java Enum</span>
+              </div>
+              <div class="schema-fields">
+                <div class="schema-field"><span class="field-name">DRAFT</span><span class="field-type">Cart being
+                    built</span></div>
+                <div class="schema-field"><span class="field-name">CHECKOUT_STARTED</span><span
+                    class="field-type">Checkout initiated</span></div>
+                <div class="schema-field"><span class="field-name">PRESCRIPTION_PENDING</span><span
+                    class="field-type">Awaiting Rx approval</span></div>
+                <div class="schema-field"><span class="field-name">PRESCRIPTION_APPROVED</span><span
+                    class="field-type">Rx verified</span></div>
+                <div class="schema-field"><span class="field-name">PRESCRIPTION_REJECTED</span><span
+                    class="field-type">Rx rejected → terminal</span></div>
+                <div class="schema-field"><span class="field-name">PAYMENT_PENDING</span><span
+                    class="field-type">Awaiting payment</span></div>
+                <div class="schema-field"><span class="field-name">PAID</span><span class="field-type">Payment
+                    confirmed</span></div>
+                <div class="schema-field"><span class="field-name">PACKED</span><span class="field-type">Preparing for
+                    dispatch</span></div>
+                <div class="schema-field"><span class="field-name">OUT_FOR_DELIVERY</span><span class="field-type">In
+                    transit</span></div>
+                <div class="schema-field"><span class="field-name">DELIVERED</span><span
+                    class="field-type">Completed</span></div>
+                <div class="schema-field"><span class="field-name">CUSTOMER_CANCELLED</span><span
+                    class="field-type">Terminal</span></div>
+                <div class="schema-field"><span class="field-name">ADMIN_CANCELLED</span><span
+                    class="field-type">Terminal</span></div>
+                <div class="schema-field"><span class="field-name">PAYMENT_FAILED</span><span
+                    class="field-type">Terminal</span></div>
+                <div class="schema-field"><span class="field-name">RETURN_REQUESTED</span><span
+                    class="field-type">Post-delivery</span></div>
+                <div class="schema-field"><span class="field-name">REFUND_INITIATED</span><span
+                    class="field-type"></span></div>
+                <div class="schema-field"><span class="field-name">REFUND_COMPLETED</span><span
+                    class="field-type">Terminal</span></div>
+              </div>
+            </div>
+            <div class="schema-table-card">
+              <div class="schema-table-header">
+                <span class="schema-table-name">PrescriptionStatus</span>
+                <span class="schema-table-db">Java Enum</span>
+              </div>
+              <div class="schema-fields">
+                <div class="schema-field"><span class="field-name">PENDING</span><span class="field-type">Uploaded,
+                    awaiting review</span></div>
+                <div class="schema-field"><span class="field-name">APPROVED</span><span class="field-type">Verified by
+                    admin</span></div>
+                <div class="schema-field"><span class="field-name">REJECTED</span><span class="field-type">Declined with
+                    remarks</span></div>
+                <div class="schema-field"><span class="field-name">EXPIRED</span><span class="field-type">Past
+                    valid_till date</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gateway Rules -->
+        <div id="gateway">
+          <h3 class="sub-heading" style="color:#a0a8c8">Gateway Routing Rules</h3>
+          <div class="controller-card">
+            <div class="controller-card-header">
+              <span class="controller-name">GatewayConfig.java</span>
+              <span class="controller-desc">Spring Cloud Gateway route predicates + filters</span>
+            </div>
+            <table class="endpoint-table">
+              <thead>
+                <tr>
+                  <th>Route Pattern</th>
+                  <th>Forwards To</th>
+                  <th>JWT Required</th>
+                  <th>Role Check</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="path-cell">/api/auth/signup, /api/auth/login, /api/auth/refresh, /api/auth/forgot-password,
+                    /api/auth/reset-password</td>
+                  <td class="desc-cell">auth-service:8081</td>
+                  <td class="desc-cell">No</td>
+                  <td class="desc-cell">None</td>
+                </tr>
+                <tr>
+                  <td class="path-cell">/api/auth/**</td>
+                  <td class="desc-cell">auth-service:8081</td>
+                  <td class="desc-cell">Yes</td>
+                  <td class="desc-cell">CUSTOMER or ADMIN</td>
+                </tr>
+                <tr>
+                  <td class="path-cell">/api/catalog/medicines (GET), /api/catalog/categories (GET)</td>
+                  <td class="desc-cell">catalog-service:8082</td>
+                  <td class="desc-cell">No</td>
+                  <td class="desc-cell">None</td>
+                </tr>
+                <tr>
+                  <td class="path-cell">/api/catalog/**</td>
+                  <td class="desc-cell">catalog-service:8082</td>
+                  <td class="desc-cell">Yes</td>
+                  <td class="desc-cell">CUSTOMER or ADMIN</td>
+                </tr>
+                <tr>
+                  <td class="path-cell">/api/orders/**</td>
+                  <td class="desc-cell">order-service:8083</td>
+                  <td class="desc-cell">Yes</td>
+                  <td class="desc-cell">CUSTOMER or ADMIN</td>
+                </tr>
+                <tr>
+                  <td class="path-cell">/api/admin/**</td>
+                  <td class="desc-cell">admin-service:8084</td>
+                  <td class="desc-cell">Yes</td>
+                  <td class="desc-cell">ADMIN only</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="info-box" style="margin-top:16px;">
+            The Gateway extracts <code>userId</code> and <code>role</code> from the JWT and forwards them as
+            <code>X-User-Id</code> and <code>X-User-Role</code> headers to downstream services. Services read these
+            headers instead of re-validating the token, which keeps each service stateless. The
+            <code>/api/orders/payments/callback</code> webhook is whitelisted at the Gateway to bypass JWT (it uses HMAC
+            signature verification instead).
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+</body>
+
+</html>

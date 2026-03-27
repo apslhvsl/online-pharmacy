@@ -8,6 +8,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Public-facing category endpoints — accessible by anyone through the gateway.
+ * Write operations live in InternalCategoryController (Feign-only, not gateway-routed).
+ */
 @RestController
 @RequestMapping("/api/catalog/categories")
 @RequiredArgsConstructor
@@ -18,5 +22,10 @@ public class CategoryController {
     @GetMapping
     public ResponseEntity<List<CategoryDto>> getAllCategories() {
         return ResponseEntity.ok(categoryService.getAllCategories());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<CategoryDto> getCategoryById(@PathVariable Long id) {
+        return ResponseEntity.ok(categoryService.getCategoryById(id));
     }
 }

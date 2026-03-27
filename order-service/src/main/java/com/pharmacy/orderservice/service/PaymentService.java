@@ -1,15 +1,18 @@
 package com.pharmacy.orderservice.service;
 
 import com.pharmacy.orderservice.dto.PaymentDto;
-import com.pharmacy.orderservice.entity.Order;
-import com.pharmacy.orderservice.entity.OrderStatus;
-import com.pharmacy.orderservice.entity.Payment;
+import com.pharmacy.orderservice.dto.PaymentInitiateRequest;
+import com.pharmacy.orderservice.entity.*;
 import com.pharmacy.orderservice.repository.OrderRepository;
+import com.pharmacy.orderservice.repository.OrderStatusLogRepository;
 import com.pharmacy.orderservice.repository.PaymentRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -17,47 +20,81 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
+    private final OrderStatusLogRepository statusLogRepository;
     private final OrderStateMachine orderStateMachine;
 
     @Transactional
-    public PaymentDto processPayment(Long orderId, Long userId) {
-        Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new EntityNotFoundException("Order not found: " + orderId));
+    public PaymentDto initiatePayment(PaymentInitiateRequest request, Long userId) {
+        Order order = orderRepository.findById(request.getOrderId())
+                .orElseThrow(() -> new EntityNotFoundException("Order not found: " + request.getOrderId()));
+        if (!order.getUserId().equals(userId)) throw new EntityNotFoundException("Order not found");
+        if (order.getStatus() != OrderStatus.PAYMENT_PENDING)
+            throw new IllegalStateException("Order is not in PAYMENT_PENDING state");
 
-        if (!order.getUserId().equals(userId)) {
-            throw new EntityNotFoundException("Order not found: " + orderId);
-        }
-
-        // Simulate payment success
         Payment payment = Payment.builder()
-                .orderId(orderId)
+                .orderId(order.getId())
+                .paymentMethod(request.getPaymentMethod())
                 .amount(order.getTotalAmount())
-                .status("SUCCESS")
+                .status(PaymentStatus.PENDING)
+                .gatewayTxnRef(UUID.randomUUID().toString())
                 .build();
 
-        payment = paymentRepository.save(payment);
+        // COD — mark paid immediately
+        if (request.getPaymentMethod() == PaymentMethod.COD) {
+            payment.setStatus(PaymentStatus.PAID);
+            payment.setPaidAt(LocalDateTime.now());
+            transitionOrder(order, OrderStatus.PAID, userId, "COD payment confirmed");
+        }
 
-        // Transition order to CONFIRMED
-        orderStateMachine.validate(order.getStatus(), OrderStatus.CONFIRMED);
-        order.setStatus(OrderStatus.CONFIRMED);
-        orderRepository.save(order);
+        return toDto(paymentRepository.save(payment));
+    }
 
-        return toDto(payment);
+    /** Called by payment gateway webhook */
+    @Transactional
+    public void handleCallback(String txnRef, boolean success, String gatewayResponse) {
+        Payment payment = paymentRepository.findByGatewayTxnRef(txnRef)
+                .orElseThrow(() -> new EntityNotFoundException("Payment not found for txnRef: " + txnRef));
+        Order order = orderRepository.findById(payment.getOrderId())
+                .orElseThrow(() -> new EntityNotFoundException("Order not found"));
+
+        payment.setGatewayResponse(gatewayResponse);
+        if (success) {
+            payment.setStatus(PaymentStatus.PAID);
+            payment.setPaidAt(LocalDateTime.now());
+            transitionOrder(order, OrderStatus.PAID, null, "Payment confirmed via gateway");
+        } else {
+            payment.setStatus(PaymentStatus.FAILED);
+            transitionOrder(order, OrderStatus.PAYMENT_FAILED, null, "Payment failed via gateway");
+        }
+        paymentRepository.save(payment);
     }
 
     public PaymentDto getPaymentByOrder(Long orderId) {
-        Payment payment = paymentRepository.findByOrderId(orderId)
+        return paymentRepository.findByOrderId(orderId)
+                .map(this::toDto)
                 .orElseThrow(() -> new EntityNotFoundException("Payment not found for order: " + orderId));
-        return toDto(payment);
     }
 
-    private PaymentDto toDto(Payment payment) {
+    private void transitionOrder(Order order, OrderStatus next, Long changedBy, String note) {
+        orderStateMachine.validate(order.getStatus(), next);
+        statusLogRepository.save(OrderStatusLog.builder()
+                .orderId(order.getId())
+                .fromStatus(order.getStatus().name())
+                .toStatus(next.name())
+                .changedBy(changedBy)
+                .note(note)
+                .build());
+        order.setStatus(next);
+        orderRepository.save(order);
+    }
+
+    private PaymentDto toDto(Payment p) {
         return PaymentDto.builder()
-                .id(payment.getId())
-                .orderId(payment.getOrderId())
-                .amount(payment.getAmount())
-                .status(payment.getStatus())
-                .createdAt(payment.getCreatedAt())
+                .id(p.getId()).orderId(p.getOrderId())
+                .paymentMethod(p.getPaymentMethod()).status(p.getStatus())
+                .amount(p.getAmount()).gatewayTxnRef(p.getGatewayTxnRef())
+                .paidAt(p.getPaidAt()).refundedAt(p.getRefundedAt())
+                .createdAt(p.getCreatedAt())
                 .build();
     }
 }

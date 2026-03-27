@@ -49,22 +49,7 @@ spring.devtools.restart.enabled: false
 
 springdoc:
   api-docs:
-    path: /api/catalog/v3/api-docs
+    path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
-    config-url: /api/catalog/v3/api-docs/swagger-config
     disable-swagger-default-url: true
-    url: /api/catalog/v3/api-docs
-#springdoc:
-#  api-docs:
-#    path: /api/catalog/v3/api-docs
-#  swagger-ui:
-#    path: /swagger-ui.html
-## order-service/src/main/resources/application.yml
-#springdoc:
-#  swagger-ui:
-#    path: /swagger-ui.html
-#  api-docs:
-#    path: /v3/api-docs
-#  server-url: http://localhost:8080   # THIS is the key line
-#  server-description: API Gateway

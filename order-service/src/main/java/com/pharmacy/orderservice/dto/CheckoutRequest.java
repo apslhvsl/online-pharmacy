@@ -1,18 +1,15 @@
 package com.pharmacy.orderservice.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class CheckoutRequest {
+    // Step 2: address
+    private Long addressId;
+    private AddressRequest inlineAddress; // alternative to addressId
 
-    @NotBlank(message = "Shipping address is required")
-    private String shippingAddress;
-
+    // Step 3: prescription
     private Long prescriptionId;
-
-    private String idempotencyKey;
 }

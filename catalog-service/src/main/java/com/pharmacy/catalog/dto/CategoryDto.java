@@ -9,5 +9,7 @@ import lombok.*;
 public class CategoryDto {
     private Long id;
     private String name;
-    private String description;
+    private String slug;
+    private String iconUrl;
+    private Integer medicineCount;
 }

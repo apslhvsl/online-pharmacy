@@ -1,31 +1,26 @@
 package com.pharmacy.orderservice.client;
 
+import com.pharmacy.orderservice.dto.StockCheckResponse;
+import com.pharmacy.orderservice.dto.MedicineInfo;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import java.math.BigDecimal;
-import java.util.Map;
+import org.springframework.web.bind.annotation.*;
 
 @FeignClient(name = "catalog-service")
 public interface CatalogClient {
 
     @GetMapping("/api/catalog/medicines/{id}")
-    Map<String, Object> getMedicineById(@PathVariable(name = "id") Long id);
+    MedicineInfo getMedicineById(@PathVariable("id") Long id);
 
     @GetMapping("/api/catalog/medicines/{id}/stock-check")
-    Map<String, Object> checkStock(
-            @PathVariable(name = "id") Long medicineId,
-            @RequestParam(name = "quantity") Integer quantity
-    );
+    StockCheckResponse checkStock(@PathVariable("id") Long medicineId,
+                                  @RequestParam("quantity") Integer quantity);
 
-    @GetMapping("/api/catalog/prescriptions/{id}/status")
-    String getPrescriptionStatus(@PathVariable(name = "id") Long prescriptionId);
+    // Batch-level stock check — used when adding to cart by batchId
+    @GetMapping("/api/catalog/internal/batches/{batchId}/stock-check")
+    StockCheckResponse checkBatchStock(@PathVariable("batchId") Long batchId,
+                                       @RequestParam("quantity") Integer quantity);
 
-    @org.springframework.web.bind.annotation.PutMapping("/api/catalog/medicines/{id}/stock/deduct")
-    void deductStock(
-            @PathVariable(name = "id") Long medicineId,
-            @RequestParam(name = "quantity") Integer quantity
-    );
+    @PostMapping("/api/catalog/internal/medicines/{id}/deduct")
+    void deductStock(@PathVariable("id") Long medicineId,
+                     @RequestParam("quantity") Integer quantity);
 }
