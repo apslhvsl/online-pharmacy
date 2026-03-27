@@ -20,16 +20,16 @@ public class OrderItem {
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-    @Column(name = "batch_id")
+    @Column(name = "batch_id", nullable = false)
     private Long batchId;
 
-    @Column(name = "medicine_id", nullable = false)
+    @Column(name = "medicine_id")
     private Long medicineId;
 
-    @Column(name = "medicine_name", nullable = false, length = 200)
+    @Column(name = "medicine_name", length = 200)
     private String medicineName;
 
-    @Column(name = "unit_price", nullable = false, precision = 10, scale = 2)
+    @Column(name = "unit_price", precision = 10, scale = 2)
     private BigDecimal unitPrice;
 
     @Column(nullable = false)

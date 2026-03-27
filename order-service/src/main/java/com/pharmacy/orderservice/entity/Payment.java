@@ -33,7 +33,7 @@ public class Payment {
     @Column(name = "gateway_txn_ref", length = 200)
     private String gatewayTxnRef;
 
-    @Column(name = "gateway_response", columnDefinition = "TEXT")
+    @Column(name = "gateway_response", columnDefinition = "jsonb")
     private String gatewayResponse;
 
     @Column(name = "paid_at")

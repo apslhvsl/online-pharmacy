@@ -3,6 +3,7 @@ package com.pharmacy.orderservice.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "cart_items", uniqueConstraints = @UniqueConstraint(columnNames = {"cart_id", "batch_id"}))
@@ -37,4 +38,12 @@ public class CartItem {
 
     @Column(name = "requires_prescription")
     private Boolean requiresPrescription;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }
