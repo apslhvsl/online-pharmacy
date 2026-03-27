@@ -13,10 +13,11 @@ import java.time.LocalDate;
 public class MedicineResponse {
     private Long id;
     private String name;
+    private String description;
     private Long categoryId;
     private String categoryName;
     private BigDecimal price;
-    private Integer stock;
+    private Integer stockQuantity;
     private Boolean requiresPrescription;
     private LocalDate expiryDate;
 }

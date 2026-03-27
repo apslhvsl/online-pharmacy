@@ -2,6 +2,7 @@ package com.pharmacy.auth.controller;
 
 import com.pharmacy.auth.dto.*;
 import com.pharmacy.auth.service.AuthService;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,7 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<UserProfileResponse> getProfile(
+            @Parameter(hidden = true)
             @RequestHeader(value = "X-User-Id", required = false) Long userId) {
         return ResponseEntity.ok(authService.getProfile(userId));
     }

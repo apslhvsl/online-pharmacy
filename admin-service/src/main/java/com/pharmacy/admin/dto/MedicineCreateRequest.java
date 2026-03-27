@@ -12,9 +12,10 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class MedicineCreateRequest {
     private String name;
+    private String description;
     private Long categoryId;
     private BigDecimal price;
-    private Integer stock;
+    private Integer stockQuantity;
     private Boolean requiresPrescription;
     private LocalDate expiryDate;
 }

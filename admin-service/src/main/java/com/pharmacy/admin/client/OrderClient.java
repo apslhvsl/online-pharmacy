@@ -17,6 +17,6 @@ public interface OrderClient {
             @PathVariable(name = "id") Long id,
             @RequestParam(name = "status") String status);
 
-    @GetMapping("/api/orders/{id}")
+    @GetMapping("/api/orders/admin/{id}")
     OrderResponse getOrderById(@PathVariable(name = "id") Long id);
 }

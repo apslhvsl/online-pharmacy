@@ -14,4 +14,10 @@ eureka:
     service-url:
       defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
   server:
-    wait-time-in-ms-when-sync-empty: 0
+      # DEV OPTIMIZATIONS
+      # 1. Don't wait for peer sync on startup
+      wait-time-in-ms-when-sync-empty: 0
+      # 2. Turn off self-preservation so dead dev instances are evicted immediately
+      enable-self-preservation: false
+      # 3. Check for "dead" services every 2 seconds instead of every 60
+      eviction-interval-timer-in-ms: 2000

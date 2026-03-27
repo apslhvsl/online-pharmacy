@@ -32,3 +32,39 @@ eureka:
 
 prescription:
   upload-dir: uploads/prescriptions
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+spring.devtools.restart.enabled: false
+
+springdoc:
+  api-docs:
+    path: /api/catalog/v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    config-url: /api/catalog/v3/api-docs/swagger-config
+    disable-swagger-default-url: true
+    url: /api/catalog/v3/api-docs
+#springdoc:
+#  api-docs:
+#    path: /api/catalog/v3/api-docs
+#  swagger-ui:
+#    path: /swagger-ui.html
+## order-service/src/main/resources/application.yml
+#springdoc:
+#  swagger-ui:
+#    path: /swagger-ui.html
+#  api-docs:
+#    path: /v3/api-docs
+#  server-url: http://localhost:8080   # THIS is the key line
+#  server-description: API Gateway

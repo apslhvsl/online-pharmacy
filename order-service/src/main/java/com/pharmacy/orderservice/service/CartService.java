@@ -8,6 +8,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+
 @Service
 @RequiredArgsConstructor
 public class CartService {
@@ -16,16 +18,40 @@ public class CartService {
 
     public CartDto getCart(Long userId) {
         Cart cart = cartRepository.findByUserId(userId)
-                .orElse(Cart.builder().userId(userId).build());
+                .orElseGet(() -> Cart.builder()
+                        .userId(userId)
+                        .items(new HashMap<>()) // FIX
+                        .build());
+
         return toDto(cart);
     }
 
+//    public CartDto getCart(Long userId) {
+//        Cart cart = cartRepository.findByUserId(userId)
+//                .orElse(Cart.builder().userId(userId).build());
+//        return toDto(cart);
+//    }
     public CartDto addItem(Long userId, Long medicineId, Integer quantity) {
         Cart cart = cartRepository.findByUserId(userId)
-                .orElse(Cart.builder().userId(userId).build());
+                .orElseGet(() -> Cart.builder()
+                        .userId(userId)
+                        .items(new HashMap<>()) // FIX
+                        .build());
+
         cart.getItems().merge(medicineId, quantity, Integer::sum);
-        return toDto(cartRepository.save(cart));
+
+        Cart savedCart = cartRepository.save(cart);
+        System.out.println("USER ID: " + userId);
+        return toDto(savedCart);
     }
+
+//    public CartDto addItem(Long userId, Long medicineId, Integer quantity) {
+//        Cart cart = cartRepository.findByUserId(userId)
+//                .orElse(Cart.builder().userId(userId).build());
+//        cart.getItems().merge(medicineId, quantity, Integer::sum);
+//        return toDto(cartRepository.save(cart));
+//    }
+
 
     public CartDto removeItem(Long userId, Long medicineId) {
         Cart cart = cartRepository.findByUserId(userId)

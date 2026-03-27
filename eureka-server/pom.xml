@@ -24,6 +24,17 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<!-- Override to remove inherited Lombok annotation processor (not needed here) -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration combine.self="override">
+					<source>21</source>
+					<target>21</target>
+					<parameters>true</parameters>
+					<fork>true</fork>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 

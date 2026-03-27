@@ -34,6 +34,12 @@ public class OrderService {
         return toDto(order);
     }
 
+    public OrderDto getOrderByIdAdmin(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found: " + orderId));
+        return toDto(order);
+    }
+
     public OrderDto updateStatus(Long orderId, OrderStatus newStatus) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found: " + orderId));

@@ -66,4 +66,9 @@ public class OrderController {
     public ResponseEntity<List<OrderDto>> getAllOrders() {
         return ResponseEntity.ok(orderService.getAllOrders());
     }
+
+    @GetMapping("/admin/{id}")
+    public ResponseEntity<OrderDto> getOrderAdmin(@PathVariable(name = "id") Long orderId) {
+        return ResponseEntity.ok(orderService.getOrderByIdAdmin(orderId));
+    }
 }

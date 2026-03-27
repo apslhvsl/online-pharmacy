@@ -25,10 +25,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/signup",
                                 "/api/auth/login",
                                 "/swagger-ui.html",
+                                "/api/auth/me",
                                 "/swagger-ui/**",
                                 "/api-docs/**",
                                 "/v3/api-docs/**",
                                 "/api-docs/**",
+                                "/api/auth/v3/api-docs",
+                                "/api/auth/v3/api-docs/**",
                                 "/webjars/**").permitAll()
                         .anyRequest().authenticated());
 

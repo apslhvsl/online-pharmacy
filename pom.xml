@@ -35,6 +35,7 @@
         <lombok.version>1.18.36</lombok.version>
         <postgresql.version>42.7.3</postgresql.version>
         <springdoc.version>2.5.0</springdoc.version>
+
     </properties>
 
     <dependencyManagement>
@@ -104,6 +105,8 @@
                 <version>${springdoc.version}</version>
             </dependency>
 
+
+
         </dependencies>
     </dependencyManagement>
 
@@ -127,6 +130,13 @@
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
                     <version>${spring-boot.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>repackage</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                     <configuration>
                         <excludes>
                             <exclude>
@@ -144,6 +154,7 @@
                         <source>21</source>
                         <target>21</target>
                         <parameters>true</parameters>
+                        <fork>true</fork>
                         <annotationProcessorPaths>
                             <path>
                                 <groupId>org.projectlombok</groupId>

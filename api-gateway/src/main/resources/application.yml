@@ -1,0 +1,92 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - PreserveHostHeader
+
+        - id: catalog-service
+          uri: lb://catalog-service
+          predicates:
+            - Path=/api/catalog/**
+          filters:
+            - PreserveHostHeader
+
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/api/orders/**
+          filters:
+            - PreserveHostHeader
+
+        - id: admin-service
+          uri: lb://admin-service
+          predicates:
+            - Path=/api/admin/**
+          filters:
+            - PreserveHostHeader
+
+  codec:
+    max-in-memory-size: 10MB
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+  pattern:
+    level: "%5p [${spring.application.name},%X{traceId},%X{spanId}]"
+
+jwt:
+  secret: 3cfa76ef14937c1c0ea519f8fc057a80fcd04a7d0d7b7b6d9b9e2f0b3d5a1c8
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+
+spring.devtools.restart.enabled: false
+
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    use-root-path: true
+    config-url: /v3/api-docs/swagger-config
+    disable-swagger-default-url: true
+    urls:
+      - name: 1. Auth Service
+        url: /api/auth/v3/api-docs
+      - name: 2. Catalog Service
+        url: /api/catalog/v3/api-docs
+      - name: 3. Order Service
+        url: /api/orders/v3/api-docs
+      - name: 4. Admin Service
+        url: /api/admin/v3/api-docs
+  webjars:
+    prefix: ""   # critical for WebFlux
+
