@@ -114,7 +114,7 @@ logging:
 
 # ── JWT (MODIFIED: externalized, NOT removed) ───────────────────────
 jwt:
-  secret: 3cfa76ef14937c1c0ea519f8fc057a80fcd04a7d0d7b7b6d9b9e2f0b3d5a1c8
+  secret: ${JWT_SECRET}
 
 management:
   tracing:

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body style="font-family: Arial, sans-serif; color: #333;">
+  <div style="max-width: 600px; margin: auto; padding: 24px; border: 1px solid #e0e0e0; border-radius: 8px;">
+    <h2 style="color: #2c7be5;">Order Update</h2>
+    <p>Hi <span th:text="${userName}">User</span>,</p>
+    <p>Your order <strong th:text="${orderNumber}">ORD-0000</strong> has been updated.</p>
+
+    <table style="width:100%; border-collapse: collapse; margin: 16px 0;">
+      <tr style="background:#f5f5f5;">
+        <td style="padding:8px; border:1px solid #ddd;">Status</td>
+        <td style="padding:8px; border:1px solid #ddd;" th:text="${status}">PROCESSING</td>
+      </tr>
+      <tr>
+        <td style="padding:8px; border:1px solid #ddd;">Total Amount</td>
+        <td style="padding:8px; border:1px solid #ddd;" th:text="${'$' + totalAmount}">$0.00</td>
+      </tr>
+      <tr style="background:#f5f5f5;">
+        <td style="padding:8px; border:1px solid #ddd;">Updated At</td>
+        <td style="padding:8px; border:1px solid #ddd;" th:text="${updatedAt}">-</td>
+      </tr>
+    </table>
+
+    <p style="color:#888; font-size:12px;">If you have any questions, please contact our support team.</p>
+  </div>
+</body>
+</html>
