@@ -5,6 +5,7 @@ import com.pharmacy.admin.dto.PagedResponse;
 import com.pharmacy.admin.dto.UpdateUserStatusRequest;
 import com.pharmacy.admin.dto.UserProfileResponse;
 import com.pharmacy.admin.service.AdminUserService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ public class AdminUserController {
 
     private final AdminUserService adminUserService;
 
+    @Operation(summary = "List all users", description = "Returns a paginated list of all users with optional filters for role, status, and search query")
     @GetMapping
     public ResponseEntity<PagedResponse<UserProfileResponse>> listUsers(
             @RequestParam(required = false) String role,
@@ -28,11 +30,13 @@ public class AdminUserController {
         return ResponseEntity.ok(adminUserService.listUsers(role, status, q, page, size));
     }
 
+    @Operation(summary = "Get user by ID", description = "Returns the profile details of a specific user by their ID")
     @GetMapping("/{id}")
     public ResponseEntity<UserProfileResponse> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(adminUserService.getUserById(id));
     }
 
+    @Operation(summary = "Update user status", description = "Activates or deactivates a user account, effectively controlling their access to the platform")
     @PatchMapping("/{id}/status")
     public ResponseEntity<UserProfileResponse> updateUserStatus(
             @PathVariable Long id,
@@ -40,6 +44,7 @@ public class AdminUserController {
         return ResponseEntity.ok(adminUserService.updateUserStatus(id, request));
     }
 
+    @Operation(summary = "Create a new user", description = "Creates a new user account with a specified role (e.g., ADMIN or CUSTOMER) on behalf of an administrator")
     @PostMapping
     public ResponseEntity<UserProfileResponse> createUser(
             @Valid @RequestBody AdminCreateUserRequest request) {

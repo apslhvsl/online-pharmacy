@@ -4,6 +4,7 @@ import com.pharmacy.catalog.dto.PrescriptionDto;
 import com.pharmacy.catalog.dto.PrescriptionReviewRequest;
 import com.pharmacy.catalog.entity.PrescriptionStatus;
 import com.pharmacy.catalog.service.PrescriptionService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class InternalPrescriptionController {
 
     private final PrescriptionService prescriptionService;
 
+    @Operation(summary = "Get pending prescription queue", description = "Returns a paginated list of prescriptions awaiting admin review, optionally filtered by user. For internal use by Admin Service only.")
     @GetMapping("/queue")
     public ResponseEntity<Page<PrescriptionDto>> getPendingQueue(
             @RequestParam(required = false) Long userId,
@@ -33,6 +35,7 @@ public class InternalPrescriptionController {
         return ResponseEntity.ok(prescriptionService.getPendingQueue(userId, pageable));
     }
 
+    @Operation(summary = "Review a prescription", description = "Approves or rejects a prescription and records the reviewing admin. For internal use by Admin Service only.")
     @PatchMapping("/{id}/status")
     public ResponseEntity<PrescriptionDto> reviewPrescription(
             @PathVariable Long id,
@@ -41,6 +44,7 @@ public class InternalPrescriptionController {
         return ResponseEntity.ok(prescriptionService.reviewPrescription(id, request, adminId));
     }
 
+    @Operation(summary = "List all prescriptions (admin)", description = "Returns a paginated list of all prescriptions with optional filters for status, user, and date range. For internal use by Admin Service only.")
     @GetMapping
     public ResponseEntity<Page<PrescriptionDto>> getAllPrescriptions(
             @RequestParam(required = false) PrescriptionStatus status,
@@ -52,12 +56,14 @@ public class InternalPrescriptionController {
     }
 
     // Admin can also download prescription files
+    @Operation(summary = "Get prescription file path", description = "Returns the server-side file path of a prescription's uploaded file. For internal use by Admin Service only.")
     @GetMapping("/{id}/file-path")
     public ResponseEntity<String> getPrescriptionFilePath(@PathVariable Long id) {
         return ResponseEntity.ok(prescriptionService.getPrescriptionFilePath(id).toString());
     }
 
     /** Used by Order Service to validate prescription status at checkout */
+    @Operation(summary = "Get prescription by ID (internal)", description = "Returns prescription details by ID without ownership checks. Used by Order Service to validate prescription status at checkout.")
     @GetMapping("/{id}")
     public ResponseEntity<PrescriptionDto> getPrescriptionById(@PathVariable Long id) {
         return ResponseEntity.ok(prescriptionService.getPrescriptionById(id, null, true));

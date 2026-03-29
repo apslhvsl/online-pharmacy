@@ -45,12 +45,19 @@ public class MedicineService {
     public StockCheckResponse checkStock(Long medicineId, Integer requestedQuantity) {
         medicineRepository.findById(medicineId)
                 .orElseThrow(() -> new EntityNotFoundException("Medicine not found: " + medicineId));
-        int available = batchRepository.sumAvailableStock(medicineId, LocalDate.now());
+
+        List<com.pharmacy.catalog.entity.InventoryBatch> batches =
+                batchRepository.findAvailableByMedicineId(medicineId, LocalDate.now());
+
+        int available = batches.stream().mapToInt(b -> b.getQuantity()).sum();
+        Long bestBatchId = batches.isEmpty() ? null : batches.get(0).getId(); // FEFO — earliest expiry first
+
         return StockCheckResponse.builder()
                 .medicineId(medicineId)
+                .batchId(bestBatchId)
                 .requestedQuantity(requestedQuantity)
                 .availableQuantity(available)
-                .available(available >= requestedQuantity)
+                .available(available >= requestedQuantity && bestBatchId != null)
                 .build();
     }
 

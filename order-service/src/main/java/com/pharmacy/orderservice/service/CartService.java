@@ -32,15 +32,16 @@ public class CartService {
     }
 
     @Transactional
-    public CartDto addItem(Long userId, Long batchId, Integer quantity) {
-        // Validate batch stock via catalog
-        var stockCheck = catalogClient.checkBatchStock(batchId, quantity);
+    public CartDto addItem(Long userId, Long medicineId, Integer quantity) {
+        // Check medicine-level stock (catalog picks best batch via FEFO internally)
+        var stockCheck = catalogClient.checkStock(medicineId, quantity);
         if (!Boolean.TRUE.equals(stockCheck.getAvailable())) {
             throw new InsufficientStockException("Insufficient stock. Available: " + stockCheck.getAvailableQuantity());
         }
 
-        // Fetch medicine info for name/price snapshot (using medicineId from stock check)
-        Long medicineId = stockCheck.getMedicineId();
+        Long batchId = stockCheck.getBatchId();
+
+        // Fetch medicine info for name/price snapshot
         MedicineInfo medicine = catalogClient.getMedicineById(medicineId);
         if (!Boolean.TRUE.equals(medicine.getActive())) {
             throw new IllegalArgumentException("Medicine is not available");

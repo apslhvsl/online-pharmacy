@@ -11,15 +11,15 @@ import java.math.BigDecimal;
 
 public interface MedicineRepository extends JpaRepository<Medicine, Long> {
 
-    @Query("""
-        SELECT m FROM Medicine m
+    @Query(value = """
+        SELECT * FROM medicines m
         WHERE m.active = true
-        AND (:q IS NULL OR LOWER(m.name) LIKE LOWER(CONCAT('%', :q, '%')))
-        AND (:categoryId IS NULL OR m.category.id = :categoryId)
-        AND (:requiresPrescription IS NULL OR m.requiresPrescription = :requiresPrescription)
-        AND (:minPrice IS NULL OR m.price >= :minPrice)
-        AND (:maxPrice IS NULL OR m.price <= :maxPrice)
-    """)
+        AND (CAST(:q AS text) IS NULL OR LOWER(m.name) LIKE LOWER('%' || CAST(:q AS text) || '%'))
+        AND (CAST(:categoryId AS bigint) IS NULL OR m.category_id = :categoryId)
+        AND (CAST(:requiresPrescription AS boolean) IS NULL OR m.requires_prescription = :requiresPrescription)
+        AND (CAST(:minPrice AS numeric) IS NULL OR m.price >= :minPrice)
+        AND (CAST(:maxPrice AS numeric) IS NULL OR m.price <= :maxPrice)
+    """, nativeQuery = true)
     Page<Medicine> findByFilters(
             @Param("q") String q,
             @Param("categoryId") Long categoryId,
@@ -29,14 +29,14 @@ public interface MedicineRepository extends JpaRepository<Medicine, Long> {
             Pageable pageable
     );
 
-    @Query("""
-        SELECT m FROM Medicine m
-        WHERE (:q IS NULL OR LOWER(m.name) LIKE LOWER(CONCAT('%', :q, '%')))
-        AND (:categoryId IS NULL OR m.category.id = :categoryId)
-        AND (:requiresPrescription IS NULL OR m.requiresPrescription = :requiresPrescription)
-        AND (:minPrice IS NULL OR m.price >= :minPrice)
-        AND (:maxPrice IS NULL OR m.price <= :maxPrice)
-    """)
+    @Query(value = """
+        SELECT * FROM medicines m
+        WHERE (CAST(:q AS text) IS NULL OR LOWER(m.name) LIKE LOWER('%' || CAST(:q AS text) || '%'))
+        AND (CAST(:categoryId AS bigint) IS NULL OR m.category_id = :categoryId)
+        AND (CAST(:requiresPrescription AS boolean) IS NULL OR m.requires_prescription = :requiresPrescription)
+        AND (CAST(:minPrice AS numeric) IS NULL OR m.price >= :minPrice)
+        AND (CAST(:maxPrice AS numeric) IS NULL OR m.price <= :maxPrice)
+    """, nativeQuery = true)
     Page<Medicine> findByFiltersAdmin(
             @Param("q") String q,
             @Param("categoryId") Long categoryId,

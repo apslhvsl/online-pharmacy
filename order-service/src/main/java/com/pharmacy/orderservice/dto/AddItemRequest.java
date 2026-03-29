@@ -10,7 +10,7 @@ import lombok.*;
 public class AddItemRequest {
 
     @NotNull
-    private Long batchId;
+    private Long medicineId;
 
     @NotNull @Min(1)
     private Integer quantity;
