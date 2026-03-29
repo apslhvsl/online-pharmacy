@@ -6,8 +6,8 @@ spring:
     name: catalog-service
   datasource:
     url: jdbc:postgresql://localhost:5432/catalog_db
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:sqlpass}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:

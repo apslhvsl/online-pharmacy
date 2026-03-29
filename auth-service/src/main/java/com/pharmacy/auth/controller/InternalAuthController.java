@@ -25,12 +25,14 @@ public class InternalAuthController {
 
     @GetMapping("/users")
     public ResponseEntity<Page<UserProfileResponse>> listUsers(
-            @RequestParam(required = false) Role role,
-            @RequestParam(required = false) UserStatus status,
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) String status,
             @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(authService.listUsers(role, status, q, page, size));
+        Role roleEnum   = (role   != null) ? Role.valueOf(role.toUpperCase())         : null;
+        UserStatus statusEnum = (status != null) ? UserStatus.valueOf(status.toUpperCase()) : null;
+        return ResponseEntity.ok(authService.listUsers(roleEnum, statusEnum, q, page, size));
     }
 
     @GetMapping("/users/{id}")

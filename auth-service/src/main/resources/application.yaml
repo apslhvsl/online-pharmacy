@@ -17,6 +17,11 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
 
 eureka:
   client:
@@ -32,7 +37,7 @@ springdoc:
     path: /swagger-ui.html
     disable-swagger-default-url: true
 jwt:
-  secret: 3cfa76ef14937c1c0ea519f8fc057a80fcd04a7d0d7b7b6d9b9e2f0b3d5a1c8
+  secret: a1c1e21c711dc90f0c38b77935b747eafa1106afea7a1aeba09cfe3e34517bab6ba2496436461bc1600d50637e71421d
   expiration: 86400000  # 24h in ms
 
 management:

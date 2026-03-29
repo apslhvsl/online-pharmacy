@@ -11,24 +11,19 @@ import java.time.LocalDateTime;
 public class MedicineDto {
     private Long id;
     private String name;
-    private String brandName;
-    private String activeIngredient;
     private Long categoryId;
     private String categoryName;
     private BigDecimal price;
-    private BigDecimal mrp;
-    /** Computed: sum of non-expired batch quantities */
-    private Integer stock;
-    private Integer reorderLevel;
+    private Boolean active;
     private Boolean requiresPrescription;
-    private String dosageForm;
+    private String manufacturer;
     private String strength;
     private String packSize;
     private String description;
     private String imageUrl;
-    private String manufacturer;
-    private Boolean isFeatured;
-    private Boolean active;
+    private Integer reorderLevel;
+    /** Computed: sum of non-expired batch quantities */
+    private Integer stock;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

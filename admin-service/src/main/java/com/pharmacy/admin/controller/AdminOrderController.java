@@ -4,6 +4,7 @@ import com.pharmacy.admin.dto.OrderResponse;
 import com.pharmacy.admin.dto.OrderStatusUpdateRequest;
 import com.pharmacy.admin.dto.PagedResponse;
 import com.pharmacy.admin.service.AdminOrderService;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,15 +34,15 @@ public class AdminOrderController {
     public ResponseEntity<OrderResponse> updateOrderStatus(
             @PathVariable Long id,
             @RequestBody OrderStatusUpdateRequest request,
-            @RequestHeader("X-User-Id") Long adminId) {
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") Long adminId) {
         return ResponseEntity.ok(adminOrderService.updateOrderStatus(id, request, adminId));
     }
 
-    @PostMapping("/{id}/cancel")
+    @PatchMapping("/{id}/cancel")
     public ResponseEntity<OrderResponse> cancelOrder(
             @PathVariable Long id,
             @RequestBody OrderStatusUpdateRequest request,
-            @RequestHeader("X-User-Id") Long adminId) {
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") Long adminId) {
         return ResponseEntity.ok(adminOrderService.cancelOrder(id, request.getNote(), adminId));
     }
 }

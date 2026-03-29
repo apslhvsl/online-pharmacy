@@ -14,10 +14,9 @@ public class InventoryBatchDto {
     private Long medicineId;
     private String medicineName;
     private String batchNumber;
-    private BigDecimal price;
-    private BigDecimal mrp;
-    private Integer quantity;
     private LocalDate expiryDate;
+    private BigDecimal price;
+    private Integer quantity;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

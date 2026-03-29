@@ -2,6 +2,7 @@ package com.pharmacy.catalog.controller;
 
 import com.pharmacy.catalog.dto.PrescriptionDto;
 import com.pharmacy.catalog.service.PrescriptionService;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.PathResource;
 import org.springframework.core.io.Resource;
@@ -30,27 +31,27 @@ public class PrescriptionController {
     @PostMapping("/upload")
     public ResponseEntity<PrescriptionDto> upload(
             @RequestParam("file") MultipartFile file,
-            @RequestHeader("X-User-Id") Long userId) throws IOException {
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId) throws IOException {
         return ResponseEntity.status(201).body(prescriptionService.uploadPrescription(file, userId));
     }
 
     @GetMapping
     public ResponseEntity<List<PrescriptionDto>> getMyPrescriptions(
-            @RequestHeader("X-User-Id") Long userId) {
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId) {
         return ResponseEntity.ok(prescriptionService.getPrescriptionsForUser(userId));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PrescriptionDto> getById(
             @PathVariable Long id,
-            @RequestHeader("X-User-Id") Long userId) {
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId) {
         return ResponseEntity.ok(prescriptionService.getPrescriptionById(id, userId, false));
     }
 
     @GetMapping("/{id}/file")
     public ResponseEntity<Resource> downloadFile(
             @PathVariable Long id,
-            @RequestHeader("X-User-Id") Long userId) throws IOException {
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId) throws IOException {
         // ownership enforced in service
         prescriptionService.getPrescriptionById(id, userId, false);
 

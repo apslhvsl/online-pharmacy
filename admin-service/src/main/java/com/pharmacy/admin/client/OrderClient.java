@@ -26,7 +26,7 @@ public interface OrderClient {
                                     @RequestBody OrderStatusUpdateRequest request,
                                     @RequestHeader("X-User-Id") Long adminId);
 
-    @PostMapping("/api/orders/internal/{id}/cancel")
+    @PatchMapping("/api/orders/internal/{id}/cancel")
     OrderResponse cancelOrder(@PathVariable("id") Long id, @RequestBody OrderStatusUpdateRequest request,
                                @RequestHeader("X-User-Id") Long adminId);
 

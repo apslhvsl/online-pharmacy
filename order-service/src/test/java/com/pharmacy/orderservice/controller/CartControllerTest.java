@@ -1,6 +1,5 @@
 package com.pharmacy.orderservice.controller;
 
-
 import com.pharmacy.orderservice.dto.CartDto;
 import com.pharmacy.orderservice.service.CartService;
 import org.junit.jupiter.api.Test;
@@ -9,7 +8,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.List;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -26,7 +26,14 @@ class CartControllerTest {
 
     @Test
     void getCart_returnsCart() throws Exception {
-        var dto = CartDto.builder().userId(1L).items(Map.of(1L, 2)).build();
+        CartDto dto = CartDto.builder()
+                .userId(1L)
+                .items(List.of())
+                .subTotal(BigDecimal.ZERO)
+                .taxAmount(BigDecimal.ZERO)
+                .total(BigDecimal.ZERO)
+                .requiresPrescription(false)
+                .build();
         when(cartService.getCart(1L)).thenReturn(dto);
 
         mockMvc.perform(get("/api/orders/cart")

@@ -1,10 +1,12 @@
 package com.pharmacy.auth.service;
 
+import com.pharmacy.auth.config.RabbitMQConfig;
 import com.pharmacy.auth.dto.*;
 import com.pharmacy.auth.entity.*;
 import com.pharmacy.auth.exception.DuplicateEmailException;
 import com.pharmacy.auth.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +27,7 @@ public class AuthService {
     private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final RabbitTemplate rabbitTemplate;
 
     // ── Signup ────────────────────────────────────────────────────────
     @Transactional
@@ -130,7 +133,19 @@ public class AuthService {
                     .expiresAt(LocalDateTime.now().plusMinutes(15))
                     .build();
             passwordResetTokenRepository.save(resetToken);
-            // TODO: send email with reset token
+
+            PasswordResetEvent event = PasswordResetEvent.builder()
+                    .userId(user.getId())
+                    .userEmail(user.getEmail())
+                    .userName(user.getName() != null ? user.getName() : user.getEmail())
+                    .resetToken(resetToken.getToken())
+                    .expiresAt(resetToken.getExpiresAt())
+                    .build();
+            rabbitTemplate.convertAndSend(
+                    RabbitMQConfig.EXCHANGE,
+                    RabbitMQConfig.PASSWORD_ROUTING_KEY,
+                    event
+            );
         });
         // Always return success to avoid email enumeration
     }

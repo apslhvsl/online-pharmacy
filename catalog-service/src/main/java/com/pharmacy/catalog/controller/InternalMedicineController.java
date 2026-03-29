@@ -65,4 +65,11 @@ public class InternalMedicineController {
             @RequestParam(required = false) Integer stockLessThan) {
         return ResponseEntity.ok(medicineService.getLowStockMedicines(stockLessThan));
     }
+
+    @GetMapping("/expiring-soon")
+    public ResponseEntity<List<MedicineDto>> getExpiringSoon(
+            @RequestParam(required = false) String expiryBefore,
+            @RequestParam(defaultValue = "90") int days) {
+        return ResponseEntity.ok(medicineService.getExpiringSoon(expiryBefore, days));
+    }
 }

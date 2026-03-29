@@ -13,12 +13,11 @@ public class PrescriptionResponse {
     private Long id;
     private Long userId;
     private String fileName;
-    private String fileType;
-    private Long fileSizeBytes;
+    private String filePath;
     private String status;
-    private Long reviewedBy;
-    private String remarks;
-    private LocalDateTime validTill;
     private LocalDateTime uploadedAt;
     private LocalDateTime reviewedAt;
+    private Long reviewedBy;
+    private LocalDateTime validTill;
+    private String remarks;
 }

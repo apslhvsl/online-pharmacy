@@ -31,8 +31,7 @@ public class MedicineService {
     private final MedicineMapper medicineMapper;
 
     public Page<MedicineDto> getMedicines(String q, Long categoryId, Boolean requiresPrescription,
-                                          BigDecimal minPrice, BigDecimal maxPrice,
-                                          Pageable pageable) {
+                                          BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
         return medicineRepository.findByFilters(q, categoryId, requiresPrescription, minPrice, maxPrice, pageable)
                 .map(m -> enrichWithStock(medicineMapper.toDto(m), m.getId()));
     }
@@ -55,11 +54,6 @@ public class MedicineService {
                 .build();
     }
 
-    public List<MedicineDto> getFeaturedMedicines() {
-        return medicineRepository.findByIsFeaturedTrueAndActiveTrue()
-                .stream().map(m -> enrichWithStock(medicineMapper.toDto(m), m.getId())).toList();
-    }
-
     public List<MedicineDto> getLowStockMedicines(Integer stockLessThan) {
         int threshold = stockLessThan != null ? stockLessThan : 10;
         List<Long> lowStockIds = batchRepository.findMedicineIdsWithLowStock(threshold, LocalDate.now());
@@ -70,7 +64,6 @@ public class MedicineService {
     }
 
     public List<MedicineDto> getExpiringSoon(String expiryBefore, int days) {
-        // Delegate to batch service — returns batches; here we return distinct medicines
         LocalDate threshold = expiryBefore != null ? LocalDate.parse(expiryBefore) : LocalDate.now().plusDays(days);
         List<Long> medicineIds = batchRepository.findExpiringSoon(threshold)
                 .stream().map(b -> b.getMedicine().getId()).distinct().toList();
@@ -86,20 +79,15 @@ public class MedicineService {
 
         Medicine medicine = Medicine.builder()
                 .name(request.getName())
-                .brandName(request.getBrandName())
-                .activeIngredient(request.getActiveIngredient())
                 .category(category)
                 .price(request.getPrice())
-                .mrp(request.getMrp())
-                .reorderLevel(request.getReorderLevel() != null ? request.getReorderLevel() : 10)
                 .requiresPrescription(request.getRequiresPrescription())
-                .dosageForm(request.getDosageForm())
+                .manufacturer(request.getManufacturer())
                 .strength(request.getStrength())
                 .packSize(request.getPackSize())
                 .description(request.getDescription())
                 .imageUrl(request.getImageUrl())
-                .manufacturer(request.getManufacturer())
-                .isFeatured(request.getIsFeatured() != null && request.getIsFeatured())
+                .reorderLevel(request.getReorderLevel() != null ? request.getReorderLevel() : 10)
                 .active(true)
                 .build();
 
@@ -112,19 +100,14 @@ public class MedicineService {
                 .orElseThrow(() -> new EntityNotFoundException("Medicine not found: " + id));
 
         if (request.getName() != null) medicine.setName(request.getName());
-        if (request.getBrandName() != null) medicine.setBrandName(request.getBrandName());
-        if (request.getActiveIngredient() != null) medicine.setActiveIngredient(request.getActiveIngredient());
         if (request.getPrice() != null) medicine.setPrice(request.getPrice());
-        if (request.getMrp() != null) medicine.setMrp(request.getMrp());
-        if (request.getReorderLevel() != null) medicine.setReorderLevel(request.getReorderLevel());
         if (request.getRequiresPrescription() != null) medicine.setRequiresPrescription(request.getRequiresPrescription());
-        if (request.getDosageForm() != null) medicine.setDosageForm(request.getDosageForm());
+        if (request.getManufacturer() != null) medicine.setManufacturer(request.getManufacturer());
         if (request.getStrength() != null) medicine.setStrength(request.getStrength());
         if (request.getPackSize() != null) medicine.setPackSize(request.getPackSize());
         if (request.getDescription() != null) medicine.setDescription(request.getDescription());
         if (request.getImageUrl() != null) medicine.setImageUrl(request.getImageUrl());
-        if (request.getManufacturer() != null) medicine.setManufacturer(request.getManufacturer());
-        if (request.getIsFeatured() != null) medicine.setIsFeatured(request.getIsFeatured());
+        if (request.getReorderLevel() != null) medicine.setReorderLevel(request.getReorderLevel());
         if (request.getCategoryId() != null) {
             Category category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new EntityNotFoundException("Category not found: " + request.getCategoryId()));
@@ -150,7 +133,6 @@ public class MedicineService {
         medicineRepository.save(medicine);
     }
 
-    /** Used by Order Service via Feign — FEFO deduction across batches */
     @Transactional
     public void deductStock(Long medicineId, Integer quantity) {
         batchService.deductStock(medicineId, quantity);
@@ -162,15 +144,12 @@ public class MedicineService {
                 .toList();
     }
 
-    /** Admin view — includes inactive medicines, supports full filters */
     public Page<MedicineDto> getMedicinesAdmin(String q, Long categoryId, Boolean requiresPrescription,
-                                               BigDecimal minPrice, BigDecimal maxPrice,
-                                               Pageable pageable) {
+                                               BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
         return medicineRepository.findByFiltersAdmin(q, categoryId, requiresPrescription, minPrice, maxPrice, pageable)
                 .map(m -> enrichWithStock(medicineMapper.toDto(m), m.getId()));
     }
 
-    /** Admin get by id — does not filter by active */
     public MedicineDto getMedicineByIdAdmin(Long id) {
         Medicine m = medicineRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Medicine not found: " + id));

@@ -54,10 +54,8 @@ public class PrescriptionService {
 
         Prescription prescription = Prescription.builder()
                 .userId(userId)
-                .filePath(filePath.toString())
                 .fileName(file.getOriginalFilename())
-                .fileType(file.getContentType())
-                .fileSizeBytes(file.getSize())
+                .filePath(filePath.toString())
                 .status(PrescriptionStatus.PENDING)
                 .build();
 
@@ -89,8 +87,6 @@ public class PrescriptionService {
                 .map(Prescription::getStatus)
                 .orElseThrow(() -> new EntityNotFoundException("Prescription not found: " + id));
     }
-
-    // ── Admin methods ────────────────────────────────────────────────
 
     public Page<PrescriptionDto> getPendingQueue(Long userId, Pageable pageable) {
         return prescriptionRepository.findWithFilters(PrescriptionStatus.PENDING, userId, null, null, pageable)

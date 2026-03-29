@@ -18,14 +18,11 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
     private String name;
 
-    @Column(unique = true)
+    @Column(unique = true, length = 255)
     private String slug;
-
-    @Column(name = "icon_url", length = 500)
-    private String iconUrl;
 
     @Column(nullable = false)
     @Builder.Default

@@ -39,10 +39,9 @@ public class InventoryBatchService {
         InventoryBatch batch = InventoryBatch.builder()
                 .medicine(medicine)
                 .batchNumber(request.getBatchNumber())
-                .price(request.getPrice())
-                .mrp(request.getMrp())
-                .quantity(request.getQuantity())
                 .expiryDate(request.getExpiryDate())
+                .price(request.getPrice())
+                .quantity(request.getQuantity())
                 .build();
 
         return toDto(batchRepository.save(batch));
@@ -53,10 +52,9 @@ public class InventoryBatchService {
         InventoryBatch batch = batchRepository.findById(batchId)
                 .orElseThrow(() -> new EntityNotFoundException("Batch not found: " + batchId));
         if (request.getBatchNumber() != null) batch.setBatchNumber(request.getBatchNumber());
-        if (request.getPrice() != null) batch.setPrice(request.getPrice());
-        if (request.getMrp() != null) batch.setMrp(request.getMrp());
-        if (request.getQuantity() != null) batch.setQuantity(request.getQuantity());
         if (request.getExpiryDate() != null) batch.setExpiryDate(request.getExpiryDate());
+        if (request.getPrice() != null) batch.setPrice(request.getPrice());
+        if (request.getQuantity() != null) batch.setQuantity(request.getQuantity());
         return toDto(batchRepository.save(batch));
     }
 
@@ -96,7 +94,6 @@ public class InventoryBatchService {
                 .build();
     }
 
-    /** Deducts stock from the earliest-expiring valid batch (FEFO). Used by order-service. */
     @Transactional
     public void deductStock(Long medicineId, Integer quantity) {
         List<InventoryBatch> batches = batchRepository.findAvailableByMedicineId(medicineId, LocalDate.now());
@@ -111,7 +108,6 @@ public class InventoryBatchService {
         if (remaining > 0) throw new IllegalStateException("Insufficient stock for medicine: " + medicineId);
     }
 
-    /** Deducts stock from a specific batch by batchId. Used by order-service when batchId is known. */
     @Transactional
     public void deductBatchStock(Long batchId, Integer quantity) {
         InventoryBatch batch = batchRepository.findById(batchId)
@@ -138,10 +134,9 @@ public class InventoryBatchService {
                 .medicineId(b.getMedicine().getId())
                 .medicineName(b.getMedicine().getName())
                 .batchNumber(b.getBatchNumber())
-                .price(b.getPrice())
-                .mrp(b.getMrp())
-                .quantity(b.getQuantity())
                 .expiryDate(b.getExpiryDate())
+                .price(b.getPrice())
+                .quantity(b.getQuantity())
                 .createdAt(b.getCreatedAt())
                 .updatedAt(b.getUpdatedAt())
                 .build();

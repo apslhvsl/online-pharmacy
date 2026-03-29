@@ -8,15 +8,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 public interface MedicineRepository extends JpaRepository<Medicine, Long> {
 
     @Query("""
         SELECT m FROM Medicine m
         WHERE m.active = true
-        AND (:q IS NULL OR LOWER(m.name) LIKE LOWER(CONCAT('%', :q, '%'))
-             OR LOWER(m.brandName) LIKE LOWER(CONCAT('%', :q, '%')))
+        AND (:q IS NULL OR LOWER(m.name) LIKE LOWER(CONCAT('%', :q, '%')))
         AND (:categoryId IS NULL OR m.category.id = :categoryId)
         AND (:requiresPrescription IS NULL OR m.requiresPrescription = :requiresPrescription)
         AND (:minPrice IS NULL OR m.price >= :minPrice)
@@ -31,11 +29,9 @@ public interface MedicineRepository extends JpaRepository<Medicine, Long> {
             Pageable pageable
     );
 
-    /** Admin variant — does not filter by active */
     @Query("""
         SELECT m FROM Medicine m
-        WHERE (:q IS NULL OR LOWER(m.name) LIKE LOWER(CONCAT('%', :q, '%'))
-             OR LOWER(m.brandName) LIKE LOWER(CONCAT('%', :q, '%')))
+        WHERE (:q IS NULL OR LOWER(m.name) LIKE LOWER(CONCAT('%', :q, '%')))
         AND (:categoryId IS NULL OR m.category.id = :categoryId)
         AND (:requiresPrescription IS NULL OR m.requiresPrescription = :requiresPrescription)
         AND (:minPrice IS NULL OR m.price >= :minPrice)
@@ -49,6 +45,4 @@ public interface MedicineRepository extends JpaRepository<Medicine, Long> {
             @Param("maxPrice") BigDecimal maxPrice,
             Pageable pageable
     );
-
-    List<Medicine> findByIsFeaturedTrueAndActiveTrue();
 }

@@ -20,32 +20,23 @@ public class Medicine {
     @Column(nullable = false, length = 200)
     private String name;
 
-    @Column(name = "brand_name", length = 200)
-    private String brandName;
-
-    @Column(name = "active_ingredient", length = 300)
-    private String activeIngredient;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
-    @Column(precision = 10, scale = 2)
-    private BigDecimal mrp;
-
-    @Column(name = "reorder_level")
+    @Column(nullable = false)
     @Builder.Default
-    private Integer reorderLevel = 10;
+    private Boolean active = true;
 
     @Column(name = "requires_prescription", nullable = false)
     @Builder.Default
     private Boolean requiresPrescription = false;
 
-    @Column(name = "dosage_form", length = 100)
-    private String dosageForm;
+    @Column(length = 200)
+    private String manufacturer;
 
     @Column(length = 100)
     private String strength;
@@ -59,16 +50,9 @@ public class Medicine {
     @Column(name = "image_url", length = 500)
     private String imageUrl;
 
-    @Column(length = 200)
-    private String manufacturer;
-
-    @Column(name = "is_featured")
+    @Column(name = "reorder_level")
     @Builder.Default
-    private Boolean isFeatured = false;
-
-    @Column(nullable = false)
-    @Builder.Default
-    private Boolean active = true;
+    private Integer reorderLevel = 10;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

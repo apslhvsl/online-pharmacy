@@ -25,17 +25,14 @@ public class InventoryBatch {
     @Column(name = "batch_number", nullable = false, length = 100)
     private String batchNumber;
 
+    @Column(name = "expiry_date", nullable = false)
+    private LocalDate expiryDate;
+
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
-    @Column(precision = 10, scale = 2)
-    private BigDecimal mrp;
-
     @Column(nullable = false)
     private Integer quantity;
-
-    @Column(name = "expiry_date", nullable = false)
-    private LocalDate expiryDate;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

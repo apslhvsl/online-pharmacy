@@ -10,5 +10,4 @@ import lombok.AllArgsConstructor;
 public class CategoryCreateRequest {
     private String name;
     private String slug;
-    private String iconUrl;
 }

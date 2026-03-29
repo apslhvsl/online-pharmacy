@@ -19,14 +19,12 @@ public class InventoryBatchCreateRequest {
     @NotBlank
     private String batchNumber;
 
+    @NotNull @Future
+    private LocalDate expiryDate;
+
     @NotNull @Positive
     private BigDecimal price;
 
-    private BigDecimal mrp;
-
     @NotNull @Positive
     private Integer quantity;
-
-    @NotNull @Future
-    private LocalDate expiryDate;
 }

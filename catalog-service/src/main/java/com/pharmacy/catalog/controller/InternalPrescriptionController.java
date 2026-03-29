@@ -4,6 +4,7 @@ import com.pharmacy.catalog.dto.PrescriptionDto;
 import com.pharmacy.catalog.dto.PrescriptionReviewRequest;
 import com.pharmacy.catalog.entity.PrescriptionStatus;
 import com.pharmacy.catalog.service.PrescriptionService;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -36,7 +37,7 @@ public class InternalPrescriptionController {
     public ResponseEntity<PrescriptionDto> reviewPrescription(
             @PathVariable Long id,
             @Valid @RequestBody PrescriptionReviewRequest request,
-            @RequestHeader(value = "X-User-Id", required = false) Long adminId) {
+            @Parameter(hidden = true) @RequestHeader(value = "X-User-Id", required = false) Long adminId) {
         return ResponseEntity.ok(prescriptionService.reviewPrescription(id, request, adminId));
     }
 

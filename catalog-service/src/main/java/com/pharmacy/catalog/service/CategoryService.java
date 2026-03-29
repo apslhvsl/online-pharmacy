@@ -35,7 +35,6 @@ public class CategoryService {
         Category category = Category.builder()
                 .name(request.getName())
                 .slug(request.getSlug())
-                .iconUrl(request.getIconUrl())
                 .active(true)
                 .build();
         return toDto(categoryRepository.save(category));
@@ -47,7 +46,6 @@ public class CategoryService {
                 .orElseThrow(() -> new EntityNotFoundException("Category not found: " + id));
         if (request.getName() != null) category.setName(request.getName());
         if (request.getSlug() != null) category.setSlug(request.getSlug());
-        if (request.getIconUrl() != null) category.setIconUrl(request.getIconUrl());
         return toDto(categoryRepository.save(category));
     }
 
@@ -75,7 +73,7 @@ public class CategoryService {
                 .id(c.getId())
                 .name(c.getName())
                 .slug(c.getSlug())
-                .iconUrl(c.getIconUrl())
+                .active(c.getActive())
                 .medicineCount(count)
                 .build();
     }

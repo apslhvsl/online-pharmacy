@@ -2,6 +2,7 @@ package com.pharmacy.catalog.controller;
 
 import com.pharmacy.catalog.dto.*;
 import com.pharmacy.catalog.service.InventoryBatchService;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -42,7 +43,7 @@ public class InternalBatchController {
     public ResponseEntity<InventoryBatchDto> adjustStock(
             @PathVariable Long batchId,
             @Valid @RequestBody StockAdjustRequest request,
-            @RequestHeader(value = "X-User-Id", required = false) Long performedBy) {
+            @Parameter(hidden = true) @RequestHeader(value = "X-User-Id", required = false) Long performedBy) {
         return ResponseEntity.ok(batchService.adjustBatchStock(batchId, request, performedBy));
     }
 
@@ -59,11 +60,5 @@ public class InternalBatchController {
             @PathVariable Long batchId,
             @RequestParam Integer quantity) {
         return ResponseEntity.ok(batchService.checkStock(batchId, quantity));
-    }
-
-    @GetMapping("/expiring-soon")
-    public ResponseEntity<List<InventoryBatchDto>> getExpiringSoon(
-            @RequestParam(defaultValue = "90") int days) {
-        return ResponseEntity.ok(batchService.getExpiringSoon(days));
     }
 }

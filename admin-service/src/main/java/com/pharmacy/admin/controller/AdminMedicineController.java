@@ -2,6 +2,7 @@ package com.pharmacy.admin.controller;
 
 import com.pharmacy.admin.dto.*;
 import com.pharmacy.admin.service.AdminMedicineService;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +38,7 @@ public class AdminMedicineController {
     @PostMapping("/medicines")
     public ResponseEntity<MedicineResponse> createMedicine(
             @RequestBody MedicineCreateRequest request,
-            @RequestHeader("X-User-Id") Long adminId) {
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") Long adminId) {
         return ResponseEntity.status(HttpStatus.CREATED).body(adminMedicineService.createMedicine(request, adminId));
     }
 
@@ -64,6 +65,18 @@ public class AdminMedicineController {
             @RequestParam(required = false) String expiryBefore,
             @RequestParam(defaultValue = "90") int days) {
         return ResponseEntity.ok(adminMedicineService.getExpiringSoon(expiryBefore, days));
+    }
+
+    // ── Batch stock adjustment ────────────────────────────────────────
+
+    @PatchMapping("/batches/{batchId}/stock")
+    public ResponseEntity<Void> adjustStock(
+            @PathVariable Long batchId,
+            @RequestBody StockAdjustRequest request,
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") Long adminId) {
+        request.setBatchId(batchId);
+        adminMedicineService.adjustStock(batchId, request, adminId);
+        return ResponseEntity.noContent().build();
     }
 
     // ── Category endpoints ───────────────────────────────────────────
@@ -109,7 +122,7 @@ public class AdminMedicineController {
     public ResponseEntity<PrescriptionResponse> reviewPrescription(
             @PathVariable Long id,
             @RequestBody PrescriptionReviewRequest request,
-            @RequestHeader("X-User-Id") Long adminId) {
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") Long adminId) {
         return ResponseEntity.ok(adminMedicineService.reviewPrescription(id, request, adminId));
     }
 
