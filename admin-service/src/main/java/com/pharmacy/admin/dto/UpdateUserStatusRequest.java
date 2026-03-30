@@ -1,10 +1,10 @@
 package com.pharmacy.admin.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
 public class UpdateUserStatusRequest {
-    @NotBlank
-    private String status; // ACTIVE | INACTIVE | SUSPENDED
+    @NotNull
+    private UserStatus status;
 }

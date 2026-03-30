@@ -1,5 +1,7 @@
 package com.pharmacy.orderservice.entity;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -36,6 +38,7 @@ public class Payment {
     @Column(name = "gateway_txn_ref", length = 200)
     private String gatewayTxnRef;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "gateway_response", columnDefinition = "jsonb")
     private String gatewayResponse;
 

@@ -21,14 +21,16 @@ public interface OrderClient {
     @GetMapping("/api/orders/internal/{id}")
     OrderResponse getOrderById(@PathVariable("id") Long id);
 
-    @PatchMapping("/api/orders/internal/{id}/status")
+    @PatchMapping("/api/orders/internal/{id}/status/{status}")
     OrderResponse updateOrderStatus(@PathVariable("id") Long id,
-                                    @RequestBody OrderStatusUpdateRequest request,
+                                    @PathVariable("status") String status,
+                                    @RequestParam(required = false) String note,
                                     @RequestHeader("X-User-Id") Long adminId);
 
     @PatchMapping("/api/orders/internal/{id}/cancel")
-    OrderResponse cancelOrder(@PathVariable("id") Long id, @RequestBody OrderStatusUpdateRequest request,
-                               @RequestHeader("X-User-Id") Long adminId);
+    OrderResponse cancelOrder(@PathVariable("id") Long id,
+                              @RequestParam(required = false) String note,
+                              @RequestHeader("X-User-Id") Long adminId);
 
     @GetMapping("/api/orders/internal/dashboard")
     DashboardDto getDashboard();

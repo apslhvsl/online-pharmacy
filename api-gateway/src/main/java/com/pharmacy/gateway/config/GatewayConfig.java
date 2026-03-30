@@ -2,8 +2,6 @@ package com.pharmacy.gateway.config;
 
 import org.springdoc.core.properties.AbstractSwaggerUiConfigProperties.SwaggerUrl;
 import org.springdoc.core.properties.SwaggerUiConfigProperties;
-import org.springframework.cloud.gateway.route.RouteLocator;
-import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -52,35 +50,5 @@ public class GatewayConfig implements WebFluxConfigurer {
         su.setName(name);
         su.setUrl(url);
         return su;
-    }
-
-    // ---------------------------------------------------------------
-    // Explicit routes for api-docs aggregation
-    // These are only needed if you are NOT using Eureka lb:// routing
-    // in application.yml (i.e., running without service discovery).
-    // If you use lb://auth-service etc., routes in application.yml
-    // already cover these paths and you can delete this bean.
-    // Keep this bean if you ever run without Eureka (e.g. local Docker).
-    // ---------------------------------------------------------------
-    @Bean
-    public RouteLocator apiDocsRoutes(RouteLocatorBuilder builder) {
-        return builder.routes()
-            .route("auth-api-docs", r -> r
-                .path("/auth-service/v3/api-docs")
-                .filters(f -> f.rewritePath("/auth-service/v3/api-docs", "/v3/api-docs"))
-                .uri("http://localhost:8081"))
-            .route("catalog-api-docs", r -> r
-                .path("/catalog-service/v3/api-docs")
-                .filters(f -> f.rewritePath("/catalog-service/v3/api-docs", "/v3/api-docs"))
-                .uri("http://localhost:8082"))
-            .route("order-api-docs", r -> r
-                .path("/order-service/v3/api-docs")
-                .filters(f -> f.rewritePath("/order-service/v3/api-docs", "/v3/api-docs"))
-                .uri("http://localhost:8083"))
-            .route("admin-api-docs", r -> r
-                .path("/admin-service/v3/api-docs")
-                .filters(f -> f.rewritePath("/admin-service/v3/api-docs", "/v3/api-docs"))
-                .uri("http://localhost:8084"))
-            .build();
     }
 }

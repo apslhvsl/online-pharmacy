@@ -130,7 +130,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             if (path.contains("/prescriptions/") && !path.contains("/admin/")) return isAuthenticated(role);
             return "ADMIN".equals(role);
         }
-        if (path.startsWith("/api/orders/")) {
+        if (path.startsWith("/api/orders/") || path.equals("/api/orders")) {
             if (path.startsWith("/api/orders/internal/")) return "ADMIN".equals(role);
             return isAuthenticated(role);
         }

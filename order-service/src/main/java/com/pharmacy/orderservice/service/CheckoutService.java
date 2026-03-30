@@ -62,7 +62,7 @@ public class CheckoutService {
     public OrderDto setAddress(Long orderId, Long userId, CheckoutRequest request) {
         Order order = getOwnedOrder(orderId, userId);
 
-        Long addressId = request.getAddressId();
+        Long addressId = (request.getAddressId() != null && request.getAddressId() > 0) ? request.getAddressId() : null;
         if (addressId == null && request.getInlineAddress() != null) {
             var saved = addressService.addAddress(userId, request.getInlineAddress());
             addressId = saved.getId();

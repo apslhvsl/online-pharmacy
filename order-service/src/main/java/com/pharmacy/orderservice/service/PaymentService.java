@@ -22,6 +22,7 @@ public class PaymentService {
     private final OrderRepository orderRepository;
     private final OrderStatusLogRepository statusLogRepository;
     private final OrderStateMachine orderStateMachine;
+    private final OrderEventPublisher orderEventPublisher;
 
     @Transactional
     public PaymentDto initiatePayment(PaymentInitiateRequest request, Long userId) {
@@ -44,6 +45,7 @@ public class PaymentService {
             payment.setStatus(PaymentStatus.PAID);
             payment.setPaidAt(LocalDateTime.now());
             transitionOrder(order, OrderStatus.PAID, userId, "COD payment confirmed");
+            orderEventPublisher.publishOrderUpdate(order);
         }
 
         return toDto(paymentRepository.save(payment));

@@ -1,5 +1,6 @@
 package com.pharmacy.admin.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PrescriptionReviewRequest {
-    private String status; // APPROVED or REJECTED
+    @NotNull
+    private PrescriptionStatus status;
     private String remarks;
 }

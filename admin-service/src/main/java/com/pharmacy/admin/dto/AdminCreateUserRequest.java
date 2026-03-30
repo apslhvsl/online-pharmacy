@@ -17,5 +17,5 @@ public class AdminCreateUserRequest {
     @NotBlank
     private String password;
     @NotNull
-    private String role; // CUSTOMER | ADMIN
+    private UserRole role;
 }

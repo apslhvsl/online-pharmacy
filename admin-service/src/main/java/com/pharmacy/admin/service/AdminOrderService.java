@@ -21,11 +21,11 @@ public class AdminOrderService {
         return orderClient.getOrderById(id);
     }
 
-    public OrderResponse updateOrderStatus(Long id, OrderStatusUpdateRequest request, Long adminId) {
-        return orderClient.updateOrderStatus(id, request, adminId);
+    public OrderResponse updateOrderStatus(Long id, String status, String note, Long adminId) {
+        return orderClient.updateOrderStatus(id, status, note, adminId);
     }
 
     public OrderResponse cancelOrder(Long id, String reason, Long adminId) {
-        return orderClient.cancelOrder(id, new OrderStatusUpdateRequest("ADMIN_CANCELLED", reason), adminId);
+        return orderClient.cancelOrder(id, reason, adminId);
     }
 }

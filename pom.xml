@@ -36,6 +36,7 @@
         <lombok.version>1.18.36</lombok.version>
         <postgresql.version>42.7.3</postgresql.version>
         <springdoc.version>2.5.0</springdoc.version>
+        <sonar.maven.plugin.version>3.11.0.3922</sonar.maven.plugin.version>
 
     </properties>
 
@@ -169,6 +170,11 @@
                             </path>
                         </annotationProcessorPaths>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>${sonar.maven.plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>

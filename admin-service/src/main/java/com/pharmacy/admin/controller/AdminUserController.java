@@ -4,6 +4,8 @@ import com.pharmacy.admin.dto.AdminCreateUserRequest;
 import com.pharmacy.admin.dto.PagedResponse;
 import com.pharmacy.admin.dto.UpdateUserStatusRequest;
 import com.pharmacy.admin.dto.UserProfileResponse;
+import com.pharmacy.admin.dto.UserRole;
+import com.pharmacy.admin.dto.UserStatus;
 import com.pharmacy.admin.service.AdminUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -22,12 +24,15 @@ public class AdminUserController {
     @Operation(summary = "List all users", description = "Returns a paginated list of all users with optional filters for role, status, and search query")
     @GetMapping
     public ResponseEntity<PagedResponse<UserProfileResponse>> listUsers(
-            @RequestParam(required = false) String role,
-            @RequestParam(required = false) String status,
+            @RequestParam(required = false) UserRole role,
+            @RequestParam(required = false) UserStatus status,
             @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(adminUserService.listUsers(role, status, q, page, size));
+        return ResponseEntity.ok(adminUserService.listUsers(
+                role != null ? role.name() : null,
+                status != null ? status.name() : null,
+                q, page, size));
     }
 
     @Operation(summary = "Get user by ID", description = "Returns the profile details of a specific user by their ID")

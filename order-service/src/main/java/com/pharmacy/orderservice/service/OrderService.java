@@ -3,10 +3,12 @@ package com.pharmacy.orderservice.service;
 import com.pharmacy.orderservice.dto.DashboardDto;
 import com.pharmacy.orderservice.dto.OrderDto;
 import com.pharmacy.orderservice.dto.OrderStatusUpdateRequest;
+import com.pharmacy.orderservice.dto.PaymentDto;
 import com.pharmacy.orderservice.dto.SalesReportDto;
 import com.pharmacy.orderservice.entity.*;
 import com.pharmacy.orderservice.repository.OrderRepository;
 import com.pharmacy.orderservice.repository.OrderStatusLogRepository;
+import com.pharmacy.orderservice.repository.PaymentRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,6 +31,8 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderStatusLogRepository statusLogRepository;
     private final OrderStateMachine orderStateMachine;
+    private final PaymentRepository paymentRepository;
+    private final OrderEventPublisher orderEventPublisher;
 
     public Page<OrderDto> getOrdersByUser(Long userId, OrderStatus status, Pageable pageable) {
         if (status != null) {
@@ -59,7 +63,9 @@ public class OrderService {
         orderStateMachine.validate(order.getStatus(), next);
         logTransition(order, next, userId, reason);
         order.setStatus(next);
-        return toDto(orderRepository.save(order));
+        OrderDto result = toDto(orderRepository.save(order));
+        orderEventPublisher.publishOrderUpdate(order);
+        return result;
     }
 
     @Transactional
@@ -69,7 +75,9 @@ public class OrderService {
         orderStateMachine.validate(order.getStatus(), request.getStatus());
         logTransition(order, request.getStatus(), changedBy, request.getNote());
         order.setStatus(request.getStatus());
-        return toDto(orderRepository.save(order));
+        OrderDto result = toDto(orderRepository.save(order));
+        orderEventPublisher.publishOrderUpdate(order);
+        return result;
     }
 
     @Transactional
@@ -85,7 +93,9 @@ public class OrderService {
         orderStateMachine.validate(order.getStatus(), OrderStatus.RETURN_REQUESTED);
         logTransition(order, OrderStatus.RETURN_REQUESTED, userId, reason);
         order.setStatus(OrderStatus.RETURN_REQUESTED);
-        return toDto(orderRepository.save(order));
+        OrderDto result = toDto(orderRepository.save(order));
+        orderEventPublisher.publishOrderUpdate(order);
+        return result;
     }
 
     public Page<OrderDto> getAllOrders(OrderStatus status, Long userId,
@@ -176,6 +186,20 @@ public class OrderService {
                         .lineTotal(i.getLineTotal())
                         .build()).toList();
 
+        PaymentDto paymentDto = paymentRepository.findByOrderId(order.getId())
+                .map(p -> PaymentDto.builder()
+                        .id(p.getId())
+                        .orderId(order.getId())
+                        .paymentMethod(p.getPaymentMethod())
+                        .status(p.getStatus())
+                        .amount(p.getAmount())
+                        .gatewayTxnRef(p.getGatewayTxnRef())
+                        .paidAt(p.getPaidAt())
+                        .refundedAt(p.getRefundedAt())
+                        .createdAt(p.getCreatedAt())
+                        .build())
+                .orElse(null);
+
         return OrderDto.builder()
                 .id(order.getId())
                 .orderNumber(order.getOrderNumber())
@@ -191,6 +215,7 @@ public class OrderService {
                 .createdAt(order.getCreatedAt())
                 .updatedAt(order.getUpdatedAt())
                 .items(itemDtos)
+                .payment(paymentDto)
                 .build();
     }
 }

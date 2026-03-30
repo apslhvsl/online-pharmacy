@@ -1,6 +1,7 @@
 package com.pharmacy.admin.controller;
 
 import com.pharmacy.admin.dto.*;
+import com.pharmacy.admin.dto.PrescriptionStatus;
 import com.pharmacy.admin.service.AdminMedicineService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -145,10 +146,11 @@ public class AdminMedicineController {
     @Operation(summary = "List all prescriptions", description = "Returns a paginated list of all prescriptions with optional filters for status and user")
     @GetMapping("/prescriptions")
     public ResponseEntity<PagedResponse<PrescriptionResponse>> getAllPrescriptions(
-            @RequestParam(required = false) String status,
+            @RequestParam(required = false) PrescriptionStatus status,
             @RequestParam(required = false) Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return ResponseEntity.ok(adminMedicineService.getAllPrescriptions(status, userId, page, size));
+        return ResponseEntity.ok(adminMedicineService.getAllPrescriptions(
+                status != null ? status.name() : null, userId, page, size));
     }
 }

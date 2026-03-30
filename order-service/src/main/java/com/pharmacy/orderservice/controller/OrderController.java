@@ -2,6 +2,7 @@ package com.pharmacy.orderservice.controller;
 
 import com.pharmacy.orderservice.dto.*;
 import com.pharmacy.orderservice.entity.OrderStatus;
+import com.pharmacy.orderservice.entity.PaymentMethod;
 import com.pharmacy.orderservice.service.CartService;
 import com.pharmacy.orderservice.service.OrderService;
 import com.pharmacy.orderservice.service.PaymentService;
@@ -9,7 +10,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -28,11 +28,11 @@ public class OrderController {
 
     @Operation(summary = "List my orders", description = "Returns a paginated list of orders placed by the authenticated user, with an optional filter by order status")
     @GetMapping
-    public ResponseEntity<Page<OrderDto>> getMyOrders(
+    public ResponseEntity<PagedResponse<OrderDto>> getMyOrders(
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId,
             @RequestParam(required = false) OrderStatus status,
             @PageableDefault(size = 10) Pageable pageable) {
-        return ResponseEntity.ok(orderService.getOrdersByUser(userId, status, pageable));
+        return ResponseEntity.ok(PagedResponse.from(orderService.getOrdersByUser(userId, status, pageable)));
     }
 
     @Operation(summary = "Get order by ID", description = "Returns the full details of a specific order belonging to the authenticated user")
@@ -79,11 +79,13 @@ public class OrderController {
 
     // ── Payment endpoints ────────────────────────────────────────────
 
-    @Operation(summary = "Initiate payment", description = "Creates a payment record for a confirmed order and returns payment details including the payment method and amount")
-    @PostMapping("/payments/initiate")
+    @Operation(summary = "Initiate payment", description = "Creates a payment record for a confirmed order. Choose a payment method from the available options.")
+    @PostMapping("/payments/initiate/{orderId}")
     public ResponseEntity<PaymentDto> initiatePayment(
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId,
-            @Valid @RequestBody PaymentInitiateRequest request) {
+            @PathVariable Long orderId,
+            @RequestParam PaymentMethod paymentMethod) {
+        PaymentInitiateRequest request = new PaymentInitiateRequest(orderId, paymentMethod);
         return ResponseEntity.ok(paymentService.initiatePayment(request, userId));
     }
 
