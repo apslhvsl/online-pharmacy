@@ -105,6 +105,7 @@ public class CheckoutService {
             if (rx.getValidTill() != null && rx.getValidTill().isBefore(java.time.LocalDateTime.now())) {
                 throw new IllegalStateException("Linked prescription has expired");
             }
+            // make sure the prescription belongs to the person placing the order
             if (!userId.equals(rx.getUserId())) {
                 throw new IllegalStateException("Prescription does not belong to this user");
             }
@@ -133,6 +134,7 @@ public class CheckoutService {
         }
 
         BigDecimal taxAmount = subtotal.multiply(new BigDecimal("0.05"));
+        // free delivery on orders over ₹500
         BigDecimal deliveryCharge = subtotal.compareTo(new BigDecimal("500")) >= 0 ? BigDecimal.ZERO : new BigDecimal("50");
         BigDecimal total = subtotal.add(taxAmount).add(deliveryCharge);
 

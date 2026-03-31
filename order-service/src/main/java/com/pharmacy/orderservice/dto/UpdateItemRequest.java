@@ -10,5 +10,5 @@ import lombok.*;
 public class UpdateItemRequest {
 
     @NotNull @Min(0)
-    private Integer quantity; // 0 = remove item
+    private Integer quantity; // 0 means remove the item from the cart
 }

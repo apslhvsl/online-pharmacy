@@ -24,7 +24,7 @@ public class AddressService {
     @Transactional
     public AddressDto addAddress(Long userId, AddressRequest request) {
         if (Boolean.TRUE.equals(request.getIsDefault())) {
-            // clear existing default
+            // clear the existing default before setting a new one
             addressRepository.findByUserId(userId).forEach(a -> {
                 a.setIsDefault(false);
                 addressRepository.save(a);

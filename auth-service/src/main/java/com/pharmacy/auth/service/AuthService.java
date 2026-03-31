@@ -35,6 +35,7 @@ public class AuthService {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new DuplicateEmailException("Email already registered: " + request.getEmail());
         }
+        // also check mobile since it's used as a unique identifier
         if (userRepository.findByMobile(request.getMobile()).isPresent()) {
             throw new DuplicateEmailException("Mobile number already registered: " + request.getMobile());
         }
@@ -80,8 +81,7 @@ public class AuthService {
         }
 
         // Rotate: revoke old, issue new
-        stored.setRevoked(true);
-        refreshTokenRepository.save(stored);
+        stored.setRevoked(true);        refreshTokenRepository.save(stored);
 
         return buildAuthResponse(stored.getUser());
     }
@@ -116,7 +116,7 @@ public class AuthService {
         }
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
-        // Invalidate all refresh tokens on password change
+        // invalidate all sessions after a password change
         refreshTokenRepository.deleteAllByUserId(userId);
     }
 
@@ -124,7 +124,7 @@ public class AuthService {
     @Transactional
     public void forgotPassword(ForgotPasswordRequest request) {
         userRepository.findByEmail(request.getEmail()).ifPresent(user -> {
-            // Remove any existing reset tokens
+            // clean up any existing tokens before issuing a new one
             passwordResetTokenRepository.deleteAllByUserId(user.getId());
 
             PasswordResetToken resetToken = PasswordResetToken.builder()

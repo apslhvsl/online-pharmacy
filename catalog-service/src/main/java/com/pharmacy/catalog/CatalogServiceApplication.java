@@ -4,6 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
+// Entry point for the Catalog Service (medicines, categories, prescriptions, inventory)
 @SpringBootApplication
 @EnableDiscoveryClient
 public class CatalogServiceApplication {

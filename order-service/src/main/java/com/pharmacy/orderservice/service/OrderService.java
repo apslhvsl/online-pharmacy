@@ -44,6 +44,7 @@ public class OrderService {
     public OrderDto getOrderById(Long orderId, Long userId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found: " + orderId));
+        // return 404 instead of 403 to avoid leaking order existence
         if (!order.getUserId().equals(userId)) throw new EntityNotFoundException("Order not found: " + orderId);
         return toDto(order);
     }
@@ -57,6 +58,7 @@ public class OrderService {
     public OrderDto cancelOrder(Long orderId, Long userId, String reason) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found: " + orderId));
+        // hide other users' orders with a 404 rather than a 403
         if (!order.getUserId().equals(userId)) throw new EntityNotFoundException("Order not found: " + orderId);
 
         OrderStatus next = OrderStatus.CUSTOMER_CANCELLED;
@@ -86,9 +88,8 @@ public class OrderService {
                 .orElseThrow(() -> new EntityNotFoundException("Order not found: " + orderId));
         if (!order.getUserId().equals(userId)) throw new EntityNotFoundException("Order not found: " + orderId);
         if (order.getStatus() != OrderStatus.DELIVERED)
-            throw new IllegalStateException("Returns only allowed for DELIVERED orders");
-        if (order.getUpdatedAt() != null && order.getUpdatedAt().isBefore(LocalDateTime.now().minusDays(7)))
-            throw new IllegalStateException("Return window of 7 days has passed");
+            throw new IllegalStateException("Returns only allowed for DELIVERED orders");        if (order.getUpdatedAt() != null && order.getUpdatedAt().isBefore(LocalDateTime.now().minusDays(7)))
+            throw new IllegalStateException("Return window of 7 days has passed"); // 7-day return policy
 
         orderStateMachine.validate(order.getStatus(), OrderStatus.RETURN_REQUESTED);
         logTransition(order, OrderStatus.RETURN_REQUESTED, userId, reason);

@@ -1,8 +1,8 @@
 package com.pharmacy.catalog.entity;
 
 public enum PrescriptionStatus {
-    PENDING,
+    PENDING,    // waiting for pharmacist review
     APPROVED,
     REJECTED,
-    EXPIRED
+    EXPIRED     // valid_till date has passed
 }

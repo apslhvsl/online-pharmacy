@@ -24,8 +24,7 @@ public interface InventoryBatchRepository extends JpaRepository<InventoryBatch, 
     @Query("SELECT b FROM InventoryBatch b WHERE b.expiryDate < :threshold AND b.quantity > 0 ORDER BY b.expiryDate ASC")
     List<InventoryBatch> findExpiringSoon(@Param("threshold") LocalDate threshold);
 
-    /** Medicines whose total available stock is below a threshold */
-    @Query("""
+    /** Medicines whose total available stock is below a threshold */    @Query("""
         SELECT b.medicine.id FROM InventoryBatch b
         WHERE b.expiryDate > :today
         GROUP BY b.medicine.id

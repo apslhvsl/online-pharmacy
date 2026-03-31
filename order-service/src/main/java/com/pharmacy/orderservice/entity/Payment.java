@@ -54,6 +54,6 @@ public class Payment {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
-        if (status == null) status = PaymentStatus.PENDING;
+        if (status == null) status = PaymentStatus.PENDING; // default before gateway responds
     }
 }

@@ -45,6 +45,7 @@ public class PrescriptionService {
             throw new InvalidFileTypeException("File size must not exceed 5MB.");
         }
 
+        // store under a per-user directory to keep things organised
         Path userDir = Paths.get(uploadDir, String.valueOf(userId));
         Files.createDirectories(userDir);
 

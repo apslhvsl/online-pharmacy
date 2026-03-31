@@ -35,6 +35,7 @@ public class AdminMedicineService {
     }
 
     public void adjustStock(Long medicineId, StockAdjustRequest request, Long adminId) {
+        // batchId is mandatory — we don't want to accidentally adjust the wrong batch
         if (request.getBatchId() == null) throw new IllegalArgumentException("batchId is required for stock adjustment");
         catalogClient.adjustBatchStock(request.getBatchId(), request, adminId);
     }

@@ -3,5 +3,5 @@ package com.pharmacy.admin.dto;
 public enum PrescriptionStatus {
     PENDING,
     APPROVED,
-    REJECTED
+    REJECTED  // rejected prescriptions can't be used at checkout
 }

@@ -6,6 +6,7 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+// Publishes password reset events to the notification service via RabbitMQ
 @Configuration
 public class RabbitMQConfig {
 

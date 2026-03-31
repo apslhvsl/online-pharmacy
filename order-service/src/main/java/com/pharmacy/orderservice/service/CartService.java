@@ -33,7 +33,7 @@ public class CartService {
 
     @Transactional
     public CartDto addItem(Long userId, Long medicineId, Integer quantity) {
-        // Check medicine-level stock (catalog picks best batch via FEFO internally)
+        // check medicine-level stock; catalog picks the best batch via FEFO internally
         var stockCheck = catalogClient.checkStock(medicineId, quantity);
         if (!Boolean.TRUE.equals(stockCheck.getAvailable())) {
             throw new InsufficientStockException("Insufficient stock. Available: " + stockCheck.getAvailableQuantity());
@@ -125,7 +125,7 @@ public class CartService {
                 .map(CartItemDto::getLineTotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal taxAmount = subTotal.multiply(new BigDecimal("0.05")); // 5% GST
+        BigDecimal taxAmount = subTotal.multiply(new BigDecimal("0.05")); // 5% GST flat rate
         boolean requiresRx = itemDtos.stream().anyMatch(i -> Boolean.TRUE.equals(i.getRequiresPrescription()));
 
         return CartDto.builder()

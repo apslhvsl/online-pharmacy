@@ -19,7 +19,7 @@ public class LoggingFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        String requestId = UUID.randomUUID().toString();
+        String requestId = UUID.randomUUID().toString(); // unique ID per request for tracing
         long   startTime = System.currentTimeMillis();
 
         // Stamp the request ID so JwtAuthFilter (and downstream services)

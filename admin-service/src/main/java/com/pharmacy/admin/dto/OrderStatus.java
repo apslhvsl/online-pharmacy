@@ -16,5 +16,5 @@ public enum OrderStatus {
     PAYMENT_FAILED,
     RETURN_REQUESTED,
     REFUND_INITIATED,
-    REFUND_COMPLETED
+    REFUND_COMPLETED  // terminal state
 }

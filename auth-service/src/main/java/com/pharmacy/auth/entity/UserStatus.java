@@ -3,5 +3,5 @@ package com.pharmacy.auth.entity;
 public enum UserStatus {
     ACTIVE,
     INACTIVE,
-    SUSPENDED
+    SUSPENDED  // suspended accounts can't log in
 }

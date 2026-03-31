@@ -34,6 +34,7 @@ public class IdempotencyKey {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+        // default expiry is 24 hours from creation
         if (expiresAt == null) expiresAt = createdAt.plusHours(24);
     }
 }

@@ -61,6 +61,7 @@ public class CategoryService {
     public void deleteCategory(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found: " + id));
+        // don't allow deleting a category that still has medicines under it
         boolean hasMedicines = category.getMedicines() != null && !category.getMedicines().isEmpty();
         if (hasMedicines) throw new IllegalStateException("Cannot delete category with existing medicines");
         category.setActive(false);

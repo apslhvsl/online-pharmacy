@@ -62,7 +62,7 @@ public class OrderController {
             try {
                 cartService.addItem(userId, item.getMedicineId(), item.getQuantity());
             } catch (Exception ignored) {
-                // out-of-stock items skipped
+                // silently skip items that are out of stock or no longer available
             }
         }
         return ResponseEntity.ok(cartService.getCart(userId));

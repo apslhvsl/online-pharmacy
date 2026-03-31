@@ -64,7 +64,7 @@ public class Order {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
-        if (status == null) status = OrderStatus.DRAFT;
+        if (status == null) status = OrderStatus.DRAFT; // default status on creation
     }
 
     @PreUpdate

@@ -51,7 +51,6 @@ public class MedicineService {
 
         int available = batches.stream().mapToInt(b -> b.getQuantity()).sum();
         Long bestBatchId = batches.isEmpty() ? null : batches.get(0).getId(); // FEFO — earliest expiry first
-
         return StockCheckResponse.builder()
                 .medicineId(medicineId)
                 .batchId(bestBatchId)
@@ -142,6 +141,7 @@ public class MedicineService {
 
     @Transactional
     public void deductStock(Long medicineId, Integer quantity) {
+        // delegates to batch service which handles FEFO ordering
         batchService.deductStock(medicineId, quantity);
     }
 

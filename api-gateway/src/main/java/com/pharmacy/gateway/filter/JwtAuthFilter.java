@@ -27,6 +27,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
+    // paths that don't need a token at all
     private static final Set<String> PUBLIC_EXACT = Set.of(
             "/api/auth/login",
             "/api/auth/signup",
@@ -54,6 +55,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
         String method    = exchange.getRequest().getMethod().name();
         String requestId = exchange.getRequest().getHeaders().getFirst("X-Request-Id");
 
+        // skip auth for public routes
         if (isPublicPath(path)) {
             return chain.filter(exchange);
         }
@@ -77,6 +79,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             String userId = claims.getSubject();
             String role   = claims.get("role", String.class);
 
+            // both fields must be present in the token
             if (userId == null || role == null) {
                 log.warn("INVALID_CLAIMS | reqId={} path={}", requestId, path);
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
@@ -90,6 +93,7 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
                 return exchange.getResponse().setComplete();
             }
 
+            // forward user identity to downstream services via headers
             ServerWebExchange mutated = exchange.mutate()
                     .request(r -> r
                             .header("X-User-Id", userId)
@@ -155,6 +159,6 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return -1;
+        return -1; // run after LoggingFilter (-2) but before everything else
     }
 }

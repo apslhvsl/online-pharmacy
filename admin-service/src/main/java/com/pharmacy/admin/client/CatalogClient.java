@@ -53,6 +53,7 @@ public interface CatalogClient {
 
     // ── Internal batch operations ─────────────────────────────────────
 
+    // adjustBatchStock passes the admin's user ID so the audit log knows who did it
     @PatchMapping("/api/catalog/internal/batches/{batchId}/stock")
     Object adjustBatchStock(@PathVariable("batchId") Long batchId,
                             @RequestBody StockAdjustRequest request,

@@ -47,6 +47,6 @@ public class Prescription {
     @PrePersist
     protected void onCreate() {
         uploadedAt = LocalDateTime.now();
-        if (status == null) status = PrescriptionStatus.PENDING;
+        if (status == null) status = PrescriptionStatus.PENDING; // all uploads start as pending
     }
 }

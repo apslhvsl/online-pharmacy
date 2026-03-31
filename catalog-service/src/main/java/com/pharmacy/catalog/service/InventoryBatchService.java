@@ -70,6 +70,7 @@ public class InventoryBatchService {
         batch.setQuantity(after);
         batchRepository.save(batch);
 
+        // record every stock change for audit purposes
         auditRepository.save(InventoryAudit.builder()
                 .batch(batch)
                 .adjustment(request.getAdjustment())
@@ -96,6 +97,7 @@ public class InventoryBatchService {
 
     @Transactional
     public void deductStock(Long medicineId, Integer quantity) {
+        // FEFO: deduct from the batch expiring soonest first
         List<InventoryBatch> batches = batchRepository.findAvailableByMedicineId(medicineId, LocalDate.now());
         int remaining = quantity;
         for (InventoryBatch batch : batches) {

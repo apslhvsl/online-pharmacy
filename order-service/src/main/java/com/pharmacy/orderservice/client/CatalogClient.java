@@ -16,17 +16,17 @@ public interface CatalogClient {
     StockCheckResponse checkStock(@PathVariable("id") Long medicineId,
                                   @RequestParam("quantity") Integer quantity);
 
-    /** Batch-level stock check — used when adding to cart by batchId */
+    // batch-level stock check — used when adding to cart by batchId
     @GetMapping("/api/catalog/internal/batches/{batchId}/stock-check")
     StockCheckResponse checkBatchStock(@PathVariable("batchId") Long batchId,
                                        @RequestParam("quantity") Integer quantity);
 
-    /** Deduct from a specific batch by batchId — used at order confirmation */
+    // deduct from a specific batch — called at order confirmation
     @PostMapping("/api/catalog/internal/batches/{batchId}/deduct")
     void deductBatchStock(@PathVariable("batchId") Long batchId,
                           @RequestParam("quantity") Integer quantity);
 
-    /** Validate prescription status at checkout */
+    // validate prescription status at checkout
     @GetMapping("/api/catalog/internal/prescriptions/{id}")
     PrescriptionInfo getPrescriptionById(@PathVariable("id") Long prescriptionId);
 }

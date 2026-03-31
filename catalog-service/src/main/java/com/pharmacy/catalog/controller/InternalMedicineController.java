@@ -30,8 +30,7 @@ public class InternalMedicineController {
     /** Admin-filtered list — includes inactive medicines */
     @Operation(summary = "List all medicines (admin)", description = "Returns a paginated list of all medicines including inactive ones, with optional filters. For internal use by Admin Service only.")
     @GetMapping
-    public ResponseEntity<Page<MedicineDto>> getAllMedicines(
-            @RequestParam(required = false) String q,
+    public ResponseEntity<Page<MedicineDto>> getAllMedicines(            @RequestParam(required = false) String q,
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Boolean requiresPrescription,
             @RequestParam(required = false) BigDecimal minPrice,

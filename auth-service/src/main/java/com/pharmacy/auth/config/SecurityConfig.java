@@ -11,6 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+// Auth service is stateless — JWT validation happens at the gateway, not here
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor

@@ -66,6 +66,7 @@ public class InternalPrescriptionController {
     @Operation(summary = "Get prescription by ID (internal)", description = "Returns prescription details by ID without ownership checks. Used by Order Service to validate prescription status at checkout.")
     @GetMapping("/{id}")
     public ResponseEntity<PrescriptionDto> getPrescriptionById(@PathVariable Long id) {
+        // isAdmin=true skips the ownership check — caller is a trusted internal service
         return ResponseEntity.ok(prescriptionService.getPrescriptionById(id, null, true));
     }
 }

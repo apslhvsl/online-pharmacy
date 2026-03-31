@@ -38,7 +38,7 @@ public class OrderEventPublisher {
             rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, RabbitMQConfig.ORDER_ROUTING_KEY, event);
             log.info("Published order update event | order={} status={}", order.getOrderNumber(), order.getStatus());
         } catch (Exception e) {
-            // Non-critical — don't fail the order operation if notification fails
+            // notification failure shouldn't roll back the order operation
             log.warn("Failed to publish order update event | order={} reason={}", order.getOrderNumber(), e.getMessage());
         }
     }

@@ -40,7 +40,7 @@ public class PaymentService {
                 .gatewayTxnRef(UUID.randomUUID().toString())
                 .build();
 
-        // COD — mark paid immediately
+        // COD is confirmed immediately — no gateway involved
         if (request.getPaymentMethod() == PaymentMethod.COD) {
             payment.setStatus(PaymentStatus.PAID);
             payment.setPaidAt(LocalDateTime.now());

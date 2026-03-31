@@ -5,5 +5,5 @@ public enum PaymentStatus {
     PAID,
     FAILED,
     REFUND_INITIATED,
-    REFUNDED
+    REFUNDED  // final state after refund is settled
 }

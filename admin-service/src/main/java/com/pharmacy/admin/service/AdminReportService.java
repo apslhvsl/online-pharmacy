@@ -17,6 +17,7 @@ public class AdminReportService {
         DashboardDto orderDashboard = orderClient.getDashboard();
         long lowStockCount = catalogClient.getLowStockMedicines(null).size();
         long expiringCount = catalogClient.getExpiringSoon(null, 90).size();
+        // page size 1 is enough — we only need the total count
         long pendingRx = catalogClient.getPendingQueue(null, 0, 1).getTotalElements();
 
         return new DashboardDto(

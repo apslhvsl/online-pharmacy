@@ -53,7 +53,7 @@ public class EmailService {
             helper.setFrom(fromAddress);
             helper.setTo(to);
             helper.setSubject(subject);
-            helper.setText(htmlBody, true);
+            helper.setText(htmlBody, true); // true = HTML content
             mailSender.send(message);
             log.info("Email sent to {} | subject: {}", to, subject);
         } catch (MessagingException e) {

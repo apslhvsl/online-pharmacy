@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+// minimal prescription info returned by catalog-service for checkout validation
 @Getter
 @Setter
 @NoArgsConstructor
