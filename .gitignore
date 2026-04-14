@@ -135,6 +135,6 @@ buildNumber.properties
 .classpath
 
 # End of https://www.toptal.com/developers/gitignore/api/java,maven,intellij+all
-
+.vscode
 # Environment secrets
 .env
