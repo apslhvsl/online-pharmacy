@@ -8,9 +8,11 @@ import com.pharmacy.admin.service.AdminOrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/admin/orders")
 @RequiredArgsConstructor
@@ -25,12 +27,14 @@ public class AdminOrderController {
             @RequestParam(required = false) Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
+        log.info("Admin list orders | status={} userId={}", status, userId);
         return ResponseEntity.ok(adminOrderService.getAllOrders(status != null ? status.name() : null, userId, page, size));
     }
 
     @Operation(summary = "Get order by ID", description = "Returns the full details of a specific order including items, payment, and status history")
     @GetMapping("/{id}")
     public ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
+        log.info("Admin get order | orderId={}", id);
         return ResponseEntity.ok(adminOrderService.getOrderById(id));
     }
 
@@ -41,6 +45,7 @@ public class AdminOrderController {
             @PathVariable OrderStatus status,
             @RequestBody(required = false) OrderStatusUpdateRequest request,
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long adminId) {
+        log.info("Admin update order status | orderId={} newStatus={} adminId={}", id, status, adminId);
         String note = request != null ? request.getNote() : null;
         return ResponseEntity.ok(adminOrderService.updateOrderStatus(id, status.name(), note, adminId));
     }
@@ -51,6 +56,7 @@ public class AdminOrderController {
             @PathVariable Long id,
             @RequestParam(required = false) String note,
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long adminId) {
+        log.info("Admin cancel order | orderId={} adminId={}", id, adminId);
         return ResponseEntity.ok(adminOrderService.cancelOrder(id, note, adminId));
     }
 }

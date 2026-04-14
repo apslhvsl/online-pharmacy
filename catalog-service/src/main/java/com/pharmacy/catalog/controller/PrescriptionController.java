@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.PathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -23,6 +24,7 @@ import java.util.List;
  * Customer-facing prescription endpoints — accessible by authenticated customers through the gateway.
  * Admin operations live in InternalPrescriptionController (Feign-only, not gateway-routed).
  */
+@Slf4j
 @RestController
 @RequestMapping("/api/catalog/prescriptions")
 @RequiredArgsConstructor
@@ -30,8 +32,7 @@ public class PrescriptionController {
 
     private final PrescriptionService prescriptionService;
 
-    @Operation(
-            summary = "Upload a prescription file",
+    @Operation(summary = "Upload a prescription file",
             description = "Uploads an image or PDF prescription for a user"
     )
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -39,13 +40,17 @@ public class PrescriptionController {
             @Parameter(description = "Prescription image or PDF", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
             @RequestParam("file") MultipartFile file,
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId) throws IOException {
-        return ResponseEntity.status(201).body(prescriptionService.uploadPrescription(file, userId));
+        log.info("Prescription upload | userId={} fileName={} size={}", userId, file.getOriginalFilename(), file.getSize());
+        PrescriptionDto result = prescriptionService.uploadPrescription(file, userId);
+        log.info("Prescription uploaded | userId={} prescriptionId={}", userId, result.getId());
+        return ResponseEntity.status(201).body(result);
     }
 
     @Operation(summary = "List my prescriptions", description = "Returns all prescriptions uploaded by the currently authenticated user")
     @GetMapping
     public ResponseEntity<List<PrescriptionDto>> getMyPrescriptions(
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId) {
+        log.info("List prescriptions | userId={}", userId);
         return ResponseEntity.ok(prescriptionService.getPrescriptionsForUser(userId));
     }
 
@@ -54,6 +59,7 @@ public class PrescriptionController {
     public ResponseEntity<PrescriptionDto> getById(
             @PathVariable Long id,
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId) {
+        log.info("Get prescription | userId={} prescriptionId={}", userId, id);
         return ResponseEntity.ok(prescriptionService.getPrescriptionById(id, userId, false));
     }
 

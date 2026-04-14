@@ -7,9 +7,11 @@ import com.pharmacy.orderservice.service.CheckoutService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/orders/checkout")
 @RequiredArgsConstructor
@@ -22,7 +24,10 @@ public class CheckoutController {
     @PostMapping("/start")
     public ResponseEntity<CheckoutSessionDto> startCheckout(
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId) {
-        return ResponseEntity.status(201).body(checkoutService.startCheckout(userId));
+        log.info("Checkout start | userId={}", userId);
+        CheckoutSessionDto session = checkoutService.startCheckout(userId);
+        log.info("Checkout session created | userId={} orderId={} requiresRx={}", userId, session.getOrderId(), session.getRequiresPrescription());
+        return ResponseEntity.status(201).body(session);
     }
 
     /** Step 2 — set delivery address */
@@ -32,6 +37,7 @@ public class CheckoutController {
             @PathVariable Long orderId,
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId,
             @RequestBody CheckoutRequest request) {
+        log.info("Set address | userId={} orderId={}", userId, orderId);
         return ResponseEntity.ok(checkoutService.setAddress(orderId, userId, request));
     }
 
@@ -42,6 +48,7 @@ public class CheckoutController {
             @PathVariable Long orderId,
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId,
             @RequestParam Long prescriptionId) {
+        log.info("Link prescription | userId={} orderId={} prescriptionId={}", userId, orderId, prescriptionId);
         return ResponseEntity.ok(checkoutService.linkPrescription(orderId, userId, prescriptionId));
     }
 
@@ -51,6 +58,9 @@ public class CheckoutController {
     public ResponseEntity<OrderDto> confirmOrder(
             @PathVariable Long orderId,
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId) {
-        return ResponseEntity.ok(checkoutService.confirmOrder(orderId, userId));
+        log.info("Confirm order | userId={} orderId={}", userId, orderId);
+        OrderDto result = checkoutService.confirmOrder(orderId, userId);
+        log.info("Order confirmed | orderId={} total={} status={}", orderId, result.getTotalAmount(), result.getStatus());
+        return ResponseEntity.ok(result);
     }
 }

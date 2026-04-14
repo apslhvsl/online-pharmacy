@@ -5,11 +5,13 @@ import com.pharmacy.admin.dto.SalesReportDto;
 import com.pharmacy.admin.service.AdminReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
@@ -20,12 +22,14 @@ public class AdminReportController {
     @Operation(summary = "Get admin dashboard", description = "Returns aggregated KPIs for the admin dashboard including total orders, revenue, active users, and low-stock alerts")
     @GetMapping("/dashboard")
     public ResponseEntity<DashboardDto> getDashboard() {
+        log.info("Admin dashboard requested");
         return ResponseEntity.ok(adminReportService.getDashboard());
     }
 
     @Operation(summary = "Get sales report", description = "Returns a summary sales report including total revenue, order counts, and top-selling medicines")
     @GetMapping("/reports/sales")
     public ResponseEntity<SalesReportDto> getSalesReport() {
+        log.info("Sales report requested");
         return ResponseEntity.ok(adminReportService.getSalesReport());
     }
 }

@@ -8,6 +8,7 @@ import com.pharmacy.auth.entity.UserStatus;
 import com.pharmacy.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
  * Internal auth endpoints — NOT gateway-routed.
  * Called exclusively by Admin Service via Feign.
  */
+@Slf4j
 @RestController
 @RequestMapping("/api/auth/internal")
 @RequiredArgsConstructor

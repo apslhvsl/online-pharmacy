@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,7 @@ import java.util.List;
  * Internal batch endpoints — NOT gateway-routed.
  * Called by Admin Service (CRUD) and Order Service (stock-check / deduct) via Feign.
  */
+@Slf4j
 @RestController
 @RequestMapping("/api/catalog/internal/batches")
 @RequiredArgsConstructor
@@ -57,6 +59,7 @@ public class InternalBatchController {
     public ResponseEntity<Void> deductBatchStock(
             @PathVariable Long batchId,
             @RequestParam Integer quantity) {
+        log.info("Deduct batch stock | batchId={} qty={}", batchId, quantity);
         batchService.deductBatchStock(batchId, quantity);
         return ResponseEntity.noContent().build();
     }
@@ -66,6 +69,7 @@ public class InternalBatchController {
     public ResponseEntity<StockCheckResponse> checkStock(
             @PathVariable Long batchId,
             @RequestParam Integer quantity) {
+        log.info("Batch stock check | batchId={} qty={}", batchId, quantity);
         return ResponseEntity.ok(batchService.checkStock(batchId, quantity));
     }
 }

@@ -10,11 +10,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor
@@ -32,6 +34,7 @@ public class OrderController {
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId,
             @RequestParam(required = false) OrderStatus status,
             @PageableDefault(size = 10) Pageable pageable) {
+        log.info("List orders | userId={} status={}", userId, status);
         return ResponseEntity.ok(PagedResponse.from(orderService.getOrdersByUser(userId, status, pageable)));
     }
 
@@ -40,6 +43,7 @@ public class OrderController {
     public ResponseEntity<OrderDto> getOrder(
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId,
             @PathVariable Long id) {
+        log.info("Get order | userId={} orderId={}", userId, id);
         return ResponseEntity.ok(orderService.getOrderById(id, userId));
     }
 
@@ -49,6 +53,7 @@ public class OrderController {
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId,
             @PathVariable Long id,
             @RequestBody CancelRequest request) {
+        log.info("Cancel order | userId={} orderId={} reason={}", userId, id, request.getReason());
         return ResponseEntity.ok(orderService.cancelOrder(id, userId, request.getReason()));
     }
 
@@ -57,12 +62,13 @@ public class OrderController {
     public ResponseEntity<CartDto> reorder(
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId,
             @PathVariable Long id) {
+        log.info("Reorder | userId={} orderId={}", userId, id);
         OrderDto order = orderService.getOrderById(id, userId);
         for (var item : order.getItems()) {
             try {
                 cartService.addItem(userId, item.getMedicineId(), item.getQuantity());
             } catch (Exception ignored) {
-                // silently skip items that are out of stock or no longer available
+                log.warn("Reorder skipped item | userId={} medicineId={}", userId, item.getMedicineId());
             }
         }
         return ResponseEntity.ok(cartService.getCart(userId));
@@ -74,6 +80,7 @@ public class OrderController {
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId,
             @PathVariable Long id,
             @RequestBody ReturnRequest request) {
+        log.info("Return request | userId={} orderId={} reason={}", userId, id, request.getReason());
         return ResponseEntity.ok(orderService.requestReturn(id, userId, request.getReason()));
     }
 
@@ -85,6 +92,7 @@ public class OrderController {
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId,
             @PathVariable Long orderId,
             @RequestParam PaymentMethod paymentMethod) {
+        log.info("Initiate payment | userId={} orderId={} method={}", userId, orderId, paymentMethod);
         PaymentInitiateRequest request = new PaymentInitiateRequest(orderId, paymentMethod);
         return ResponseEntity.ok(paymentService.initiatePayment(request, userId));
     }
@@ -94,6 +102,7 @@ public class OrderController {
     public ResponseEntity<PaymentDto> getPayment(
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId,
             @PathVariable Long orderId) {
+        log.info("Get payment | userId={} orderId={}", userId, orderId);
         orderService.getOrderById(orderId, userId);
         return ResponseEntity.ok(paymentService.getPaymentByOrder(orderId));
     }

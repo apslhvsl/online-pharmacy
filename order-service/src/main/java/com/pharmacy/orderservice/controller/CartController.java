@@ -8,9 +8,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/orders/cart")
 @RequiredArgsConstructor
@@ -21,6 +23,7 @@ public class CartController {
     @Operation(summary = "Get current cart", description = "Returns the active shopping cart for the authenticated user, including all items and totals")
     @GetMapping
     public ResponseEntity<CartDto> getCart(@Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId) {
+        log.info("Get cart | userId={}", userId);
         return ResponseEntity.ok(cartService.getCart(userId));
     }
 
@@ -29,6 +32,7 @@ public class CartController {
     public ResponseEntity<CartDto> addItem(
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId,
             @Valid @RequestBody AddItemRequest request) {
+        log.info("Add to cart | userId={} medicineId={} qty={}", userId, request.getMedicineId(), request.getQuantity());
         return ResponseEntity.ok(cartService.addItem(userId, request.getMedicineId(), request.getQuantity()));
     }
 
@@ -38,6 +42,7 @@ public class CartController {
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId,
             @PathVariable Long batchId,
             @Valid @RequestBody UpdateItemRequest request) {
+        log.info("Update cart item | userId={} batchId={} qty={}", userId, batchId, request.getQuantity());
         return ResponseEntity.ok(cartService.updateItem(userId, batchId, request.getQuantity()));
     }
 
@@ -46,12 +51,14 @@ public class CartController {
     public ResponseEntity<CartDto> removeItem(
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId,
             @PathVariable Long batchId) {
+        log.info("Remove cart item | userId={} batchId={}", userId, batchId);
         return ResponseEntity.ok(cartService.removeItem(userId, batchId));
     }
 
     @Operation(summary = "Clear the cart", description = "Removes all items from the authenticated user's cart")
     @DeleteMapping
     public ResponseEntity<Void> clearCart(@Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId) {
+        log.info("Clear cart | userId={}", userId);
         cartService.clearCart(userId);
         return ResponseEntity.noContent().build();
     }

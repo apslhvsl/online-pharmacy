@@ -4,6 +4,7 @@ import com.pharmacy.catalog.dto.MedicineDto;
 import com.pharmacy.catalog.service.MedicineService;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
  */
 import java.math.BigDecimal;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/catalog/medicines")
 @RequiredArgsConstructor
@@ -32,12 +34,14 @@ public class MedicineController {
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
             @PageableDefault(size = 10, sort = "name") Pageable pageable) {
+        log.info("Search medicines | q={} categoryId={} requiresRx={}", q, categoryId, requiresPrescription);
         return ResponseEntity.ok(medicineService.getMedicines(q, categoryId, requiresPrescription, minPrice, maxPrice, pageable));
     }
 
     @Operation(summary = "Get medicine by ID", description = "Returns the details of a single active medicine by its ID")
     @GetMapping("/{id}")
     public ResponseEntity<MedicineDto> getMedicineById(@PathVariable Long id) {
+        log.info("Get medicine | medicineId={}", id);
         return ResponseEntity.ok(medicineService.getMedicineById(id));
     }
 
@@ -46,6 +50,7 @@ public class MedicineController {
     public ResponseEntity<com.pharmacy.catalog.dto.StockCheckResponse> checkStock(
             @PathVariable Long id,
             @RequestParam Integer quantity) {
+        log.info("Stock check | medicineId={} qty={}", id, quantity);
         return ResponseEntity.ok(medicineService.checkStock(id, quantity));
     }
 }

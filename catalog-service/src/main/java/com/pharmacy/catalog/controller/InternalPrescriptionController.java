@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
  * Internal prescription endpoints — NOT gateway-routed.
  * Called exclusively by Admin Service via Feign.
  */
+@Slf4j
 @RestController
 @RequestMapping("/api/catalog/internal/prescriptions")
 @RequiredArgsConstructor
@@ -41,7 +43,10 @@ public class InternalPrescriptionController {
             @PathVariable Long id,
             @Valid @RequestBody PrescriptionReviewRequest request,
             @Parameter(hidden = true) @RequestHeader(value = "X-User-Id", required = false) Long adminId) {
-        return ResponseEntity.ok(prescriptionService.reviewPrescription(id, request, adminId));
+        log.info("Review prescription | prescriptionId={} adminId={} decision={}", id, adminId, request.getStatus());
+        PrescriptionDto result = prescriptionService.reviewPrescription(id, request, adminId);
+        log.info("Prescription reviewed | prescriptionId={} status={}", id, result.getStatus());
+        return ResponseEntity.ok(result);
     }
 
     @Operation(summary = "List all prescriptions (admin)", description = "Returns a paginated list of all prescriptions with optional filters for status, user, and date range. For internal use by Admin Service only.")

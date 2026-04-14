@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
  * Called by Admin Service via Feign only.
  * Gateway blocks /api/orders/internal/** from external access.
  */
+@Slf4j
 @RestController
 @RequestMapping("/api/orders/internal")
 @RequiredArgsConstructor
@@ -51,6 +53,7 @@ public class InternalOrderController {
             @PathVariable OrderStatus status,
             @RequestParam(required = false) String note,
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long adminId) {
+        log.info("Admin update order status | orderId={} newStatus={} adminId={}", id, status, adminId);
         OrderStatusUpdateRequest req = new OrderStatusUpdateRequest();
         req.setStatus(status);
         req.setNote(note);
@@ -63,6 +66,7 @@ public class InternalOrderController {
             @PathVariable Long id,
             @RequestParam(required = false) String note,
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long adminId) {
+        log.info("Admin cancel order | orderId={} adminId={}", id, adminId);
         OrderStatusUpdateRequest req = new OrderStatusUpdateRequest();
         req.setStatus(OrderStatus.ADMIN_CANCELLED);
         req.setNote(note);

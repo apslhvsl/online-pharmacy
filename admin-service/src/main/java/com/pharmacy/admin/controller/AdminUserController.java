@@ -10,10 +10,12 @@ import com.pharmacy.admin.service.AdminUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/admin/users")
 @RequiredArgsConstructor
@@ -29,6 +31,7 @@ public class AdminUserController {
             @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
+        log.info("Admin list users | role={} status={} q={}", role, status, q);
         return ResponseEntity.ok(adminUserService.listUsers(
                 role != null ? role.name() : null,
                 status != null ? status.name() : null,
@@ -38,6 +41,7 @@ public class AdminUserController {
     @Operation(summary = "Get user by ID", description = "Returns the profile details of a specific user by their ID")
     @GetMapping("/{id}")
     public ResponseEntity<UserProfileResponse> getUserById(@PathVariable Long id) {
+        log.info("Admin get user | userId={}", id);
         return ResponseEntity.ok(adminUserService.getUserById(id));
     }
 
@@ -46,6 +50,7 @@ public class AdminUserController {
     public ResponseEntity<UserProfileResponse> updateUserStatus(
             @PathVariable Long id,
             @Valid @RequestBody UpdateUserStatusRequest request) {
+        log.info("Admin update user status | userId={} newStatus={}", id, request.getStatus());
         return ResponseEntity.ok(adminUserService.updateUserStatus(id, request));
     }
 
@@ -53,6 +58,9 @@ public class AdminUserController {
     @PostMapping
     public ResponseEntity<UserProfileResponse> createUser(
             @Valid @RequestBody AdminCreateUserRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(adminUserService.createUser(request));
+        log.info("Admin create user | email={} role={}", request.getEmail(), request.getRole());
+        UserProfileResponse response = adminUserService.createUser(request);
+        log.info("Admin user created | userId={}", response.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }
