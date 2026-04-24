@@ -17,18 +17,44 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Long
 
     Page<Prescription> findByStatus(PrescriptionStatus status, Pageable pageable);
 
-    @Query("""
-        SELECT p FROM Prescription p
-        WHERE (:status IS NULL OR p.status = :status)
-        AND (:userId IS NULL OR p.userId = :userId)
-        AND (:dateFrom IS NULL OR p.uploadedAt >= :dateFrom)
-        AND (:dateTo IS NULL OR p.uploadedAt <= :dateTo)
-    """)
-    Page<Prescription> findWithFilters(
-            @Param("status") PrescriptionStatus status,
-            @Param("userId") Long userId,
-            @Param("dateFrom") LocalDateTime dateFrom,
-            @Param("dateTo") LocalDateTime dateTo,
-            Pageable pageable
-    );
+    Page<Prescription> findByStatusAndUserId(PrescriptionStatus status, Long userId, Pageable pageable);
+
+    @Query("SELECT p FROM Prescription p WHERE p.status = :status AND p.uploadedAt >= :dateFrom AND p.uploadedAt <= :dateTo")
+    Page<Prescription> findByStatusAndDateRange(@Param("status") PrescriptionStatus status, @Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, Pageable pageable);
+
+    @Query("SELECT p FROM Prescription p WHERE p.status = :status AND p.uploadedAt >= :dateFrom")
+    Page<Prescription> findByStatusAndDateFrom(@Param("status") PrescriptionStatus status, @Param("dateFrom") LocalDateTime dateFrom, Pageable pageable);
+
+    @Query("SELECT p FROM Prescription p WHERE p.status = :status AND p.uploadedAt <= :dateTo")
+    Page<Prescription> findByStatusAndDateTo(@Param("status") PrescriptionStatus status, @Param("dateTo") LocalDateTime dateTo, Pageable pageable);
+
+    @Query("SELECT p FROM Prescription p WHERE p.status = :status AND p.userId = :userId AND p.uploadedAt >= :dateFrom AND p.uploadedAt <= :dateTo")
+    Page<Prescription> findByStatusAndUserIdAndDateRange(@Param("status") PrescriptionStatus status, @Param("userId") Long userId, @Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, Pageable pageable);
+
+    @Query("SELECT p FROM Prescription p WHERE p.status = :status AND p.userId = :userId AND p.uploadedAt >= :dateFrom")
+    Page<Prescription> findByStatusAndUserIdAndDateFrom(@Param("status") PrescriptionStatus status, @Param("userId") Long userId, @Param("dateFrom") LocalDateTime dateFrom, Pageable pageable);
+
+    @Query("SELECT p FROM Prescription p WHERE p.status = :status AND p.userId = :userId AND p.uploadedAt <= :dateTo")
+    Page<Prescription> findByStatusAndUserIdAndDateTo(@Param("status") PrescriptionStatus status, @Param("userId") Long userId, @Param("dateTo") LocalDateTime dateTo, Pageable pageable);
+
+    // no-status variants
+    Page<Prescription> findByUserId(Long userId, Pageable pageable);
+
+    @Query("SELECT p FROM Prescription p WHERE p.uploadedAt >= :dateFrom AND p.uploadedAt <= :dateTo")
+    Page<Prescription> findByDateRange(@Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, Pageable pageable);
+
+    @Query("SELECT p FROM Prescription p WHERE p.uploadedAt >= :dateFrom")
+    Page<Prescription> findByDateFrom(@Param("dateFrom") LocalDateTime dateFrom, Pageable pageable);
+
+    @Query("SELECT p FROM Prescription p WHERE p.uploadedAt <= :dateTo")
+    Page<Prescription> findByDateTo(@Param("dateTo") LocalDateTime dateTo, Pageable pageable);
+
+    @Query("SELECT p FROM Prescription p WHERE p.userId = :userId AND p.uploadedAt >= :dateFrom AND p.uploadedAt <= :dateTo")
+    Page<Prescription> findByUserIdAndDateRange(@Param("userId") Long userId, @Param("dateFrom") LocalDateTime dateFrom, @Param("dateTo") LocalDateTime dateTo, Pageable pageable);
+
+    @Query("SELECT p FROM Prescription p WHERE p.userId = :userId AND p.uploadedAt >= :dateFrom")
+    Page<Prescription> findByUserIdAndDateFrom(@Param("userId") Long userId, @Param("dateFrom") LocalDateTime dateFrom, Pageable pageable);
+
+    @Query("SELECT p FROM Prescription p WHERE p.userId = :userId AND p.uploadedAt <= :dateTo")
+    Page<Prescription> findByUserIdAndDateTo(@Param("userId") Long userId, @Param("dateTo") LocalDateTime dateTo, Pageable pageable);
 }

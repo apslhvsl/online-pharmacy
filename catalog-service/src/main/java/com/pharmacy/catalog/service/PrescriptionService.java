@@ -90,7 +90,11 @@ public class PrescriptionService {
     }
 
     public Page<PrescriptionDto> getPendingQueue(Long userId, Pageable pageable) {
-        return prescriptionRepository.findWithFilters(PrescriptionStatus.PENDING, userId, null, null, pageable)
+        if (userId != null) {
+            return prescriptionRepository.findByStatusAndUserId(PrescriptionStatus.PENDING, userId, pageable)
+                    .map(prescriptionMapper::toDto);
+        }
+        return prescriptionRepository.findByStatus(PrescriptionStatus.PENDING, pageable)
                 .map(prescriptionMapper::toDto);
     }
 
@@ -114,7 +118,33 @@ public class PrescriptionService {
     public Page<PrescriptionDto> getAllPrescriptions(PrescriptionStatus status, Long userId,
                                                      LocalDateTime dateFrom, LocalDateTime dateTo,
                                                      Pageable pageable) {
-        return prescriptionRepository.findWithFilters(status, userId, dateFrom, dateTo, pageable)
+        return dispatchPrescriptionQuery(status, userId, dateFrom, dateTo, pageable)
                 .map(prescriptionMapper::toDto);
+    }
+
+    private Page<Prescription> dispatchPrescriptionQuery(PrescriptionStatus status, Long userId,
+                                                          LocalDateTime dateFrom, LocalDateTime dateTo,
+                                                          Pageable pageable) {
+        boolean hasStatus = status != null;
+        boolean hasUser   = userId != null;
+        boolean hasFrom   = dateFrom != null;
+        boolean hasTo     = dateTo != null;
+
+        if (hasStatus && hasUser && hasFrom && hasTo) return prescriptionRepository.findByStatusAndUserIdAndDateRange(status, userId, dateFrom, dateTo, pageable);
+        if (hasStatus && hasUser && hasFrom)          return prescriptionRepository.findByStatusAndUserIdAndDateFrom(status, userId, dateFrom, pageable);
+        if (hasStatus && hasUser && hasTo)            return prescriptionRepository.findByStatusAndUserIdAndDateTo(status, userId, dateTo, pageable);
+        if (hasStatus && hasUser)                     return prescriptionRepository.findByStatusAndUserId(status, userId, pageable);
+        if (hasStatus && hasFrom && hasTo)            return prescriptionRepository.findByStatusAndDateRange(status, dateFrom, dateTo, pageable);
+        if (hasStatus && hasFrom)                     return prescriptionRepository.findByStatusAndDateFrom(status, dateFrom, pageable);
+        if (hasStatus && hasTo)                       return prescriptionRepository.findByStatusAndDateTo(status, dateTo, pageable);
+        if (hasStatus)                                return prescriptionRepository.findByStatus(status, pageable);
+        if (hasUser && hasFrom && hasTo)              return prescriptionRepository.findByUserIdAndDateRange(userId, dateFrom, dateTo, pageable);
+        if (hasUser && hasFrom)                       return prescriptionRepository.findByUserIdAndDateFrom(userId, dateFrom, pageable);
+        if (hasUser && hasTo)                         return prescriptionRepository.findByUserIdAndDateTo(userId, dateTo, pageable);
+        if (hasUser)                                  return prescriptionRepository.findByUserId(userId, pageable);
+        if (hasFrom && hasTo)                         return prescriptionRepository.findByDateRange(dateFrom, dateTo, pageable);
+        if (hasFrom)                                  return prescriptionRepository.findByDateFrom(dateFrom, pageable);
+        if (hasTo)                                    return prescriptionRepository.findByDateTo(dateTo, pageable);
+        return prescriptionRepository.findAll(pageable);
     }
 }

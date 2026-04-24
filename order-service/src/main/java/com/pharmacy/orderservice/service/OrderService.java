@@ -102,20 +102,21 @@ public class OrderService {
     public Page<OrderDto> getAllOrders(OrderStatus status, Long userId,
                                        LocalDateTime dateFrom, LocalDateTime dateTo,
                                        Pageable pageable) {
-        return orderRepository.findWithFilters(status, userId, dateFrom, dateTo, pageable).map(this::toDto);
+        return dispatchOrderQuery(status, userId, dateFrom, dateTo, pageable).map(this::toDto);
     }
 
     public DashboardDto getDashboard() {
         long totalOrders = orderRepository.count();
-        List<Order> recent = orderRepository.findWithFilters(null, null, null, null,
-                org.springframework.data.domain.PageRequest.of(0, 5)).getContent();
+        // recent 5 orders regardless of status/user/date
+        Page<Order> recentPage = orderRepository.findAll(
+                org.springframework.data.domain.PageRequest.of(0, 5,
+                        org.springframework.data.domain.Sort.by("createdAt").descending()));
+        List<Order> recent = recentPage.getContent();
 
-        BigDecimal todayRevenue = orderRepository
-                .findWithFilters(OrderStatus.PAID, null, LocalDateTime.now().toLocalDate().atStartOfDay(), null,
-                        org.springframework.data.domain.Pageable.unpaged())
-                .stream()
-                .map(o -> o.getTotalAmount() != null ? o.getTotalAmount() : BigDecimal.ZERO)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+        LocalDateTime startOfTomorrow = startOfDay.plusDays(1);
+        BigDecimal todayRevenue = orderRepository.sumTotalAmountByStatusAndDateRange(
+                OrderStatus.PAID, startOfDay, startOfTomorrow);
 
         return DashboardDto.builder()
                 .totalOrders(totalOrders)
@@ -125,10 +126,9 @@ public class OrderService {
     }
 
     public SalesReportDto getSalesReport() {
-        List<Order> completed = orderRepository
-                .findWithFilters(OrderStatus.DELIVERED, null, null, null,
-                        org.springframework.data.domain.Pageable.unpaged())
-                .getContent();
+        List<Order> completed = orderRepository.findByStatus(
+                OrderStatus.DELIVERED,
+                org.springframework.data.domain.PageRequest.of(0, Integer.MAX_VALUE)).getContent();
 
         BigDecimal totalRevenue = completed.stream()
                 .map(o -> o.getTotalAmount() != null ? o.getTotalAmount() : BigDecimal.ZERO)
@@ -164,6 +164,32 @@ public class OrderService {
                 .totalRevenue(totalRevenue)
                 .topMedicines(top)
                 .build();
+    }
+
+    private Page<Order> dispatchOrderQuery(OrderStatus status, Long userId,
+                                            LocalDateTime dateFrom, LocalDateTime dateTo,
+                                            Pageable pageable) {
+        boolean hasStatus = status != null;
+        boolean hasUser   = userId != null;
+        boolean hasFrom   = dateFrom != null;
+        boolean hasTo     = dateTo != null;
+
+        if (hasStatus && hasUser && hasFrom && hasTo)  return orderRepository.findByStatusAndUserIdAndDateRange(status, userId, dateFrom, dateTo, pageable);
+        if (hasStatus && hasUser && hasFrom)            return orderRepository.findByStatusAndUserIdAndDateFrom(status, userId, dateFrom, pageable);
+        if (hasStatus && hasUser && hasTo)              return orderRepository.findByStatusAndUserIdAndDateTo(status, userId, dateTo, pageable);
+        if (hasStatus && hasUser)                       return orderRepository.findByStatusAndUserId(status, userId, pageable);
+        if (hasStatus && hasFrom && hasTo)              return orderRepository.findByStatusAndDateRange(status, dateFrom, dateTo, pageable);
+        if (hasStatus && hasFrom)                       return orderRepository.findByStatusAndDateFrom(status, dateFrom, pageable);
+        if (hasStatus && hasTo)                         return orderRepository.findByStatusAndDateTo(status, dateTo, pageable);
+        if (hasStatus)                                  return orderRepository.findByStatus(status, pageable);
+        if (hasUser && hasFrom && hasTo)                return orderRepository.findByUserIdAndDateRange(userId, dateFrom, dateTo, pageable);
+        if (hasUser && hasFrom)                         return orderRepository.findByUserIdAndDateFrom(userId, dateFrom, pageable);
+        if (hasUser && hasTo)                           return orderRepository.findByUserIdAndDateTo(userId, dateTo, pageable);
+        if (hasUser)                                    return orderRepository.findByUserId(userId, pageable);
+        if (hasFrom && hasTo)                           return orderRepository.findByDateRange(dateFrom, dateTo, pageable);
+        if (hasFrom)                                    return orderRepository.findByDateFrom(dateFrom, pageable);
+        if (hasTo)                                      return orderRepository.findByDateTo(dateTo, pageable);
+        return orderRepository.findAll(pageable);
     }
 
     private void logTransition(Order order, OrderStatus next, Long changedBy, String note) {

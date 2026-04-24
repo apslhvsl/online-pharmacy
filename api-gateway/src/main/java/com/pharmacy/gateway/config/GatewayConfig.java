@@ -6,6 +6,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.codec.ServerCodecConfigurer;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsWebFilter;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
 
 import java.util.LinkedHashSet;
@@ -13,6 +16,26 @@ import java.util.Set;
 
 @Configuration
 public class GatewayConfig implements WebFluxConfigurer {
+
+    // ---------------------------------------------------------------
+    // CORS Configuration
+    // Allows Angular frontend (http://localhost:4200) to make requests
+    // to the API Gateway. Required for browser-based clients.
+    // ---------------------------------------------------------------
+    @Bean
+    public CorsWebFilter corsWebFilter() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.addAllowedOrigin("http://localhost:4200"); // Angular dev server
+        config.addAllowedOrigin("http://localhost:8080"); // Same origin (for Swagger UI)
+        config.addAllowedMethod("*"); // Allow all HTTP methods
+        config.addAllowedHeader("*"); // Allow all headers
+        config.setAllowCredentials(true); // Allow cookies/auth headers
+        config.setMaxAge(3600L); // Cache preflight for 1 hour
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return new CorsWebFilter(source);
+    }
 
     // Increase in-memory buffer — needed for prescription file uploads
     // that pass through the gateway (multipart bodies can be large)

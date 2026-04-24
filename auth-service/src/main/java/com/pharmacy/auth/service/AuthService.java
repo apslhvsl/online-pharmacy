@@ -173,8 +173,21 @@ public class AuthService {
     // ── Admin: list users ─────────────────────────────────────────────
     public Page<UserProfileResponse> listUsers(Role role, UserStatus status, String q, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return userRepository.findAllWithFilters(role, status, q, pageable)
-                .map(this::toProfileResponse);
+        boolean hasRole   = role != null;
+        boolean hasStatus = status != null;
+        boolean hasQ      = q != null && !q.isBlank();
+
+        Page<User> result;
+        if (hasRole && hasStatus && hasQ)  result = userRepository.findByRoleAndStatusAndQ(role, status, q, pageable);
+        else if (hasRole && hasStatus)     result = userRepository.findByRoleAndStatus(role, status, pageable);
+        else if (hasRole && hasQ)          result = userRepository.findByRoleAndQ(role, q, pageable);
+        else if (hasRole)                  result = userRepository.findByRole(role, pageable);
+        else if (hasStatus && hasQ)        result = userRepository.findByStatusAndQ(status, q, pageable);
+        else if (hasStatus)                result = userRepository.findByStatus(status, pageable);
+        else if (hasQ)                     result = userRepository.findByQ(q, pageable);
+        else                               result = userRepository.findAll(pageable);
+
+        return result.map(this::toProfileResponse);
     }
 
     // ── Admin: get user by id ─────────────────────────────────────────

@@ -17,12 +17,25 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     Optional<User> findByMobile(String mobile);
 
-    @Query("SELECT u FROM User u WHERE " +
-           "(:role IS NULL OR u.role = :role) AND " +
-           "(:status IS NULL OR u.status = :status) AND " +
-           "(:q IS NULL OR LOWER(u.name) LIKE LOWER(CONCAT('%', :q, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :q, '%')))")
-    Page<User> findAllWithFilters(@Param("role") Role role,
-                                  @Param("status") UserStatus status,
-                                  @Param("q") String q,
-                                  Pageable pageable);
+    // all three filters
+    @Query("SELECT u FROM User u WHERE u.role = :role AND u.status = :status AND (LOWER(u.name) LIKE LOWER(CONCAT('%',:q,'%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%',:q,'%')))")
+    Page<User> findByRoleAndStatusAndQ(@Param("role") Role role, @Param("status") UserStatus status, @Param("q") String q, Pageable pageable);
+
+    Page<User> findByRoleAndStatus(Role role, UserStatus status, Pageable pageable);
+
+    // role + q
+    @Query("SELECT u FROM User u WHERE u.role = :role AND (LOWER(u.name) LIKE LOWER(CONCAT('%',:q,'%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%',:q,'%')))")
+    Page<User> findByRoleAndQ(@Param("role") Role role, @Param("q") String q, Pageable pageable);
+
+    Page<User> findByRole(Role role, Pageable pageable);
+
+    // status + q
+    @Query("SELECT u FROM User u WHERE u.status = :status AND (LOWER(u.name) LIKE LOWER(CONCAT('%',:q,'%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%',:q,'%')))")
+    Page<User> findByStatusAndQ(@Param("status") UserStatus status, @Param("q") String q, Pageable pageable);
+
+    Page<User> findByStatus(UserStatus status, Pageable pageable);
+
+    // q only
+    @Query("SELECT u FROM User u WHERE LOWER(u.name) LIKE LOWER(CONCAT('%',:q,'%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%',:q,'%'))")
+    Page<User> findByQ(@Param("q") String q, Pageable pageable);
 }

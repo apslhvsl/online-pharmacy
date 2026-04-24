@@ -55,6 +55,11 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
         String method    = exchange.getRequest().getMethod().name();
         String requestId = exchange.getRequest().getHeaders().getFirst("X-Request-Id");
 
+        // skip auth for CORS preflight requests
+        if ("OPTIONS".equals(method)) {
+            return chain.filter(exchange);
+        }
+
         // skip auth for public routes
         if (isPublicPath(path)) {
             return chain.filter(exchange);
