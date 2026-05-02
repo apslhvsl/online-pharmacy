@@ -2,6 +2,7 @@ package com.pharmacy.orderservice.service;
 
 import com.pharmacy.orderservice.dto.DashboardDto;
 import com.pharmacy.orderservice.dto.OrderDto;
+import com.pharmacy.orderservice.dto.ApproveOrderRequest;
 import com.pharmacy.orderservice.dto.OrderStatusUpdateRequest;
 import com.pharmacy.orderservice.dto.PaymentDto;
 import com.pharmacy.orderservice.dto.SalesReportDto;
@@ -9,6 +10,7 @@ import com.pharmacy.orderservice.entity.*;
 import com.pharmacy.orderservice.repository.OrderRepository;
 import com.pharmacy.orderservice.repository.OrderStatusLogRepository;
 import com.pharmacy.orderservice.repository.PaymentRepository;
+import com.pharmacy.orderservice.client.CatalogClient;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -33,10 +35,11 @@ public class OrderService {
     private final OrderStateMachine orderStateMachine;
     private final PaymentRepository paymentRepository;
     private final OrderEventPublisher orderEventPublisher;
+    private final CatalogClient catalogClient;
 
-    public Page<OrderDto> getOrdersByUser(Long userId, OrderStatus status, Pageable pageable) {
-        if (status != null) {
-            return orderRepository.findByUserIdAndStatus(userId, status, pageable).map(this::toDto);
+    public Page<OrderDto> getOrdersByUser(Long userId, List<OrderStatus> statuses, Pageable pageable) {
+        if (statuses != null && !statuses.isEmpty()) {
+            return orderRepository.findByUserIdAndStatusIn(userId, statuses, pageable).map(this::toDto);
         }
         return orderRepository.findByUserId(userId, pageable).map(this::toDto);
     }
@@ -77,6 +80,32 @@ public class OrderService {
         orderStateMachine.validate(order.getStatus(), request.getStatus());
         logTransition(order, request.getStatus(), changedBy, request.getNote());
         order.setStatus(request.getStatus());
+        OrderDto result = toDto(orderRepository.save(order));
+        orderEventPublisher.publishOrderUpdate(order);
+        return result;
+    }
+
+    /** Admin approves a PENDING_APPROVAL order: applies batch overrides, deducts stock, transitions to PACKED */
+    @Transactional
+    public OrderDto approveOrder(Long orderId, ApproveOrderRequest request, Long adminId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found: " + orderId));
+        if (order.getStatus() != OrderStatus.PENDING_APPROVAL && order.getStatus() != OrderStatus.PAID) {
+            throw new IllegalStateException("Order is not awaiting approval");
+        }
+
+        Map<Long, Long> overrides = request.getBatchOverrides() != null ? request.getBatchOverrides() : Map.of();
+
+        // Apply batch overrides and deduct stock
+        for (OrderItem item : order.getItems()) {
+            Long batchId = overrides.getOrDefault(item.getId(), item.getBatchId());
+            item.setBatchId(batchId);
+            catalogClient.deductBatchStock(batchId, item.getQuantity());
+        }
+
+        logTransition(order, OrderStatus.PACKED, adminId,
+                request.getNote() != null ? request.getNote() : "Admin approved and packed");
+        order.setStatus(OrderStatus.PACKED);
         OrderDto result = toDto(orderRepository.save(order));
         orderEventPublisher.publishOrderUpdate(order);
         return result;
@@ -204,14 +233,26 @@ public class OrderService {
 
     public OrderDto toDto(Order order) {
         List<OrderDto.OrderItemDto> itemDtos = order.getItems() == null ? List.of() :
-                order.getItems().stream().map(i -> OrderDto.OrderItemDto.builder()
-                        .batchId(i.getBatchId())
-                        .medicineId(i.getMedicineId())
-                        .medicineName(i.getMedicineName())
-                        .unitPrice(i.getUnitPrice())
-                        .quantity(i.getQuantity())
-                        .lineTotal(i.getLineTotal())
-                        .build()).toList();
+                order.getItems().stream().map(i -> {
+                    // For PENDING_APPROVAL orders, suggest the best FEFO batch for dispatch
+                    Long suggested = null;
+                    if (order.getStatus() == OrderStatus.PENDING_APPROVAL) {
+                        try {
+                            var stockCheck = catalogClient.checkStock(i.getMedicineId(), i.getQuantity());
+                            suggested = stockCheck.getBatchId();
+                        } catch (Exception ignored) {}
+                    }
+                    return OrderDto.OrderItemDto.builder()
+                            .batchId(i.getBatchId())
+                            .suggestedBatchId(suggested)
+                            .medicineId(i.getMedicineId())
+                            .medicineName(i.getMedicineName())
+                            .unitPrice(i.getUnitPrice())
+                            .quantity(i.getQuantity())
+                            .lineTotal(i.getLineTotal())
+                            .requiresPrescription(Boolean.TRUE.equals(i.getRequiresPrescription()))
+                            .build();
+                }).toList();
 
         PaymentDto paymentDto = paymentRepository.findByOrderId(order.getId())
                 .map(p -> PaymentDto.builder()

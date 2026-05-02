@@ -8,6 +8,7 @@ public enum OrderStatus {
     PRESCRIPTION_REJECTED,
     PAYMENT_PENDING,
     PAID,
+    PENDING_APPROVAL,   // paid — awaiting admin review
     PACKED,
     OUT_FOR_DELIVERY,
     DELIVERED,

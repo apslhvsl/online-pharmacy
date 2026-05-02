@@ -31,6 +31,13 @@ public class InventoryBatchService {
                 .stream().map(this::toDto).toList();
     }
 
+    public List<InventoryBatchDto> getAllBatches(String q) {
+        List<InventoryBatch> batches = (q != null && !q.isBlank())
+                ? batchRepository.searchByMedicineName(q.trim())
+                : batchRepository.findAllOrderByExpiry();
+        return batches.stream().map(this::toDto).toList();
+    }
+
     @Transactional
     public InventoryBatchDto createBatch(InventoryBatchCreateRequest request) {
         Medicine medicine = medicineRepository.findById(request.getMedicineId())
@@ -116,8 +123,41 @@ public class InventoryBatchService {
                 .orElseThrow(() -> new EntityNotFoundException("Batch not found: " + batchId));
         if (batch.getQuantity() < quantity)
             throw new IllegalStateException("Insufficient stock in batch: " + batchId);
-        batch.setQuantity(batch.getQuantity() - quantity);
+
+        int before = batch.getQuantity();
+        batch.setQuantity(before - quantity);
         batchRepository.save(batch);
+
+        auditRepository.save(InventoryAudit.builder()
+                .batch(batch)
+                .adjustment(-quantity)
+                .stockBefore(before)
+                .stockAfter(batch.getQuantity())
+                .reason("Order fulfilment")
+                .build());
+    }
+
+    @Transactional
+    public void writeOffBatch(Long batchId, String reason, Long performedBy) {
+        InventoryBatch batch = batchRepository.findById(batchId)
+                .orElseThrow(() -> new EntityNotFoundException("Batch not found: " + batchId));
+
+        int before = batch.getQuantity();
+
+        // Record the write-off in the audit log before deleting
+        auditRepository.save(InventoryAudit.builder()
+                .batch(batch)
+                .adjustment(-before)
+                .stockBefore(before)
+                .stockAfter(0)
+                .reason("WRITE-OFF: " + reason)
+                .performedBy(performedBy)
+                .build());
+
+        // Delete all audit records for this batch to satisfy the FK constraint,
+        // then delete the batch itself. The write-off reason is captured above.
+        auditRepository.deleteByBatch(batch);
+        batchRepository.delete(batch);
     }
 
     public Integer getTotalAvailableStock(Long medicineId) {
@@ -125,8 +165,9 @@ public class InventoryBatchService {
     }
 
     public List<InventoryBatchDto> getExpiringSoon(int days) {
-        LocalDate threshold = LocalDate.now().plusDays(days);
-        return batchRepository.findExpiringSoon(threshold)
+        LocalDate today = LocalDate.now();
+        LocalDate threshold = today.plusDays(days);
+        return batchRepository.findExpiringSoon(threshold, today)
                 .stream().map(this::toDto).toList();
     }
 

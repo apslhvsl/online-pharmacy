@@ -40,7 +40,7 @@ public interface CatalogClient {
     @PutMapping("/api/catalog/internal/medicines/{id}")
     MedicineResponse updateMedicine(@PathVariable("id") Long id, @RequestBody MedicineCreateRequest request);
 
-    @PatchMapping("/api/catalog/internal/medicines/{id}/deactivate")
+    @PostMapping("/api/catalog/internal/medicines/{id}/deactivate")
     MedicineResponse deactivateMedicine(@PathVariable("id") Long id);
 
     @GetMapping("/api/catalog/internal/medicines/low-stock")
@@ -54,10 +54,24 @@ public interface CatalogClient {
     // ── Internal batch operations ─────────────────────────────────────
 
     // adjustBatchStock passes the admin's user ID so the audit log knows who did it
-    @PatchMapping("/api/catalog/internal/batches/{batchId}/stock")
+    @PostMapping("/api/catalog/internal/batches/{batchId}/stock")
     Object adjustBatchStock(@PathVariable("batchId") Long batchId,
                             @RequestBody StockAdjustRequest request,
                             @RequestHeader("X-User-Id") Long performedBy);
+
+    @GetMapping("/api/catalog/internal/batches")
+    List<InventoryBatchResponse> getAllBatches(@RequestParam(required = false) String q);
+
+    @GetMapping("/api/catalog/internal/batches/medicine/{medicineId}")
+    List<InventoryBatchResponse> getBatchesForMedicine(@PathVariable("medicineId") Long medicineId);
+
+    @PostMapping("/api/catalog/internal/batches")
+    InventoryBatchResponse createBatch(@RequestBody BatchCreateRequest request);
+
+    @PostMapping("/api/catalog/internal/batches/{batchId}/write-off")
+    void writeOffBatch(@PathVariable("batchId") Long batchId,
+                       @RequestParam("reason") String reason,
+                       @RequestHeader("X-User-Id") Long performedBy);
 
     // ── Internal category operations ─────────────────────────────────
 
@@ -67,7 +81,7 @@ public interface CatalogClient {
     @PutMapping("/api/catalog/internal/categories/{id}")
     CategoryResponse updateCategory(@PathVariable("id") Long id, @RequestBody CategoryCreateRequest request);
 
-    @PatchMapping("/api/catalog/internal/categories/{id}/deactivate")
+    @PostMapping("/api/catalog/internal/categories/{id}/deactivate")
     CategoryResponse deactivateCategory(@PathVariable("id") Long id);
 
     // ── Internal prescription operations ─────────────────────────────
@@ -78,7 +92,7 @@ public interface CatalogClient {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size);
 
-    @PatchMapping("/api/catalog/internal/prescriptions/{id}/status")
+    @PostMapping("/api/catalog/internal/prescriptions/{id}/status")
     PrescriptionResponse reviewPrescription(@PathVariable("id") Long id,
                                             @RequestBody PrescriptionReviewRequest request,
                                             @RequestHeader("X-User-Id") Long adminId);
@@ -89,4 +103,10 @@ public interface CatalogClient {
             @RequestParam(required = false) Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size);
+
+    @GetMapping("/api/catalog/internal/prescriptions/{id}")
+    PrescriptionResponse getPrescriptionById(@PathVariable("id") Long id);
+
+    @GetMapping(value = "/api/catalog/internal/prescriptions/{id}/file", produces = "*/*")
+    org.springframework.http.ResponseEntity<byte[]> getPrescriptionFile(@PathVariable("id") Long id);
 }

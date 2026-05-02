@@ -10,8 +10,12 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderItemResponse {
+    private Long batchId;
+    private Long suggestedBatchId;
     private Long medicineId;
     private String medicineName;
     private Integer quantity;
-    private BigDecimal price;
+    private BigDecimal unitPrice;
+    private BigDecimal lineTotal;
+    private Boolean requiresPrescription;
 }

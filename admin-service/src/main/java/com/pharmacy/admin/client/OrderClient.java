@@ -1,10 +1,6 @@
 package com.pharmacy.admin.client;
 
-import com.pharmacy.admin.dto.DashboardDto;
-import com.pharmacy.admin.dto.OrderResponse;
-import com.pharmacy.admin.dto.OrderStatusUpdateRequest;
-import com.pharmacy.admin.dto.PagedResponse;
-import com.pharmacy.admin.dto.SalesReportDto;
+import com.pharmacy.admin.dto.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,21 +12,27 @@ public interface OrderClient {
             @RequestParam(required = false) String status,
             @RequestParam(required = false) Long userId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size);
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort);
 
     @GetMapping("/api/orders/internal/{id}")
     OrderResponse getOrderById(@PathVariable("id") Long id);
 
-    @PatchMapping("/api/orders/internal/{id}/status/{status}")
+    @PostMapping("/api/orders/internal/{id}/status/{status}")
     OrderResponse updateOrderStatus(@PathVariable("id") Long id,
                                     @PathVariable("status") String status,
                                     @RequestParam(required = false) String note,
                                     @RequestHeader("X-User-Id") Long adminId);
 
-    @PatchMapping("/api/orders/internal/{id}/cancel")
+    @PostMapping("/api/orders/internal/{id}/cancel")
     OrderResponse cancelOrder(@PathVariable("id") Long id,
                               @RequestParam(required = false) String note,
                               @RequestHeader("X-User-Id") Long adminId);
+
+    @PostMapping("/api/orders/internal/{id}/approve")
+    OrderResponse approveOrder(@PathVariable("id") Long id,
+                               @RequestBody ApproveOrderRequest request,
+                               @RequestHeader("X-User-Id") Long adminId);
 
     @GetMapping("/api/orders/internal/dashboard")
     DashboardDto getDashboard();

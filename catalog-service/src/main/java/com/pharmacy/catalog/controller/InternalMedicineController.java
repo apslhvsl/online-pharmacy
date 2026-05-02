@@ -62,7 +62,7 @@ public class InternalMedicineController {
     }
 
     @Operation(summary = "Deactivate a medicine", description = "Marks a medicine as inactive so it no longer appears in the public catalog. For internal use by Admin Service only.")
-    @PatchMapping("/{id}/deactivate")
+    @PostMapping("/{id}/deactivate")
     public ResponseEntity<MedicineDto> deactivateMedicine(@PathVariable Long id) {
         return ResponseEntity.ok(medicineService.deactivateMedicine(id));
     }

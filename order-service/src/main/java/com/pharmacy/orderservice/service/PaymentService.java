@@ -23,6 +23,7 @@ public class PaymentService {
     private final OrderStatusLogRepository statusLogRepository;
     private final OrderStateMachine orderStateMachine;
     private final OrderEventPublisher orderEventPublisher;
+    private final CartService cartService;
 
     @Transactional
     public PaymentDto initiatePayment(PaymentInitiateRequest request, Long userId) {
@@ -40,13 +41,17 @@ public class PaymentService {
                 .gatewayTxnRef(UUID.randomUUID().toString())
                 .build();
 
-        // COD is confirmed immediately — no gateway involved
-        if (request.getPaymentMethod() == PaymentMethod.COD) {
-            payment.setStatus(PaymentStatus.PAID);
-            payment.setPaidAt(LocalDateTime.now());
-            transitionOrder(order, OrderStatus.PAID, userId, "COD payment confirmed");
-            orderEventPublisher.publishOrderUpdate(order);
-        }
+        // Dummy payment system — all methods succeed immediately
+        payment.setStatus(PaymentStatus.PAID);
+        payment.setPaidAt(LocalDateTime.now());
+        String note = request.getPaymentMethod().name() + " payment confirmed (dummy)";
+        transitionOrder(order, OrderStatus.PAID, userId, note);
+        // Move to pending admin approval — no auto-fulfilment
+        transitionOrder(order, OrderStatus.PENDING_APPROVAL, userId, "Awaiting admin approval");
+        orderEventPublisher.publishOrderUpdate(order);
+
+        // Clear the cart now that payment is confirmed
+        cartService.clearCart(userId);
 
         return toDto(paymentRepository.save(payment));
     }

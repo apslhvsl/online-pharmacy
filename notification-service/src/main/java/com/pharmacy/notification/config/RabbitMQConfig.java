@@ -14,8 +14,10 @@ public class RabbitMQConfig {
     public static final String EXCHANGE         = "pharmacy.notifications";
     public static final String ORDER_QUEUE      = "order.notification.queue";
     public static final String PASSWORD_QUEUE   = "password.notification.queue";
+    public static final String OTP_QUEUE        = "otp.notification.queue";
     public static final String ORDER_ROUTING_KEY    = "order.update";
     public static final String PASSWORD_ROUTING_KEY = "password.reset";
+    public static final String OTP_ROUTING_KEY      = "otp.verification";
 
     @Bean
     public DirectExchange notificationExchange() {
@@ -33,6 +35,11 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue otpNotificationQueue() {
+        return QueueBuilder.durable(OTP_QUEUE).build();
+    }
+
+    @Bean
     public Binding orderBinding() {
         return BindingBuilder.bind(orderNotificationQueue())
                 .to(notificationExchange())
@@ -44,6 +51,13 @@ public class RabbitMQConfig {
         return BindingBuilder.bind(passwordNotificationQueue())
                 .to(notificationExchange())
                 .with(PASSWORD_ROUTING_KEY);
+    }
+
+    @Bean
+    public Binding otpBinding() {
+        return BindingBuilder.bind(otpNotificationQueue())
+                .to(notificationExchange())
+                .with(OTP_ROUTING_KEY);
     }
 
     @Bean

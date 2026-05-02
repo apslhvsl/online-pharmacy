@@ -11,13 +11,14 @@ import java.util.Set;
 public class OrderStateMachine {
 
     private static final Map<OrderStatus, Set<OrderStatus>> ALLOWED_TRANSITIONS = Map.ofEntries(
-            Map.entry(OrderStatus.DRAFT,                   Set.of(OrderStatus.CHECKOUT_STARTED, OrderStatus.CUSTOMER_CANCELLED)),
-            Map.entry(OrderStatus.CHECKOUT_STARTED,        Set.of(OrderStatus.PRESCRIPTION_PENDING, OrderStatus.PAYMENT_PENDING, OrderStatus.CUSTOMER_CANCELLED)),
-            Map.entry(OrderStatus.PRESCRIPTION_PENDING,    Set.of(OrderStatus.PRESCRIPTION_APPROVED, OrderStatus.PRESCRIPTION_REJECTED)),
-            Map.entry(OrderStatus.PRESCRIPTION_APPROVED,   Set.of(OrderStatus.PAYMENT_PENDING, OrderStatus.CUSTOMER_CANCELLED)),
+            Map.entry(OrderStatus.DRAFT,                   Set.of(OrderStatus.CHECKOUT_STARTED, OrderStatus.CUSTOMER_CANCELLED, OrderStatus.ADMIN_CANCELLED)),
+            Map.entry(OrderStatus.CHECKOUT_STARTED,        Set.of(OrderStatus.PRESCRIPTION_PENDING, OrderStatus.PAYMENT_PENDING, OrderStatus.CUSTOMER_CANCELLED, OrderStatus.ADMIN_CANCELLED)),
+            Map.entry(OrderStatus.PRESCRIPTION_PENDING,    Set.of(OrderStatus.PRESCRIPTION_APPROVED, OrderStatus.PRESCRIPTION_REJECTED, OrderStatus.ADMIN_CANCELLED)),
+            Map.entry(OrderStatus.PRESCRIPTION_APPROVED,   Set.of(OrderStatus.PAYMENT_PENDING, OrderStatus.CUSTOMER_CANCELLED, OrderStatus.ADMIN_CANCELLED)),
             Map.entry(OrderStatus.PRESCRIPTION_REJECTED,   Set.of()),  // terminal
-            Map.entry(OrderStatus.PAYMENT_PENDING,         Set.of(OrderStatus.PAID, OrderStatus.PAYMENT_FAILED, OrderStatus.CUSTOMER_CANCELLED)),
-            Map.entry(OrderStatus.PAID,                    Set.of(OrderStatus.PACKED, OrderStatus.ADMIN_CANCELLED, OrderStatus.CUSTOMER_CANCELLED)),
+            Map.entry(OrderStatus.PAYMENT_PENDING,         Set.of(OrderStatus.PAID, OrderStatus.PAYMENT_FAILED, OrderStatus.CUSTOMER_CANCELLED, OrderStatus.ADMIN_CANCELLED)),
+            Map.entry(OrderStatus.PAID,                    Set.of(OrderStatus.PENDING_APPROVAL, OrderStatus.PACKED, OrderStatus.ADMIN_CANCELLED)),
+            Map.entry(OrderStatus.PENDING_APPROVAL,        Set.of(OrderStatus.PACKED, OrderStatus.ADMIN_CANCELLED)),
             Map.entry(OrderStatus.PACKED,                  Set.of(OrderStatus.OUT_FOR_DELIVERY, OrderStatus.ADMIN_CANCELLED, OrderStatus.CUSTOMER_CANCELLED)),
             Map.entry(OrderStatus.OUT_FOR_DELIVERY,        Set.of(OrderStatus.DELIVERED)),
             Map.entry(OrderStatus.DELIVERED,               Set.of(OrderStatus.RETURN_REQUESTED)),

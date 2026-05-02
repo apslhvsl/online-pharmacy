@@ -40,6 +40,30 @@ public class CheckoutService {
         boolean requiresRx = cart.getItems().stream()
                 .anyMatch(i -> Boolean.TRUE.equals(i.getRequiresPrescription()));
 
+        // Cancel any existing incomplete checkout orders to prevent abandoned orders from cluttering admin panel
+        List<OrderStatus> incompleteStatuses = List.of(
+                OrderStatus.CHECKOUT_STARTED,
+                OrderStatus.PAYMENT_PENDING
+        );
+        var existingOrders = orderRepository.findByUserIdAndStatusIn(
+                userId,
+                incompleteStatuses,
+                org.springframework.data.domain.PageRequest.of(0, 100)
+        ).getContent();
+
+        for (Order existing : existingOrders) {
+            OrderStatus previousStatus = existing.getStatus();
+            existing.setStatus(OrderStatus.CUSTOMER_CANCELLED);
+            statusLogRepository.save(OrderStatusLog.builder()
+                    .order(existing)
+                    .fromStatus(previousStatus.name())
+                    .toStatus(OrderStatus.CUSTOMER_CANCELLED.name())
+                    .changedBy(userId)
+                    .note("Auto-cancelled: new checkout started")
+                    .build());
+            orderRepository.save(existing);
+        }
+
         Order order = Order.builder()
                 .userId(userId)
                 .status(OrderStatus.CHECKOUT_STARTED)
@@ -82,7 +106,7 @@ public class CheckoutService {
         return orderService.toDto(orderRepository.save(order));
     }
 
-    /** Step 4 — confirm order: validate stock, enforce prescription, snapshot prices */
+    /** Step 4 — confirm order: validate stock availability, snapshot prices */
     @Transactional
     public OrderDto confirmOrder(Long orderId, Long userId) {
         Order order = getOwnedOrder(orderId, userId);
@@ -90,28 +114,9 @@ public class CheckoutService {
 
         if (cart.getItems().isEmpty()) throw new IllegalStateException("Cart is empty");
 
-        // ── Prescription enforcement ──────────────────────────────────
-        boolean requiresRx = cart.getItems().stream()
-                .anyMatch(i -> Boolean.TRUE.equals(i.getRequiresPrescription()));
-
-        if (requiresRx) {
-            if (order.getPrescriptionId() == null) {
-                throw new IllegalStateException("Cart contains prescription-required medicines. Please link an approved prescription first.");
-            }
-            PrescriptionInfo rx = catalogClient.getPrescriptionById(order.getPrescriptionId());
-            if (!"APPROVED".equals(rx.getStatus())) {
-                throw new IllegalStateException("Linked prescription is not approved (status: " + rx.getStatus() + ")");
-            }
-            if (rx.getValidTill() != null && rx.getValidTill().isBefore(java.time.LocalDateTime.now())) {
-                throw new IllegalStateException("Linked prescription has expired");
-            }
-            // make sure the prescription belongs to the person placing the order
-            if (!userId.equals(rx.getUserId())) {
-                throw new IllegalStateException("Prescription does not belong to this user");
-            }
-        }
-
         // ── Stock validation & order item snapshot ────────────────────
+        // Prescription enforcement is intentionally deferred to admin approval.
+        // Customers may order Rx items and pay; admin reviews and approves/rejects.
         List<OrderItem> orderItems = new ArrayList<>();
         BigDecimal subtotal = BigDecimal.ZERO;
 
@@ -128,13 +133,13 @@ public class CheckoutService {
                     .medicineName(cartItem.getMedicineName())
                     .unitPrice(cartItem.getUnitPrice())
                     .quantity(cartItem.getQuantity())
+                    .requiresPrescription(cartItem.getRequiresPrescription())
                     .lineTotal(lineTotal)
                     .build());
             subtotal = subtotal.add(lineTotal);
         }
 
         BigDecimal taxAmount = subtotal.multiply(new BigDecimal("0.05"));
-        // free delivery on orders over ₹500
         BigDecimal deliveryCharge = subtotal.compareTo(new BigDecimal("500")) >= 0 ? BigDecimal.ZERO : new BigDecimal("50");
         BigDecimal total = subtotal.add(taxAmount).add(deliveryCharge);
 
@@ -145,15 +150,10 @@ public class CheckoutService {
         order.setTotalAmount(total);
         order.setStatus(OrderStatus.PAYMENT_PENDING);
 
+        // Stock is NOT deducted here — deduction happens when admin approves (PENDING_APPROVAL → PACKED)
+        // Cart is NOT cleared here — it is cleared after successful payment so the user
+        // can refresh the payment page without losing their cart data.
         order = orderRepository.save(order);
-
-        // Deduct stock per batch
-        for (CartItem cartItem : cart.getItems()) {
-            catalogClient.deductBatchStock(cartItem.getBatchId(), cartItem.getQuantity());
-        }
-
-        // Clear cart
-        cartService.clearCart(userId);
 
         return orderService.toDto(order);
     }

@@ -31,6 +31,8 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     private static final Set<String> PUBLIC_EXACT = Set.of(
             "/api/auth/login",
             "/api/auth/signup",
+            "/api/auth/verify-otp",
+            "/api/auth/resend-otp",
             "/api/auth/refresh",
             "/api/auth/forgot-password",
             "/api/auth/reset-password",
@@ -60,9 +62,10 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
         }
 
-        // skip auth for public routes
+        // skip auth for public routes — but still strip any client-injected identity headers
         if (isPublicPath(path)) {
-            return chain.filter(exchange);
+            ServerWebExchange sanitized = stripIdentityHeaders(exchange);
+            return chain.filter(sanitized);
         }
 
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
@@ -98,8 +101,9 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
                 return exchange.getResponse().setComplete();
             }
 
-            // forward user identity to downstream services via headers
-            ServerWebExchange mutated = exchange.mutate()
+            // Strip any client-supplied identity headers first, then set gateway-owned values.
+            // Without the remove step, .header() appends and a client could inject X-User-Role: ADMIN.
+            ServerWebExchange mutated = stripIdentityHeaders(exchange).mutate()
                     .request(r -> r
                             .header("X-User-Id", userId)
                             .header("X-User-Role", role))
@@ -160,6 +164,17 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
 
     private boolean isAuthenticated(String role) {
         return "CUSTOMER".equals(role) || "ADMIN".equals(role);
+    }
+
+    /** Remove any identity headers the client may have injected before we set our own. */
+    private ServerWebExchange stripIdentityHeaders(ServerWebExchange exchange) {
+        return exchange.mutate()
+                .request(r -> r.headers(h -> {
+                    h.remove("X-User-Id");
+                    h.remove("X-User-Role");
+                    h.remove("X-User-Email");
+                }))
+                .build();
     }
 
     @Override

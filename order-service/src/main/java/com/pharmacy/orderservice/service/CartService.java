@@ -9,6 +9,7 @@ import com.pharmacy.orderservice.entity.CartItem;
 import com.pharmacy.orderservice.exception.InsufficientStockException;
 import com.pharmacy.orderservice.repository.CartItemRepository;
 import com.pharmacy.orderservice.repository.CartRepository;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ public class CartService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final CatalogClient catalogClient;
+    private final EntityManager entityManager;
 
     public CartDto getCart(Long userId) {
         Cart cart = cartRepository.findByUserId(userId)
@@ -78,6 +80,8 @@ public class CartService {
         if (quantity == 0) {
             cartItemRepository.findByCartIdAndBatchId(cart.getId(), batchId)
                     .ifPresent(cartItemRepository::delete);
+            cartItemRepository.flush();
+            entityManager.refresh(cart);
         } else {
             CartItem item = cartItemRepository.findByCartIdAndBatchId(cart.getId(), batchId)
                     .orElseThrow(() -> new EntityNotFoundException("Item not in cart"));
@@ -85,7 +89,7 @@ public class CartService {
             cartItemRepository.save(item);
         }
 
-        return toDto(cartRepository.findByUserId(userId).orElseThrow());
+        return toDto(cart);
     }
 
     @Transactional
@@ -94,7 +98,9 @@ public class CartService {
                 .orElseThrow(() -> new EntityNotFoundException("Cart not found"));
         cartItemRepository.findByCartIdAndBatchId(cart.getId(), batchId)
                 .ifPresent(cartItemRepository::delete);
-        return toDto(cartRepository.findByUserId(userId).orElseThrow());
+        cartItemRepository.flush();
+        entityManager.refresh(cart);
+        return toDto(cart);
     }
 
     @Transactional

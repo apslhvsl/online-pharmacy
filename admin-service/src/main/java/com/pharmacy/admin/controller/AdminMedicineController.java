@@ -80,8 +80,37 @@ public class AdminMedicineController {
 
     // ── Batch stock adjustment ────────────────────────────────────────
 
+    @Operation(summary = "Get all batches", description = "Returns all inventory batches across all medicines, optionally filtered by medicine name")
+    @GetMapping("/batches")
+    public ResponseEntity<List<InventoryBatchResponse>> getAllBatches(
+            @RequestParam(required = false) String q) {
+        return ResponseEntity.ok(adminMedicineService.getAllBatches(q));
+    }
+
+    @Operation(summary = "Get batches for a medicine", description = "Returns all inventory batches for a given medicine")
+    @GetMapping("/batches/medicine/{medicineId}")
+    public ResponseEntity<List<InventoryBatchResponse>> getBatchesForMedicine(@PathVariable Long medicineId) {
+        return ResponseEntity.ok(adminMedicineService.getBatchesForMedicine(medicineId));
+    }
+
+    @Operation(summary = "Create a new batch", description = "Adds a new inventory batch for an existing medicine")
+    @PostMapping("/batches")
+    public ResponseEntity<InventoryBatchResponse> createBatch(@RequestBody BatchCreateRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(adminMedicineService.createBatch(request));
+    }
+
+    @Operation(summary = "Write off a batch", description = "Records a write-off audit entry then deletes the batch. Used for damaged or expired stock removal.")
+    @DeleteMapping("/batches/{batchId}")
+    public ResponseEntity<Void> writeOffBatch(
+            @PathVariable Long batchId,
+            @RequestParam String reason,
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") Long adminId) {
+        adminMedicineService.writeOffBatch(batchId, reason, adminId);
+        return ResponseEntity.noContent().build();
+    }
+
     @Operation(summary = "Adjust batch stock", description = "Manually increases or decreases the stock quantity of a specific inventory batch and records the admin who performed the adjustment")
-    @PatchMapping("/batches/{batchId}/stock")
+    @PostMapping("/batches/{batchId}/stock")
     public ResponseEntity<Void> adjustStock(
             @PathVariable Long batchId,
             @RequestBody StockAdjustRequest request,
@@ -154,5 +183,17 @@ public class AdminMedicineController {
             @RequestParam(defaultValue = "20") int size) {
         return ResponseEntity.ok(adminMedicineService.getAllPrescriptions(
                 status != null ? status.name() : null, userId, page, size));
+    }
+
+    @Operation(summary = "Get prescription by ID", description = "Returns a single prescription by its ID")
+    @GetMapping("/prescriptions/{id}")
+    public ResponseEntity<PrescriptionResponse> getPrescriptionById(@PathVariable Long id) {
+        return ResponseEntity.ok(adminMedicineService.getPrescriptionById(id));
+    }
+
+    @Operation(summary = "Stream prescription file", description = "Streams the prescription file for admin review without ownership checks")
+    @GetMapping(value = "/prescriptions/{id}/file", produces = "*/*")
+    public ResponseEntity<byte[]> getPrescriptionFile(@PathVariable Long id) {
+        return adminMedicineService.getPrescriptionFile(id);
     }
 }

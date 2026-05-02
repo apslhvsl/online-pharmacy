@@ -16,6 +16,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/orders")
@@ -32,7 +34,7 @@ public class OrderController {
     @GetMapping
     public ResponseEntity<PagedResponse<OrderDto>> getMyOrders(
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long userId,
-            @RequestParam(required = false) OrderStatus status,
+            @RequestParam(required = false) List<OrderStatus> status,
             @PageableDefault(size = 10) Pageable pageable) {
         log.info("List orders | userId={} status={}", userId, status);
         return ResponseEntity.ok(PagedResponse.from(orderService.getOrdersByUser(userId, status, pageable)));

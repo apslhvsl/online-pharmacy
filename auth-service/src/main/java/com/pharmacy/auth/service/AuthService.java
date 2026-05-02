@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -25,13 +26,16 @@ public class AuthService {
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final EmailVerificationTokenRepository emailVerificationTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final RabbitTemplate rabbitTemplate;
 
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
     // ── Signup ────────────────────────────────────────────────────────
     @Transactional
-    public AuthResponse signup(SignupRequest request) {
+    public void signup(SignupRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new DuplicateEmailException("Email already registered: " + request.getEmail());
         }
@@ -46,11 +50,60 @@ public class AuthService {
                 .mobile(request.getMobile())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.CUSTOMER)
-                .status(UserStatus.ACTIVE)
+                .status(UserStatus.PENDING_VERIFICATION)
                 .build();
 
         User saved = userRepository.save(user);
-        return buildAuthResponse(saved);
+        issueAndSendOtp(saved);
+    }
+
+    // ── Verify OTP ────────────────────────────────────────────────────
+    @Transactional
+    public AuthResponse verifyOtp(VerifyOtpRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BadCredentialsException("Invalid email or OTP"));
+
+        if (user.getStatus() == UserStatus.ACTIVE) {
+            throw new BadCredentialsException("Account is already verified");
+        }
+        if (user.getStatus() != UserStatus.PENDING_VERIFICATION) {
+            throw new BadCredentialsException("Account cannot be verified in its current state");
+        }
+        EmailVerificationToken token = emailVerificationTokenRepository
+                .findTopByUserIdOrderByCreatedAtDesc(user.getId())
+                .orElseThrow(() -> new BadCredentialsException("Invalid email or OTP"));
+
+        if (token.isUsed() || token.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new BadCredentialsException("OTP has expired. Please request a new one");
+        }
+
+        if (!token.getOtp().equals(request.getOtp())) {
+            throw new BadCredentialsException("Invalid OTP");
+        }
+
+        // Activate the account
+        token.setUsed(true);
+        emailVerificationTokenRepository.save(token);
+
+        user.setStatus(UserStatus.ACTIVE);
+        User activated = userRepository.save(user);
+
+        return buildAuthResponse(activated);
+    }
+
+    // ── Resend OTP ────────────────────────────────────────────────────
+    @Transactional
+    public void resendOtp(ResendOtpRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BadCredentialsException("No account found with this email"));
+
+        if (user.getStatus() != UserStatus.PENDING_VERIFICATION) {
+            throw new BadCredentialsException("Account is already verified or cannot receive OTP");
+        }
+
+        // Invalidate existing tokens before issuing a new one
+        emailVerificationTokenRepository.deleteAllByUserId(user.getId());
+        issueAndSendOtp(user);
     }
 
     // ── Login ─────────────────────────────────────────────────────────
@@ -64,6 +117,9 @@ public class AuthService {
         }
 
         if (user.getStatus() != UserStatus.ACTIVE) {
+            if (user.getStatus() == UserStatus.PENDING_VERIFICATION) {
+                throw new BadCredentialsException("PENDING_VERIFICATION:" + user.getEmail());
+            }
             throw new BadCredentialsException("Account is not active");
         }
 
@@ -261,5 +317,31 @@ public class AuthService {
                 .status(user.getStatus().name())
                 .createdAt(user.getCreatedAt())
                 .build();
+    }
+
+    /** Generates a 6-digit OTP, persists it, and publishes the event to RabbitMQ. */
+    private void issueAndSendOtp(User user) {
+        String otp = String.format("%06d", SECURE_RANDOM.nextInt(1_000_000));
+
+        EmailVerificationToken token = EmailVerificationToken.builder()
+                .user(user)
+                .otp(otp)
+                .expiresAt(LocalDateTime.now().plusMinutes(10))
+                .build();
+        emailVerificationTokenRepository.save(token);
+
+        OtpVerificationEvent event = OtpVerificationEvent.builder()
+                .userId(user.getId())
+                .userEmail(user.getEmail())
+                .userName(user.getName() != null ? user.getName() : user.getEmail())
+                .otp(otp)
+                .expiresAt(token.getExpiresAt())
+                .build();
+
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.EXCHANGE,
+                RabbitMQConfig.OTP_ROUTING_KEY,
+                event
+        );
     }
 }

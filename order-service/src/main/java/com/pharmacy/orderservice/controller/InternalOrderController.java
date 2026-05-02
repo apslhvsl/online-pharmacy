@@ -1,8 +1,7 @@
 package com.pharmacy.orderservice.controller;
 
 import com.pharmacy.orderservice.dto.*;
-import com.pharmacy.orderservice.entity.OrderStatus;
-import com.pharmacy.orderservice.service.OrderService;
+import com.pharmacy.orderservice.entity.OrderStatus;import com.pharmacy.orderservice.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
@@ -47,7 +46,7 @@ public class InternalOrderController {
     }
 
     @Operation(summary = "Update order status", description = "Transitions an order to a new status and records the admin who performed the update. For internal use by Admin Service only.")
-    @PatchMapping("/{id}/status/{status}")
+    @PostMapping("/{id}/status/{status}")
     public ResponseEntity<OrderDto> updateStatus(
             @PathVariable Long id,
             @PathVariable OrderStatus status,
@@ -60,8 +59,19 @@ public class InternalOrderController {
         return ResponseEntity.ok(orderService.updateStatus(id, req, adminId));
     }
 
+    @Operation(summary = "Approve order", description = "Approves a PENDING_APPROVAL order, applies batch overrides, deducts stock, and transitions to PACKED.")
+    @PostMapping("/{id}/approve")
+    public ResponseEntity<OrderDto> approveOrder(
+            @PathVariable Long id,
+            @RequestBody(required = false) ApproveOrderRequest request,
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") Long adminId) {
+        log.info("Admin approve order | orderId={} adminId={}", id, adminId);
+        ApproveOrderRequest req = request != null ? request : new ApproveOrderRequest();
+        return ResponseEntity.ok(orderService.approveOrder(id, req, adminId));
+    }
+
     @Operation(summary = "Cancel order", description = "Cancels an order on behalf of an admin with an optional note. For internal use by Admin Service only.")
-    @PatchMapping("/{id}/cancel")
+    @PostMapping("/{id}/cancel")
     public ResponseEntity<OrderDto> cancelOrder(
             @PathVariable Long id,
             @RequestParam(required = false) String note,

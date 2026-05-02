@@ -40,6 +40,22 @@ public class AdminMedicineService {
         catalogClient.adjustBatchStock(request.getBatchId(), request, adminId);
     }
 
+    public List<InventoryBatchResponse> getAllBatches(String q) {
+        return catalogClient.getAllBatches(q);
+    }
+
+    public List<InventoryBatchResponse> getBatchesForMedicine(Long medicineId) {
+        return catalogClient.getBatchesForMedicine(medicineId);
+    }
+
+    public InventoryBatchResponse createBatch(BatchCreateRequest request) {
+        return catalogClient.createBatch(request);
+    }
+
+    public void writeOffBatch(Long batchId, String reason, Long adminId) {
+        catalogClient.writeOffBatch(batchId, reason, adminId);
+    }
+
     public List<MedicineResponse> getLowStockMedicines(Integer stockLessThan) {
         return catalogClient.getLowStockMedicines(stockLessThan);
     }
@@ -82,5 +98,13 @@ public class AdminMedicineService {
 
     public PagedResponse<PrescriptionResponse> getAllPrescriptions(String status, Long userId, int page, int size) {
         return catalogClient.getAllPrescriptions(status, userId, page, size);
+    }
+
+    public PrescriptionResponse getPrescriptionById(Long id) {
+        return catalogClient.getPrescriptionById(id);
+    }
+
+    public org.springframework.http.ResponseEntity<byte[]> getPrescriptionFile(Long id) {
+        return catalogClient.getPrescriptionFile(id);
     }
 }

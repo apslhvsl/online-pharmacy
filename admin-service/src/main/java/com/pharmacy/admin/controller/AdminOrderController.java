@@ -3,6 +3,7 @@ package com.pharmacy.admin.controller;
 import com.pharmacy.admin.dto.OrderResponse;
 import com.pharmacy.admin.dto.OrderStatus;
 import com.pharmacy.admin.dto.OrderStatusUpdateRequest;
+import com.pharmacy.admin.dto.ApproveOrderRequest;
 import com.pharmacy.admin.dto.PagedResponse;
 import com.pharmacy.admin.service.AdminOrderService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,9 +27,10 @@ public class AdminOrderController {
             @RequestParam(required = false) OrderStatus status,
             @RequestParam(required = false) Long userId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-        log.info("Admin list orders | status={} userId={}", status, userId);
-        return ResponseEntity.ok(adminOrderService.getAllOrders(status != null ? status.name() : null, userId, page, size));
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort) {
+        log.info("Admin list orders | status={} userId={} sort={}", status, userId, sort);
+        return ResponseEntity.ok(adminOrderService.getAllOrders(status != null ? status.name() : null, userId, page, size, sort));
     }
 
     @Operation(summary = "Get order by ID", description = "Returns the full details of a specific order including items, payment, and status history")
@@ -39,24 +41,34 @@ public class AdminOrderController {
     }
 
     @Operation(summary = "Update order status", description = "Transitions an order to a new status")
-    @PatchMapping("/{id}/status/{status}")
+    @PostMapping("/{id}/status")
     public ResponseEntity<OrderResponse> updateOrderStatus(
             @PathVariable Long id,
-            @PathVariable OrderStatus status,
-            @RequestBody(required = false) OrderStatusUpdateRequest request,
+            @RequestBody OrderStatusUpdateRequest request,
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long adminId) {
-        log.info("Admin update order status | orderId={} newStatus={} adminId={}", id, status, adminId);
-        String note = request != null ? request.getNote() : null;
-        return ResponseEntity.ok(adminOrderService.updateOrderStatus(id, status.name(), note, adminId));
+        log.info("Admin update order status | orderId={} newStatus={} adminId={}", id, request.getStatus(), adminId);
+        return ResponseEntity.ok(adminOrderService.updateOrderStatus(id, request.getStatus().name(), request.getNote(), adminId));
+    }
+
+    @Operation(summary = "Approve order", description = "Approves a PENDING_APPROVAL order, applies batch overrides, deducts stock, and transitions to PACKED")
+    @PostMapping("/{id}/approve")
+    public ResponseEntity<OrderResponse> approveOrder(
+            @PathVariable Long id,
+            @RequestBody(required = false) ApproveOrderRequest request,
+            @Parameter(hidden = true) @RequestHeader("X-User-Id") Long adminId) {
+        log.info("Admin approve order | orderId={} adminId={}", id, adminId);
+        return ResponseEntity.ok(adminOrderService.approveOrder(id,
+                request != null ? request : new ApproveOrderRequest(), adminId));
     }
 
     @Operation(summary = "Cancel an order", description = "Cancels an order on behalf of an admin, with an optional cancellation note")
-    @PatchMapping("/{id}/cancel")
+    @PostMapping("/{id}/cancel")
     public ResponseEntity<OrderResponse> cancelOrder(
             @PathVariable Long id,
-            @RequestParam(required = false) String note,
+            @RequestBody(required = false) OrderStatusUpdateRequest request,
             @Parameter(hidden = true) @RequestHeader("X-User-Id") Long adminId) {
         log.info("Admin cancel order | orderId={} adminId={}", id, adminId);
+        String note = request != null ? request.getNote() : null;
         return ResponseEntity.ok(adminOrderService.cancelOrder(id, note, adminId));
     }
 }

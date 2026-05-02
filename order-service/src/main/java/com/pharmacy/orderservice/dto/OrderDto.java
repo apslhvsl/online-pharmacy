@@ -33,10 +33,12 @@ public class OrderDto {
     @Builder
     public static class OrderItemDto {
         private Long batchId;
+        private Long suggestedBatchId;   // FEFO-suggested batch for dispatch
         private Long medicineId;
         private String medicineName;
         private BigDecimal unitPrice;
         private Integer quantity;
         private BigDecimal lineTotal;
+        private Boolean requiresPrescription;
     }
 }

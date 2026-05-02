@@ -6,12 +6,13 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-// Publishes password reset events to the notification service via RabbitMQ
+// Publishes password reset and OTP verification events to the notification service via RabbitMQ
 @Configuration
 public class RabbitMQConfig {
 
-    public static final String EXCHANGE          = "pharmacy.notifications";
-    public static final String PASSWORD_ROUTING_KEY = "password.reset";
+    public static final String EXCHANGE              = "pharmacy.notifications";
+    public static final String PASSWORD_ROUTING_KEY  = "password.reset";
+    public static final String OTP_ROUTING_KEY       = "otp.verification";
 
     @Bean
     public Jackson2JsonMessageConverter messageConverter() {

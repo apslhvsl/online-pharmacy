@@ -25,6 +25,13 @@ public class InternalBatchController {
 
     private final InventoryBatchService batchService;
 
+    @Operation(summary = "Get all inventory batches", description = "Returns all batches across all medicines, optionally filtered by medicine name. For internal use only.")
+    @GetMapping
+    public ResponseEntity<List<InventoryBatchDto>> getAllBatches(
+            @RequestParam(required = false) String q) {
+        return ResponseEntity.ok(batchService.getAllBatches(q));
+    }
+
     @Operation(summary = "Get batches for a medicine", description = "Returns all inventory batches associated with the specified medicine. For internal use only.")
     @GetMapping("/medicine/{medicineId}")
     public ResponseEntity<List<InventoryBatchDto>> getBatchesForMedicine(@PathVariable Long medicineId) {
@@ -46,7 +53,7 @@ public class InternalBatchController {
     }
 
     @Operation(summary = "Adjust batch stock", description = "Manually increases or decreases the stock quantity of a batch and records the adjustment. For internal use only.")
-    @PatchMapping("/{batchId}/stock")
+    @PostMapping("/{batchId}/stock")
     public ResponseEntity<InventoryBatchDto> adjustStock(
             @PathVariable Long batchId,
             @Valid @RequestBody StockAdjustRequest request,
@@ -61,6 +68,17 @@ public class InternalBatchController {
             @RequestParam Integer quantity) {
         log.info("Deduct batch stock | batchId={} qty={}", batchId, quantity);
         batchService.deductBatchStock(batchId, quantity);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Write off a batch", description = "Records a write-off audit entry then deletes the batch. Used for damaged or expired stock removal.")
+    @PostMapping("/{batchId}/write-off")
+    public ResponseEntity<Void> writeOffBatch(
+            @PathVariable Long batchId,
+            @RequestParam String reason,
+            @Parameter(hidden = true) @RequestHeader(value = "X-User-Id", required = false) Long performedBy) {
+        log.info("Write-off batch | batchId={} reason={} performedBy={}", batchId, reason, performedBy);
+        batchService.writeOffBatch(batchId, reason, performedBy);
         return ResponseEntity.noContent().build();
     }
 

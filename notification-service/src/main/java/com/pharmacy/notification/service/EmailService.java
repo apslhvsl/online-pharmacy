@@ -1,6 +1,7 @@
 package com.pharmacy.notification.service;
 
 import com.pharmacy.notification.dto.OrderNotificationEvent;
+import com.pharmacy.notification.dto.OtpVerificationEvent;
 import com.pharmacy.notification.dto.PasswordResetEvent;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -44,6 +45,16 @@ public class EmailService {
 
         String html = templateEngine.process("password-reset", ctx);
         sendHtmlEmail(event.getUserEmail(), "Password Reset Request", html);
+    }
+
+    public void sendOtpVerificationEmail(OtpVerificationEvent event) {
+        Context ctx = new Context();
+        ctx.setVariable("userName", event.getUserName());
+        ctx.setVariable("otp", event.getOtp());
+        ctx.setVariable("expiresAt", event.getExpiresAt());
+
+        String html = templateEngine.process("otp-verification", ctx);
+        sendHtmlEmail(event.getUserEmail(), "Verify Your PharmaCare Account", html);
     }
 
     private void sendHtmlEmail(String to, String subject, String htmlBody) {

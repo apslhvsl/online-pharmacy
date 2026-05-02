@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-
 @Slf4j
 @RestController
 @RequestMapping("/api/auth")
@@ -23,13 +22,31 @@ public class AuthController {
 
     // ── Public endpoints ──────────────────────────────────────────────
 
-    @Operation(summary = "Register a new user", description = "Creates a new customer account and returns an authentication token pair")
+    @Operation(summary = "Register a new user", description = "Creates a new customer account and sends a 6-digit OTP to the provided email for verification")
     @PostMapping("/signup")
-    public ResponseEntity<AuthResponse> signup(@Valid @RequestBody SignupRequest request) {
+    public ResponseEntity<Map<String, String>> signup(@Valid @RequestBody SignupRequest request) {
         log.info("Signup request | email={}", request.getEmail());
-        AuthResponse response = authService.signup(request);
-        log.info("Signup successful | userId={}", response.getUserId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        authService.signup(request);
+        log.info("Signup initiated — OTP sent | email={}", request.getEmail());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(Map.of("message", "Account created. Please check your email for the verification OTP."));
+    }
+
+    @Operation(summary = "Verify email with OTP", description = "Activates the account using the 6-digit OTP sent to the user's email and returns an authentication token pair")
+    @PostMapping("/verify-otp")
+    public ResponseEntity<AuthResponse> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
+        log.info("OTP verification request | email={}", request.getEmail());
+        AuthResponse response = authService.verifyOtp(request);
+        log.info("OTP verified — account activated | userId={}", response.getUserId());
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Resend OTP", description = "Issues a new OTP and sends it to the email address of a pending account")
+    @PostMapping("/resend-otp")
+    public ResponseEntity<Map<String, String>> resendOtp(@Valid @RequestBody ResendOtpRequest request) {
+        log.info("Resend OTP request | email={}", request.getEmail());
+        authService.resendOtp(request);
+        return ResponseEntity.ok(Map.of("message", "A new OTP has been sent to your email."));
     }
 
     @Operation(summary = "Authenticate a user", description = "Validates credentials and returns an access token and refresh token")

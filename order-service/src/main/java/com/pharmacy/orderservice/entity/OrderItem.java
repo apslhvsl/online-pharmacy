@@ -37,4 +37,8 @@ public class OrderItem {
 
     @Column(name = "line_total", precision = 10, scale = 2)
     private BigDecimal lineTotal;
+
+    @Column(name = "requires_prescription")
+    @Builder.Default
+    private Boolean requiresPrescription = false;
 }

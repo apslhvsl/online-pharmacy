@@ -70,8 +70,9 @@ public class MedicineService {
     }
 
     public List<MedicineDto> getExpiringSoon(String expiryBefore, int days) {
-        LocalDate threshold = expiryBefore != null ? LocalDate.parse(expiryBefore) : LocalDate.now().plusDays(days);
-        List<Long> medicineIds = batchRepository.findExpiringSoon(threshold)
+        LocalDate today = LocalDate.now();
+        LocalDate threshold = expiryBefore != null ? LocalDate.parse(expiryBefore) : today.plusDays(days);
+        List<Long> medicineIds = batchRepository.findExpiringSoon(threshold, today)
                 .stream().map(b -> b.getMedicine().getId()).distinct().toList();
         return medicineRepository.findAllById(medicineIds).stream()
                 .map(m -> enrichWithStock(medicineMapper.toDto(m), m.getId()))

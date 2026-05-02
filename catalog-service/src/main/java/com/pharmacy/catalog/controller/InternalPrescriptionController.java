@@ -9,12 +9,19 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.PathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 
 /**
@@ -38,7 +45,7 @@ public class InternalPrescriptionController {
     }
 
     @Operation(summary = "Review a prescription", description = "Approves or rejects a prescription and records the reviewing admin. For internal use by Admin Service only.")
-    @PatchMapping("/{id}/status")
+    @PostMapping("/{id}/status")
     public ResponseEntity<PrescriptionDto> reviewPrescription(
             @PathVariable Long id,
             @Valid @RequestBody PrescriptionReviewRequest request,
@@ -73,5 +80,18 @@ public class InternalPrescriptionController {
     public ResponseEntity<PrescriptionDto> getPrescriptionById(@PathVariable Long id) {
         // isAdmin=true skips the ownership check — caller is a trusted internal service
         return ResponseEntity.ok(prescriptionService.getPrescriptionById(id, null, true));
+    }
+
+    @Operation(summary = "Stream prescription file (admin)", description = "Streams the prescription file for admin review without ownership checks.")
+    @GetMapping("/{id}/file")
+    public ResponseEntity<Resource> downloadFile(@PathVariable Long id) throws IOException {
+        Path filePath = prescriptionService.getPrescriptionFilePath(id);
+        Resource resource = new PathResource(filePath);
+        String contentType = Files.probeContentType(filePath);
+        if (contentType == null) contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filePath.getFileName() + "\"")
+                .body(resource);
     }
 }

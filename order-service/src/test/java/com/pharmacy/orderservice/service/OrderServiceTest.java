@@ -192,10 +192,10 @@ class OrderServiceTest {
     void getOrdersByUser_withStatusFilter_returnsFilteredOrders() {
         Order order = buildOrder(1L, 10L, OrderStatus.PAID);
         Page<Order> page = new PageImpl<>(List.of(order));
-        when(orderRepository.findByUserIdAndStatus(eq(10L), eq(OrderStatus.PAID), any())).thenReturn(page);
+        when(orderRepository.findByUserIdAndStatusIn(eq(10L), eq(List.of(OrderStatus.PAID)), any())).thenReturn(page);
         when(paymentRepository.findByOrderId(1L)).thenReturn(Optional.empty());
 
-        var result = orderService.getOrdersByUser(10L, OrderStatus.PAID, PageRequest.of(0, 10));
+        var result = orderService.getOrdersByUser(10L, List.of(OrderStatus.PAID), PageRequest.of(0, 10));
 
         assertThat(result.getContent().get(0).getStatus()).isEqualTo(OrderStatus.PAID);
     }

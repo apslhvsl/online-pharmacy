@@ -38,7 +38,7 @@ public class InternalCategoryController {
     }
 
     @Operation(summary = "Deactivate a category", description = "Marks a category as inactive so it no longer appears in the public catalog. For internal use by Admin Service only.")
-    @PatchMapping("/{id}/deactivate")
+    @PostMapping("/{id}/deactivate")
     public ResponseEntity<CategoryDto> deactivateCategory(@PathVariable Long id) {
         return ResponseEntity.ok(categoryService.deactivateCategory(id));
     }

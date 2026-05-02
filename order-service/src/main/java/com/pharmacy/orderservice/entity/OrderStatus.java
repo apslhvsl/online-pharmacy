@@ -10,6 +10,7 @@ public enum OrderStatus {
     PRESCRIPTION_REJECTED,  // pharmacist rejected the prescription
     PAYMENT_PENDING,        // prescription cleared (or not required), awaiting payment
     PAID,                   // payment confirmed
+    PENDING_APPROVAL,       // paid — awaiting admin review (prescription check / batch assignment)
 
     // ── Fulfillment flow ──────────────────────────────────────────────
     PACKED,                 // warehouse has packed the order

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body style="font-family: Arial, sans-serif; color: #333; margin: 0; padding: 0; background-color: #FFEDE1;">
+  <div style="max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+
+    <!-- Header -->
+    <div style="background-color: #F47458; padding: 32px 40px;">
+      <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600; letter-spacing: 0.02em;">PharmaCare</h1>
+    </div>
+
+    <!-- Body -->
+    <div style="padding: 40px;">
+      <h2 style="color: #F47458; margin: 0 0 16px;">Verify Your Email Address</h2>
+      <p style="margin: 0 0 8px;">Hi <strong th:text="${userName}">User</strong>,</p>
+      <p style="margin: 0 0 24px; color: #555;">
+        Thanks for signing up! Use the one-time code below to verify your email address and activate your account.
+      </p>
+
+      <!-- OTP box -->
+      <div style="background: #FFF6F4; border: 2px dashed #F47458; border-radius: 10px; padding: 24px; text-align: center; margin: 0 0 24px;">
+        <p style="margin: 0 0 8px; font-size: 13px; color: #888; text-transform: uppercase; letter-spacing: 0.08em;">Your verification code</p>
+        <strong style="font-size: 40px; letter-spacing: 10px; color: #F47458;" th:text="${otp}">000000</strong>
+      </div>
+
+      <p style="margin: 0 0 8px; color: #555;">
+        This code expires at
+        <strong th:text="${#temporals.format(expiresAt, 'dd MMM yyyy, hh:mm a')}">-</strong>.
+      </p>
+      <p style="margin: 0 0 24px; color: #555;">
+        If you did not create a PharmaCare account, you can safely ignore this email.
+      </p>
+
+      <p style="color: #888; font-size: 12px; margin: 0;">
+        For your security, never share this code with anyone. PharmaCare staff will never ask for it.
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #f9f9f9; padding: 20px 40px; border-top: 1px solid #eee;">
+      <p style="margin: 0; font-size: 12px; color: #aaa; text-align: center;">
+        &copy; 2026 PharmaCare. All rights reserved.
+      </p>
+    </div>
+
+  </div>
+</body>
+</html>

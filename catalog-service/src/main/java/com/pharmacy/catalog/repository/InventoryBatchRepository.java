@@ -12,17 +12,23 @@ public interface InventoryBatchRepository extends JpaRepository<InventoryBatch, 
 
     List<InventoryBatch> findByMedicineId(Long medicineId);
 
+    @Query("SELECT b FROM InventoryBatch b ORDER BY b.expiryDate ASC")
+    List<InventoryBatch> findAllOrderByExpiry();
+
+    @Query("SELECT b FROM InventoryBatch b WHERE b.medicine.name LIKE %:q% ORDER BY b.expiryDate ASC")
+    List<InventoryBatch> searchByMedicineName(@Param("q") String q);
+
     /** Non-expired batches for a medicine, ordered by expiry (FEFO) */
     @Query("SELECT b FROM InventoryBatch b WHERE b.medicine.id = :medicineId AND b.expiryDate > :today AND b.quantity > 0 ORDER BY b.expiryDate ASC")
     List<InventoryBatch> findAvailableByMedicineId(@Param("medicineId") Long medicineId, @Param("today") LocalDate today);
 
     /** Total available stock across non-expired batches */
-    @Query("SELECT COALESCE(SUM(b.quantity), 0) FROM InventoryBatch b WHERE b.medicine.id = :medicineId AND b.expiryDate > :today")
+    @Query("SELECT COALESCE(SUM(b.quantity), 0) FROM InventoryBatch b WHERE b.medicine.id = :medicineId AND b.expiryDate > :today AND b.quantity > 0")
     Integer sumAvailableStock(@Param("medicineId") Long medicineId, @Param("today") LocalDate today);
 
-    /** Batches expiring before a given date */
-    @Query("SELECT b FROM InventoryBatch b WHERE b.expiryDate < :threshold AND b.quantity > 0 ORDER BY b.expiryDate ASC")
-    List<InventoryBatch> findExpiringSoon(@Param("threshold") LocalDate threshold);
+    /** Batches expiring before a given date but not yet expired */
+    @Query("SELECT b FROM InventoryBatch b WHERE b.expiryDate >= :today AND b.expiryDate < :threshold AND b.quantity > 0 ORDER BY b.expiryDate ASC")
+    List<InventoryBatch> findExpiringSoon(@Param("threshold") LocalDate threshold, @Param("today") LocalDate today);
 
     /** Medicines whose total available stock is below a threshold */    @Query("""
         SELECT b.medicine.id FROM InventoryBatch b
