@@ -1,0 +1,51 @@
+id,active,created_at,description,image_url,manufacturer,name,pack_size,price,reorder_level,requires_prescription,strength,updated_at,category_id
+1,true,NOW(),Pain reliever and fever reducer,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/c67db11e88874fdfab3c260e411ed30d.jpg",Sun Pharma,Paracetamol,10 tablets,25.00,50,false,500 mg,NOW(),1
+2,true,NOW(),Anti-inflammatory painkiller,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/cropped/yssbye7myd6dgld7wn2n.jpg",Cipla,Ibuprofen,10 tablets,40.00,40,false,400 mg,NOW(),1
+3,true,NOW(),Strong pain relief,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/946db7a8caa843f2b43e7f5f4cd4be40.jpg",Dr Reddy's,Diclofenac,10 tablets,55.00,30,true,50 mg,NOW(),1
+4,true,NOW(),Pain relief and anti-inflammatory,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/cropped/kogynmu9hwmwgnfiibaa.jpg",Lupin,Aceclofenac,10 tablets,60.00,30,true,100 mg,NOW(),1
+5,true,NOW(),Muscle relaxant,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/cropped/mjkrkzsu8nkclm2nbzuo.jpg",Sun Pharma,Chlorzoxazone,10 tablets,75.00,25,true,500 mg,NOW(),1
+6,true,NOW(),Antibiotic,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/748f3ba153f24a9e86469f4a7e701d24.jpg",Cipla,Amoxicillin,6 capsules,85.00,30,true,500 mg,NOW(),2
+7,true,NOW(),Broad spectrum antibiotic,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/cropped/kqkouvaqejbyk47dvjfu.jpg",Sun Pharma,Azithromycin,3 tablets,120.00,25,true,500 mg,NOW(),2
+8,true,NOW(),Antibiotic,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/e286fe5de6eb4463bf78b9f79fba9de9.jpg",Lupin,Cefixime,10 tablets,140.00,20,true,200 mg,NOW(),2
+9,true,NOW(),Antibiotic,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/hkcsim2wgxbpgoesgmj6.jpg",Zydus,Doxycycline,10 capsules,90.00,25,true,100 mg,NOW(),2
+10,true,NOW(),Antibiotic,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/cropped/twmkx9d51xn6hc77fhov.jpg",Abbott,Levofloxacin,10 tablets,150.00,20,true,500 mg,NOW(),2
+11,true,NOW(),Acidity treatment,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/55dfce8bc94541e3bd2a06e0675af3b7.jpg",Dr Reddy's,Omeprazole,10 capsules,60.00,35,false,20 mg,NOW(),3
+12,true,NOW(),GERD treatment,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/cropped/wvzx1hjqc87idlcawdip.jpg",Sun Pharma,Pantoprazole,10 tablets,70.00,35,false,40 mg,NOW(),3
+13,true,NOW(),Acidity relief,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/2d9939d3aca94e80aac2e1b1a1358438.jpg",Cipla,Rabeprazole,10 tablets,80.00,30,false,20 mg,NOW(),3
+14,true,NOW(),Digestive enzyme,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/cropped/tykerirlptjyvix7nhhn.jpg",Zydus,Digestive Enzyme Syrup,100 ml,95.00,20,false,NA,NOW(),3
+15,true,NOW(),Antacid,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/cropped/tgtnmjdvhycowpzvbxvg.png",Dabur,Antacid Suspension,170 ml,110.00,20,false,NA,NOW(),3
+16,true,NOW(),Anti-allergic,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/2bd4de82b17b47a585ccae45cf1ffafe.jpg",Cipla,Cetirizine,10 tablets,30.00,40,false,10 mg,NOW(),4
+17,true,NOW(),Anti-allergic,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/0b3747a017724731a99599f36d7d6d6e.jpg",Sun Pharma,Levocetirizine,10 tablets,45.00,35,false,5 mg,NOW(),4
+18,true,NOW(),Anti-allergic,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/0651aa0f7fb04232b15ecff2a9e61f4c.jpg",Lupin,Fexofenadine,10 tablets,120.00,25,false,120 mg,NOW(),4
+19,true,NOW(),Cold relief,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/27e36dc977f644c09c7b391385c2f09c.jpg",Zydus,Chlorpheniramine,10 tablets,20.00,40,false,4 mg,NOW(),4
+20,true,NOW(),Allergy relief syrup,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/ca61d763e2934dc799268d045031d035.jpg",Cipla,Anti Allergy Syrup,100 ml,85.00,20,false,NA,NOW(),4
+21,true,NOW(),Cough suppressant,,Dabur,Cough Syrup,100 ml,90.00,20,false,NA,NOW(),5
+22,true,NOW(),Expectorant,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/1e05568d8ca649929760131c44a7c8dd.jpg",Sun Pharma,Ambroxol Syrup,100 ml,95.00,20,false,30 mg,NOW(),5
+23,true,NOW(),Cold relief,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/1a5cf5a671a34765a9f60f944265c2dd.jpg",Cipla,Phenylephrine,10 tablets,50.00,25,false,10 mg,NOW(),5
+24,true,NOW(),Nasal decongestant,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/619669e5e6c94fc38914b5fadbf8dd00.jpg",Zydus,Nasal Spray,10 ml,120.00,15,false,NA,NOW(),5
+25,true,NOW(),Cough relief,,Himalaya,Herbal Cough Syrup,100 ml,110.00,20,false,NA,NOW(),5
+26,true,NOW(),Diabetes control,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/ec261a22df1d49c8aaa1790a735a868e.jpg",Sun Pharma,Metformin,10 tablets,55.00,60,true,500 mg,NOW(),6
+27,true,NOW(),Diabetes control,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/v9mscy7flmdd2vcxsuzc.jpg",Cipla,Glimepiride,10 tablets,65.00,50,true,1 mg,NOW(),6
+28,true,NOW(),Blood pressure,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/276c276ba0c94e0d99376c98295d8024.jpg",Lupin,Amlodipine,10 tablets,45.00,45,true,5 mg,NOW(),6
+29,true,NOW(),Hypertension,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/098efd0233f445b99635b584b3ba0ec3.jpg",Sun Pharma,Telmisartan,10 tablets,110.00,35,true,40 mg,NOW(),6
+30,true,NOW(),Cholesterol control,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/f5888caa9086409c9a1bde789bbb9761.jpg",Dr Reddy's,Atorvastatin,10 tablets,90.00,35,true,10 mg,NOW(),6
+31,true,NOW(),Vitamin supplement,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/cropped/uedj79hfzy4z8j1rokkw.jpg",Himalaya,Vitamin C,15 tablets,120.00,25,false,500 mg,NOW(),7
+32,true,NOW(),Multivitamin,,Zydus,Multivitamin Tablets,15 tablets,150.00,25,false,NA,NOW(),7
+33,true,NOW(),Vitamin D supplement,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/0ee65599098d4c229b46397dae778930.jpg",Sun Pharma,Vitamin D3,4 capsules,80.00,20,false,60000 IU,NOW(),7
+34,true,NOW(),Calcium supplement,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/106cd9f4992a48cfae6d740b66aecd2e.jpg",Cipla,Calcium Tablets,15 tablets,130.00,25,false,500 mg,NOW(),7
+35,true,NOW(),Iron supplement,,Lupin,Iron Folic Acid,15 tablets,95.00,25,false,NA,NOW(),7
+36,true,NOW(),Antifungal,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/cropped/u851yxmobzgert46yulm.jpg",Abbott,Fluconazole,1 tablet,70.00,15,true,150 mg,NOW(),2
+37,true,NOW(),Antifungal cream,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/cropped/fu5h6gvl6hok59hfqid9.jpg",Cipla,Clotrimazole Cream,15 g,60.00,20,false,1%,NOW(),2
+38,true,NOW(),Antiseptic,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/7cf780a7d2f74657a79d751343d61fff.jpg",Reckitt,Dettol Liquid,100 ml,70.00,20,false,NA,NOW(),5
+39,true,NOW(),Antiseptic cream,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/e4089d1abbca4939b9ef1fc620a3be67.jpg",GSK,Soframycin Cream,30 g,95.00,20,false,NA,NOW(),5
+40,true,NOW(),Pain relief gel,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/e4089d1abbca4939b9ef1fc620a3be67.jpg",Sun Pharma,Diclofenac Gel,30 g,110.00,20,false,1%,NOW(),1
+41,true,NOW(),Asthma inhaler,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/9117d15a82fc4d41889e083e295d7de9.jpg",Cipla,Salbutamol Inhaler,200 doses,180.00,15,true,100 mcg,NOW(),6
+42,true,NOW(),Steroid inhaler,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/95dfc22ff9684cf493f5250d28a2af40.jpg",Lupin,Budesonide Inhaler,200 doses,250.00,10,true,200 mcg,NOW(),6
+43,true,NOW(),Eye drops,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/i09dq8qmfe8keusgoybt.jpg",Sun Pharma,Eye Lubricant Drops,10 ml,120.00,20,false,NA,NOW(),4
+44,true,NOW(),Ear drops,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/50a28796abca4ad69b1e907f8120eb05.jpg",Cipla,Ear Drops,10 ml,90.00,20,false,NA,NOW(),4
+45,true,NOW(),ORS solution,,Dabur,ORS Powder,21 g,20.00,50,false,NA,NOW(),3
+46,true,NOW(),Anti-diarrheal,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/ao1jmfsa2yiknvmpuak9.jpg",Sun Pharma,Loperamide,10 tablets,35.00,30,false,2 mg,NOW(),3
+47,true,NOW(),Anti-spasmodic,,Cipla,Dicycloverine,10 tablets,60.00,25,true,10 mg,NOW(),3
+48,true,NOW(),Thyroid medicine,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/a505c8250cb54e038c0383ec03665d1c.jpg",Abbott,Thyroxine,10 tablets,100.00,20,true,50 mcg,NOW(),6
+49,true,NOW(),Anti-anxiety,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/a5c1bb686b5a4e3780ed4adda10d623f.jpg",Sun Pharma,Alprazolam,10 tablets,85.00,20,true,0.5 mg,NOW(),6
+50,true,NOW(),Sleep aid,"https://onemg.gumlet.io/l_watermark_346,w_380,h_380/a_ignore,w_380,h_380,c_fit,q_auto,f_auto/6a2dae0b8d0e47daa157c3937041bf8f.jpg",Cipla,Zolpidem,10 tablets,120.00,15,true,10 mg,NOW(),6
