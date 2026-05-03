@@ -22,7 +22,7 @@ public class GatewayConfig implements WebFluxConfigurer {
     // Allows Angular frontend (http://localhost:4200) to make requests
     // to the API Gateway. Required for browser-based clients.
     // ---------------------------------------------------------------
-    @Bean
+    @Bean //A bean is always an object, and Spring can create that object either directly from a class OR indirectly using a method here the return Calls this method Takes the returned object Stores it → this becomes a bean
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration config = new CorsConfiguration();
         config.addAllowedOrigin("http://localhost:4200"); // Angular dev server
@@ -43,16 +43,17 @@ public class GatewayConfig implements WebFluxConfigurer {
     public void configureHttpMessageCodecs(ServerCodecConfigurer configurer) {
         configurer.defaultCodecs().maxInMemorySize(10 * 1024 * 1024); // 10 MB
     }
+    /*
+     ---------------------------------------------------------------
+     Swagger / OpenAPI aggregation
+     Exposes each service's api-docs under a gateway-level prefix so
+     springdoc can aggregate them into a single UI with a service dropdown.
 
-    // ---------------------------------------------------------------
-    // Swagger / OpenAPI aggregation
-    // Exposes each service's api-docs under a gateway-level prefix so
-    // springdoc can aggregate them into a single UI with a service dropdown.
-    //
-    // Access at: http://localhost:8080/swagger-ui.html
-    // Each service's docs appear as a separate entry in the top-right
-    // "Select a definition" dropdown.
-    // ---------------------------------------------------------------
+     Access at: http://localhost:8080/swagger-ui.html
+     Each service's docs appear as a separate entry in the top-right
+     "Select a definition" dropdown.
+     ---------------------------------------------------------------
+     */
     @Bean
     @Primary
     public SwaggerUiConfigProperties swaggerUiConfigProperties() {

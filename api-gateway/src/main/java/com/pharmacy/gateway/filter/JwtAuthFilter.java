@@ -21,10 +21,10 @@ import java.util.List;
 import java.util.Set;
 
 @Component
-@Slf4j
+@Slf4j //adds logging (log.info, log.warn, etc.)
 public class JwtAuthFilter implements GlobalFilter, Ordered {
 
-    @Value("${jwt.secret}")
+    @Value("${jwt.secret}") //Reads secret from application.yml
     private String jwtSecret;
 
     // paths that don't need a token at all
@@ -50,14 +50,17 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             "/v3/api-docs",
             "/api-docs"
     );
-
+    /*
+    ServerWebExchange exchange - This represents the entire HTTP request + response From this we can access:Request (headers, body, path) Response (modify headers, status)
+    void → no return value Mono<Void> → async version of void
+    */
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path      = exchange.getRequest().getURI().getPath();
         String method    = exchange.getRequest().getMethod().name();
         String requestId = exchange.getRequest().getHeaders().getFirst("X-Request-Id");
 
-        // skip auth for CORS preflight requests
+        // skip auth for CORS preflight requests A CORS preflight request is a safety check by the browser before sending certain cross-origin requests
         if ("OPTIONS".equals(method)) {
             return chain.filter(exchange);
         }
